@@ -1005,20 +1005,15 @@ int main(void)
 이것을 해결하려면 어떻게 해야할까? 사실 부동소수점 수를 저장하기 위한 _표준_ 은 [i[IEEE-754]]
 [fl[IEEE-754|https://en.wikipedia.org/wiki/IEEE_754]]로 알려져 있다.
 대부분의 컴퓨터는 부동 소수점 계산을 위해서 내부적으로 이 형식을 사용한다.
+그러므로 그런 경우라면 엄밀히 말하자면 변환을 수행할 필요는 없다. 그러나
+여러분의 소스코드가 이식성이 있기를 바란다면 그런 가정을 할 수는 없다.
+(한 편으로 만약 속도를 원한다면 변환이 필요없는 플랫폼에서는 변환 작업을
+제거하는 최적화를 해야함을 의미한다. `htons()`및 그와 유사한 함수들은 그런
+방식으로 동작한다.)
 
-What can we do instead? Well, _The_ Standard for storing floating point
-numbers is known as [i[IEEE-754]]
-[fl[IEEE-754|https://en.wikipedia.org/wiki/IEEE_754]]. Most computers
-use this format internally for doing floating point math, so in those
-cases, strictly speaking, conversion wouldn't need to be done. But if
-you want your source code to be portable, that's an assumption you can't
-necessarily make. (On the other hand, if you want things to be fast, you
-should optimize this out on platforms that don't need to do it! That's
-what `htons()` and its ilk do.)
-
-[flx[Here's some code that encodes floats and doubles into IEEE-754
-format|ieee754.c]]. (Mostly---it doesn't encode NaN or Infinity, but it
-could be modified to do that.)
+[flx[여기 단정밀도 부동소수점 및 배정밀도 부동소수점 타입을 IEEE-754로 인코드하는
+코드가 있다|ieee754.c]]. (엄밀히는 거의 대부분을 인코드한다. 이 코드는 NaN이나
+Infinity를 처리하지 않는다. 그러나 그런 처리가 가능하게 수정할 수도 있다.)
 
 ```{.c .numberLines}
 #define pack754_32(f) (pack754((f), 32, 8))
@@ -1031,27 +1026,30 @@ uint64_t pack754(long double f, unsigned bits, unsigned expbits)
     long double fnorm;
     int shift;
     long long sign, exp, significand;
-    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+    unsigned significandbits = bits - expbits - 1; // 부호 비트를 위해 1을 뺀다.
 
-    if (f == 0.0) return 0; // get this special case out of the way
+    if (f == 0.0) return 0; // 특별한 경우의 처리
 
-    // check sign and begin normalization
+    // 부호를 확인하고 정규화를 시작한다.
     if (f < 0) { sign = 1; fnorm = -f; }
     else { sign = 0; fnorm = f; }
 
-    // get the normalized form of f and track the exponent
+    // 정규화된 형태의 f를 얻어내고 지수를 추적한다.
     shift = 0;
     while(fnorm >= 2.0) { fnorm /= 2.0; shift++; }
     while(fnorm < 1.0) { fnorm *= 2.0; shift--; }
     fnorm = fnorm - 1.0;
 
-    // calculate the binary form (non-float) of the significand data
+    // 실수부의 부동소수점이 아닌 이진 표현을 구한다.
     significand = fnorm * ((1LL<<significandbits) + 0.5f);
 
-    // get the biased exponent
+    // 바이어스를 더한 지수부를 구한다.
+    // (역자 주 : IEEE754에서는 지수부를 일정 비트의 정수로 나타내며,
+    // 바이어스보다 큰 수는 바이어스와 계산한 차의 절대값 만큼의 양의 지수,
+    // 바이어스 미만은 바이어스와 계산한 차의 절대값만큼의 음의 지수를 나타낸다.)
     exp = shift + ((1<<(expbits-1)) - 1); // shift + bias
 
-    // return the final answer
+    // 최종 값을 돌려준다.
     return (sign<<(bits-1)) | (exp<<(bits-expbits-1)) | significand;
 }
 
@@ -1060,41 +1058,40 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
     long double result;
     long long shift;
     unsigned bias;
-    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+    unsigned significandbits = bits - expbits - 1; // 부호 비트를 위해서 -1
 
     if (i == 0) return 0.0;
 
-    // pull the significand
-    result = (i&((1LL<<significandbits)-1)); // mask
-    result /= (1LL<<significandbits); // convert back to float
-    result += 1.0f; // add the one back on
+    // 실수부를 뽑아낸다.
+    result = (i&((1LL<<significandbits)-1)); // 마스크 처리
+    result /= (1LL<<significandbits); // 부동소수점으로 변환
+    result += 1.0f; // 1을 다시 더한다.
 
-    // deal with the exponent
+    // 지수부를 처리한다.
     bias = (1<<(expbits-1)) - 1;
     shift = ((i>>significandbits)&((1LL<<expbits)-1)) - bias;
     while(shift > 0) { result *= 2.0; shift--; }
     while(shift < 0) { result /= 2.0; shift++; }
 
-    // sign it
+    // 부호처리
     result *= (i>>(bits-1))&1? -1.0: 1.0;
 
     return result;
 }
 ```
 
-I put some handy macros up there at the top for packing and unpacking
-32-bit (probably a `float`) and 64-bit (probably a `double`) numbers,
-but the `pack754()` function could be called directly and told to encode
-`bits`-worth of data (`expbits` of which are reserved for the normalized
-number's exponent).
+32비트(아마도 `float`)와 64비트(아마도 `double`) 수를 위한 패킹과
+언패킹 매크로를 위에 넣어두었다. 그러나 `bits`크기의 데이터를 인코드
+하기위해서 `pack754()`함수를 직접 호출할 수도 있을 것이다.(`expbits`
+만큼의 지수부가 정규화된 수의 지수로 보존될 것이다.)
 
-Here's sample usage:
+여기 사용 예시가 있다:
 
 ```{.c .numberLines}
 
 #include <stdio.h>
-#include <stdint.h> // defines uintN_t types
-#include <inttypes.h> // defines PRIx macros
+#include <stdint.h> // uintN_t 형들을 정의한다.
+#include <inttypes.h> // PRIx 매크로들을 정의한다.
 
 int main(void)
 {
@@ -1121,7 +1118,7 @@ int main(void)
 }
 ```
 
-The above code produces this output:
+위의 코드는 아래의 출력을 생성한다:
 
 ```
 float before : 3.1415925
@@ -1133,47 +1130,43 @@ double encoded: 0x400921FB54442D18
 double after  : 3.14159265358979311600
 ```
 
-Another question you might have is how do you pack `struct`s?
-Unfortunately for you, the compiler is free to put padding all over the
-place in a `struct`, and that means you can't portably send the whole
-thing over the wire in one chunk. (Aren't you getting sick of hearing
-"can't do this", "can't do that"? Sorry! To quote a friend, "Whenever
-anything goes wrong, I always blame Microsoft." This one might not be
-Microsoft's fault, admittedly, but my friend's statement is completely
-true.)
+여러분이 가질 수 있는 또 다른 질문은 어떻게 `sturct`를 포장하는가이다.
+불행히도 컴파일러는 `struct`의 모든 곳에 자유롭게 패딩을 넣을 수 있다.
+그리고 그것은 구조체 전체를 한 번에 네트워크에 전송할 수는 없다는 것을
+의미한다. ("이건 되고", "이건 안되고"를 듣는 것이 지겨운가? 미안하다.
+내 친구의 말을 빌리자면 "뭔가 잘못되면 나는 늘 마이크로소프트를 탓한다."
+이 경우에는 아마도 마이크로소프트의 잘못만은 아닐 것이다. 그러나 내 친구의
+선언은 완전히 옳다.)
 
-Back to it: the best way to send the `struct` over the wire is to pack
-each field independently and then unpack them into the `struct` when
-they arrive on the other side.
+다시 주제로 돌아가서: `stuct`를 전송하기 위한 최고의 방법은 각각의 필드를
+독립적으로 포장한 다음 반대편에 도착하면 다시 `struct`안에 풀어넣는 것이다.
 
-That's a lot of work, is what you're thinking. Yes, it is. One thing you
-can do is write a helper function to help pack the data for you. It'll
-be fun! Really!
+여러분은 이것이 굉장히 큰 작업일 것이라 예상할 것이다. 맞다. 여러분이 할 일은
+데이터를 포장하는 일을 도와줄 도우미 함수를 작성하는 것이다. 재미있을 것이다!
+정말로!!
 
-In the book [flr[_The Practice of Programming_|tpop]] by Kernighan and
-Pike, they implement `printf()`-like functions called `pack()` and
-`unpack()` that do exactly this. I'd link to them, but apparently those
-functions aren't online with the rest of the source from the book.
+Kernighan(역자 주: 커니건)과 Pike가 지은 [flr[_The Practice of Programming_|tpop]]
+에서 그들은 바로 그 일을 하도록 `printf()`와 유사한 `pack()`과 `unpack()`함수를 작성했다.
+그것에 대한 링크를 제공하고 싶지만 그 함수들과 책의 다른 소스코드는 온라인으로
+제공되지 않고 있다.
 
-(The Practice of Programming is an excellent read. Zeus saves a kitten
-every time I recommend it.)
+(The Practice of Programming은 아주 좋은 책이다. 필자가 그 책을 추천할
+때마다 제우스 신이 고양이를 한 마리씩 구한다. (역자 주: 아주 좋은 선행이라는 뜻))
 
-At this point, I'm going to drop a pointer to a [fl[Protocol Buffers
-implementation in C|https://github.com/protobuf-c/protobuf-c]] which
-I've never used, but looks completely respectable. Python and Perl
-programmers will want to check out their language's `pack()` and
-`unpack()` functions for accomplishing the same thing. And Java has a
-big-ol' Serializable interface that can be used in a similar way.
+이 시점에서 필자는 [fl[프로토콜 버퍼의 C 구현체|https://github.com/protobuf-c/protobuf-c]]
+에 대한 링크를 제공하려 한다. 필자는 이것을 써 본 적이 없으나 훌륭한 코드로
+보인다. 파이썬과 펄 프로그래머들은 같은 일을 하기 위해서 그들의 언어가
+가진 `pack()`과 `unpack()` 함수를 확인해보길 바란다. 자바는 유사한 방식으로
+사용할 수 있는 Serializable 인터페이스를 가지고 있다.
 
-But if you want to write your own packing utility in C, K&P's trick is
-to use variable argument lists to make `printf()`-like functions to
-build the packets. [flx[Here's a version I cooked up|pack2.c]] on my
-own based on that which hopefully will be enough to give you an idea of
-how such a thing can work.
+그러나 만약 여러분이 자신만의 패킹 유틸리티를 C언어로 작성하고 싶다면, K&P의
+해결책은 패킷을 만들기 위해서 가변 길이 매개변수를 활용하는 `printf()`와
+유사한 함수를 만드는 것이다. [flx[여기 필자가 만든 버전이 있으며|pack2.c]]
+여러분이 그런 것이 어떻게 동작하는지 알기에 충분할 것이다.
 
-(This code references the `pack754()` functions, above. The `packi*()`
-functions operate like the familiar `htons()` family, except they pack
-into a `char` array instead of another integer.)
+(이 코드는 위의 `pack754()`함수를 참조한다. `packi*()`함수는 또 다른 정수가
+아닌 `char`의 배열에 수를 담는다는 점을 제외하면 `htons()`계열 함수와 유사하게
+동작한다.)
 
 ```{.c .numberLines}
 #include <stdio.h>
@@ -1182,7 +1175,7 @@ into a `char` array instead of another integer.)
 #include <string.h>
 
 /*
-** packi16() -- store a 16-bit int into a char buffer (like htons())
+** packi16() -- 16비트를 char 버퍼에 저장한다. (htons()처럼)
 */
 void packi16(unsigned char *buf, unsigned int i)
 {
@@ -1190,7 +1183,7 @@ void packi16(unsigned char *buf, unsigned int i)
 }
 
 /*
-** packi32() -- store a 32-bit int into a char buffer (like htonl())
+** packi32() -- 32비트를 char 버퍼에 저장한다. (htonl()처럼)
 */
 void packi32(unsigned char *buf, unsigned long int i)
 {
@@ -1199,7 +1192,7 @@ void packi32(unsigned char *buf, unsigned long int i)
 }
 
 /*
-** packi64() -- store a 64-bit int into a char buffer (like htonl())
+** packi64() -- 64비트를 char 버퍼에 저장한다. (htonl()처럼)
 */
 void packi64(unsigned char *buf, unsigned long long int i)
 {
@@ -1210,7 +1203,7 @@ void packi64(unsigned char *buf, unsigned long long int i)
 }
 
 /*
-** unpacki16() -- unpack a 16-bit int from a char buffer (like ntohs())
+** unpacki16() -- 16비트 정수를 char 버퍼에서 풀어낸다. (ntohs()처럼)
 */
 int unpacki16(unsigned char *buf)
 {
@@ -1225,7 +1218,7 @@ int unpacki16(unsigned char *buf)
 }
 
 /*
-** unpacku16() -- unpack a 16-bit unsigned from a char buffer (like ntohs())
+** unpacku16() -- 16비트 부호없는 정수를 char 버퍼에서 풀어낸다. (ntohs()처럼)
 */
 unsigned int unpacku16(unsigned char *buf)
 {
@@ -1233,7 +1226,7 @@ unsigned int unpacku16(unsigned char *buf)
 }
 
 /*
-** unpacki32() -- unpack a 32-bit int from a char buffer (like ntohl())
+** unpacki32() -- 32비트 정수를 char 버퍼에서 풀어낸다. (ntohl()처럼)
 */
 long int unpacki32(unsigned char *buf)
 {
@@ -1251,7 +1244,7 @@ long int unpacki32(unsigned char *buf)
 }
 
 /*
-** unpacku32() -- unpack a 32-bit unsigned from a char buffer (like ntohl())
+** unpacku32() -- 32비트 부호없는 정수를 char 버퍼에서 풀어낸다. (ntohl()처럼)
 */
 unsigned long int unpacku32(unsigned char *buf)
 {
@@ -1262,7 +1255,7 @@ unsigned long int unpacku32(unsigned char *buf)
 }
 
 /*
-** unpacki64() -- unpack a 64-bit int from a char buffer (like ntohl())
+** unpacki64() -- 32비트 정수를 char 버퍼에서 풀어낸다. (ntohl()처럼)
 */
 long long int unpacki64(unsigned char *buf)
 {
@@ -1284,7 +1277,7 @@ long long int unpacki64(unsigned char *buf)
 }
 
 /*
-** unpacku64() -- unpack a 64-bit unsigned from a char buffer (like ntohl())
+** unpacku64() -- 64비트 부호없는 정수를 char 버퍼에서 풀어낸다. (ntohl()처럼)
 */
 unsigned long long int unpacku64(unsigned char *buf)
 {
@@ -1299,7 +1292,7 @@ unsigned long long int unpacku64(unsigned char *buf)
 }
 
 /*
-** pack() -- store data dictated by the format string in the buffer
+** pack() -- 버퍼의 형식화 문자열이 지시한 방식으로 데이터를 저장한다.
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
@@ -1309,31 +1302,31 @@ unsigned long long int unpacku64(unsigned char *buf)
 **     64 |   q        Q         g
 **      - |                               s
 **
-**  (16-bit unsigned length is automatically prepended to strings)
+**  (16비트 부호없는 길이가 자동으로 문자열의 앞에 붙는다.)
 */
 
 unsigned int pack(unsigned char *buf, char *format, ...)
 {
     va_list ap;
 
-    signed char c;              // 8-bit
+    signed char c;              // 8비트
     unsigned char C;
 
-    int h;                      // 16-bit
+    int h;                      // 16비트
     unsigned int H;
 
-    long int l;                 // 32-bit
+    long int l;                 // 32비트
     unsigned long int L;
 
-    long long int q;            // 64-bit
+    long long int q;            // 64비트
     unsigned long long int Q;
 
-    float f;                    // floats
+    float f;                    // 부동소수점
     double d;
     long double g;
     unsigned long long int fhold;
 
-    char *s;                    // strings
+    char *s;                    // 문자열
     unsigned int len;
 
     unsigned int size = 0;
@@ -1342,85 +1335,85 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 
     for(; *format != '\0'; format++) {
         switch(*format) {
-        case 'c': // 8-bit
+        case 'c': // 8비트
             size += 1;
-            c = (signed char)va_arg(ap, int); // promoted
+            c = (signed char)va_arg(ap, int); // 자료형 승급
             *buf++ = c;
             break;
 
-        case 'C': // 8-bit unsigned
+        case 'C': // 부호없는 8비트
             size += 1;
-            C = (unsigned char)va_arg(ap, unsigned int); // promoted
+            C = (unsigned char)va_arg(ap, unsigned int); // 자료형 승급
             *buf++ = C;
             break;
 
-        case 'h': // 16-bit
+        case 'h': // 16비트
             size += 2;
             h = va_arg(ap, int);
             packi16(buf, h);
             buf += 2;
             break;
 
-        case 'H': // 16-bit unsigned
+        case 'H': // 부호없는 16비트
             size += 2;
             H = va_arg(ap, unsigned int);
             packi16(buf, H);
             buf += 2;
             break;
 
-        case 'l': // 32-bit
+        case 'l': // 32비트
             size += 4;
             l = va_arg(ap, long int);
             packi32(buf, l);
             buf += 4;
             break;
 
-        case 'L': // 32-bit unsigned
+        case 'L': // 부호없는 32비트
             size += 4;
             L = va_arg(ap, unsigned long int);
             packi32(buf, L);
             buf += 4;
             break;
 
-        case 'q': // 64-bit
+        case 'q': // 64비트
             size += 8;
             q = va_arg(ap, long long int);
             packi64(buf, q);
             buf += 8;
             break;
 
-        case 'Q': // 64-bit unsigned
+        case 'Q': // 부호없는 64비트
             size += 8;
             Q = va_arg(ap, unsigned long long int);
             packi64(buf, Q);
             buf += 8;
             break;
 
-        case 'f': // float-16
+        case 'f': // 부동소수점 16비트
             size += 2;
-            f = (float)va_arg(ap, double); // promoted
-            fhold = pack754_16(f); // convert to IEEE 754
+            f = (float)va_arg(ap, double); // 자료형 승급
+            fhold = pack754_16(f); // IEEE 754로 변환
             packi16(buf, fhold);
             buf += 2;
             break;
 
-        case 'd': // float-32
+        case 'd': // 부동소수점 32비트
             size += 4;
             d = va_arg(ap, double);
-            fhold = pack754_32(d); // convert to IEEE 754
+            fhold = pack754_32(d); // IEEE 754로 변환
             packi32(buf, fhold);
             buf += 4;
             break;
 
-        case 'g': // float-64
+        case 'g': // 부동소수점 64비트
             size += 8;
             g = va_arg(ap, long double);
-            fhold = pack754_64(g); // convert to IEEE 754
+            fhold = pack754_64(g); // IEEE 754로 변환
             packi64(buf, fhold);
             buf += 8;
             break;
 
-        case 's': // string
+        case 's': // 문자열
             s = va_arg(ap, char*);
             len = strlen(s);
             size += len + 2;
@@ -1438,7 +1431,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 }
 
 /*
-** unpack() -- unpack data dictated by the format string into the buffer
+** unpack() -- 형식화 문자열이 지정하는대로 버퍼에 데이터를 풀어놓는다.
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
@@ -1448,26 +1441,25 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 **     64 |   q        Q         g
 **      - |                               s
 **
-**  (string is extracted based on its stored length, but 's' can be
-**  prepended with a max length)
+**  (문자열은 저장된 길이에 근거해서 추출된다. 그러나 `s`의 앞에 최대 길이를 앞에 지정할 수 있다.)
 */
 void unpack(unsigned char *buf, char *format, ...)
 {
     va_list ap;
 
-    signed char *c;              // 8-bit
+    signed char *c;              // 8비트
     unsigned char *C;
 
-    int *h;                      // 16-bit
+    int *h;                      // 16비트
     unsigned int *H;
 
-    long int *l;                 // 32-bit
+    long int *l;                 // 32비트
     unsigned long int *L;
 
-    long long int *q;            // 64-bit
+    long long int *q;            // 64비트
     unsigned long long int *Q;
 
-    float *f;                    // floats
+    float *f;                    // 부동소수점
     double *d;
     long double *g;
     unsigned long long int fhold;
@@ -1479,76 +1471,76 @@ void unpack(unsigned char *buf, char *format, ...)
 
     for(; *format != '\0'; format++) {
         switch(*format) {
-        case 'c': // 8-bit
+        case 'c': // 8비트
             c = va_arg(ap, signed char*);
-            if (*buf <= 0x7f) { *c = *buf;} // re-sign
+            if (*buf <= 0x7f) { *c = *buf;} // 부호를 다시 붙인다
             else { *c = -1 - (unsigned char)(0xffu - *buf); }
             buf++;
             break;
 
-        case 'C': // 8-bit unsigned
+        case 'C': // 부호없는 8비트
             C = va_arg(ap, unsigned char*);
             *C = *buf++;
             break;
 
-        case 'h': // 16-bit
+        case 'h': // 16비트
             h = va_arg(ap, int*);
             *h = unpacki16(buf);
             buf += 2;
             break;
 
-        case 'H': // 16-bit unsigned
+        case 'H': // 부호없는 16비트
             H = va_arg(ap, unsigned int*);
             *H = unpacku16(buf);
             buf += 2;
             break;
 
-        case 'l': // 32-bit
+        case 'l': // 32비트
             l = va_arg(ap, long int*);
             *l = unpacki32(buf);
             buf += 4;
             break;
 
-        case 'L': // 32-bit unsigned
+        case 'L': // 부호없는 32비트
             L = va_arg(ap, unsigned long int*);
             *L = unpacku32(buf);
             buf += 4;
             break;
 
-        case 'q': // 64-bit
+        case 'q': // 64비트
             q = va_arg(ap, long long int*);
             *q = unpacki64(buf);
             buf += 8;
             break;
 
-        case 'Q': // 64-bit unsigned
+        case 'Q': // 부호없는 64비트
             Q = va_arg(ap, unsigned long long int*);
             *Q = unpacku64(buf);
             buf += 8;
             break;
 
-        case 'f': // float
+        case 'f': // 부동소수점
             f = va_arg(ap, float*);
             fhold = unpacku16(buf);
             *f = unpack754_16(fhold);
             buf += 2;
             break;
 
-        case 'd': // float-32
+        case 'd': // 32비트 부동소수점
             d = va_arg(ap, double*);
             fhold = unpacku32(buf);
             *d = unpack754_32(fhold);
             buf += 4;
             break;
 
-        case 'g': // float-64
+        case 'g': // 64비트 부동소수점
             g = va_arg(ap, long double*);
             fhold = unpacku64(buf);
             *g = unpack754_64(fhold);
             buf += 8;
             break;
 
-        case 's': // string
+        case 's': // 문자열
             s = va_arg(ap, char*);
             len = unpacku16(buf);
             buf += 2;
@@ -1560,7 +1552,7 @@ void unpack(unsigned char *buf, char *format, ...)
             break;
 
         default:
-            if (isdigit(*format)) { // track max str len
+            if (isdigit(*format)) { // 최대 문자열 길이를 기록
                 maxstrlen = maxstrlen * 10 + (*format-'0');
             }
         }
@@ -1572,19 +1564,18 @@ void unpack(unsigned char *buf, char *format, ...)
 }
 ```
 
-And [flx[here is a demonstration program|pack2.c]] of the above code
-that packs some data into `buf` and then unpacks it into variables. Note
-that when calling `unpack()` with a string argument (format specifier
-"`s`"), it's wise to put a maximum length count in front of it to
-prevent a buffer overrun, e.g. "`96s`". Be wary when unpacking data you
-get over the network---a malicious user might send badly-constructed
-packets in an effort to attack your system!
+그리고 위의 코드를 [flx[시연하는 프로그램|pack2.c]]이 여기에 있다. 이 프로그램은
+`buf`에 약간의 데이터를 포장한 후 다시 변수에 풀어놓는다. `unpack()`을 문자열
+매개변수로 호출하는 경우(형식 지정자 "`s`") 버퍼 오버런을 방지하기 위해서
+"`96s`"처럼 최대 길이를 앞에 붙이는 것이 현명하다는 것을 기억하라. 네트워크를
+통해 받은 데이터를 풀어놓을 때에는 주의해야 한다. 악의적인 사용자가 당신의
+시스템을 공격하기 위해서 악의적으로 구성된 패킷을 보낼 수 있다!
 
 ```{.c .numberLines}
 #include <stdio.h>
 
-// various bits for floating point types--
-// varies for different architectures
+// 부동 소수점 형의 다양한 비트의 변종
+// 아키텍처 별로 다르다.
 typedef float float32_t;
 typedef double float64_t;
 
@@ -1601,7 +1592,7 @@ int main(void)
 
     packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0, (int16_t)37,
             (int32_t)-5, s, (float32_t)-3490.6677);
-    packi16(buf+1, packetsize); // store packet size in packet for kicks
+    packi16(buf+1, packetsize); // 시작을 위해 패킷 사이즈를 패킷에 넣어둔다.
 
     printf("packet is %" PRId32 " bytes\n", packetsize);
 
@@ -1616,68 +1607,63 @@ int main(void)
 }
 ```
 
-Whether you roll your own code or use someone else's, it's a good idea
-to have a general set of data packing routines for the sake of keeping
-bugs in check, rather than packing each bit by hand each time.
+여러분이 직접 만든 코드를 쓰건 다른 사람이 작성한 것을 쓰건, 매번 각 비트를
+수동으로 포장하기보다는 버그를 쉽게 잡아내기 위해서 일반적인 데이터 패킹 루틴을
+사용하는 것이 좋은 습관이다.
 
-When packing the data, what's a good format to use? Excellent question.
-Fortunately, [i[XDR]] [flrfc[RFC 4506|4506]], the External Data
-Representation Standard, already defines binary formats for a bunch of
-different types, like floating point types, integer types, arrays, raw
-data, etc. I suggest conforming to that if you're going to roll the data
-yourself. But you're not obligated to. The Packet Police are not right
-outside your door. At least, I don't _think_ they are.
+데이터를 포장할 때에 쓰기 좋은 형식은 무엇일까? 아주 좋은 질문이다. 다행히도
+[i[XDR]] [flrfc[RFC 4506|4506]], 외부 데이터 표현 표준이 부동소수점과 정수,
+배열 등 다양한 자료형에 대해서 이진 형식을 정의한다. 만약 데이터를 직접 처리할
+생각이라면 이것을 준수하는 것을 권장한다. 그러나 반드시 그래야 하는 것은 아니다.
+패킷 경찰들이 문 앞에 지키고 서 있는 것은 아니다. 최소한 필자는 그렇지 않을 것이라고
+_생각한다._
 
-In any case, encoding the data somehow or another before you send it is
-the right way of doing things!
+어떤 경우에도, 데이터를 보내기 전에 인코드 하는 것이 옳은 일이다.
 
 [i[Serialization]>]
 
-## Son of Data Encapsulation {#sonofdataencap}
+## 데이터 캡슐화의 아들 {#sonofdataencap}
 
-What does it really mean to encapsulate data, anyway? In the simplest
-case, it means you'll stick a header on there with either some
-identifying information or a packet length, or both.
+아무튼 데이터 캡슐화가 정말로 의미하는 것은 무엇인가? 가장 단순한 경우 그것은
+여러분이 데이터에 약간의 식별 정보나 패킷 길이 혹은 둘 모두를 담은 헤더를
+붙여둔다는 뜻이 된다.
 
-What should your header look like? Well, it's just some binary data that
-represents whatever you feel is necessary to complete your project.
+헤더가 어떤 모양을 하고 있어야 할까? 사실 여러분의 프로젝트를 끝내기 위해서
+필요하다고 느끼는 어떤 이진 데이터면 된다.
 
-Wow. That's vague.
+와. 정말 막연한 이야기다.
 
-Okay. For instance, let's say you have a multi-user chat program that
-uses `SOCK_STREAM`s. When a user types ("says") something, two pieces of
-information need to be transmitted to the server: what was said and who
-said it.
+좋다. 예를 들자면 `SOCK_STREAM`을 사용하는 다중 사용자 대화 프로그램이 있다고 하자.
+한 사용자가 뭔가 입력한다면, 두 조각의 정보가 서버에 전달되어야 한다. 무엇을 말했는지,
+그리고 누가 말했는지.
 
-So far so good? "What's the problem?" you're asking.
+여기까지는 좋은가? "그럼 무엇이 문제인가?"라고 여러분은 질문할 것이다.
 
-The problem is that the messages can be of varying lengths. One person
-named "tom" might say, "Hi", and another person named "Benjamin" might
-say, "Hey guys what is up?"
+문제는 메시지가 가변 길이일 수 있다는 점이다. "Tom"이라는 사용자가 "Hi"라고
+말할 수 있고 "Benjamin"이라는 또다른 사용자가 "Hey guys what is up?"이라고
+말할 수도 있다.
 
-So you `send()` all this stuff to the clients as it comes in. Your
-outgoing data stream looks like this:
+그것이 들어오는대로 클라이언트에게 `send()`한다고 하자. 여러분의 송출 자료 스트림은
+아래와 같을 것이다.
 
 ```
 t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
 ```
 
-And so on. How does the client know when one message starts and another
-stops? You could, if you wanted, make all messages the same length and
-just call the [i[`sendall()` function]] `sendall()` we implemented,
-[above](#sendall). But that wastes bandwidth! We don't want to `send()`
-1024 bytes just so "tom" can say "Hi".
+이런 식일 것이다. 클라이언트가 어떻게 하면 메시지의 시작과 끝을 알 수 있겠는가?
+원한다면 모든 메시지가 같은 길이를 갖도록 하고 우리가 구현한 [i[`sendall()` function]] `sendall()`
+함수를 그냥 호출할 수 있을 것이다. 그러나 그렇게 하면 대역폭을 낭비하게 된다!
+"tom"이 "Hi"라고 말하는 일을 위해서 1024바이트를 `send()`하고싶지는 않을
+것이다.
 
-So we _encapsulate_ the data in a tiny header and packet structure. Both
-the client and server know how to pack and unpack (sometimes referred to
-as "marshal" and "unmarshal") this data. Don't look now, but we're
-starting to define a _protocol_ that describes how a client and server
-communicate!
+그래서 우리는 데이터를 작은 헤더와 패킷 구조에 _캡슐화_ 한다. 클라이언트와
+서버 모두 이 데이터를 어떻게 포장하고 풀어내는지(때때로 "marshal"과 "unmarshal"
+이라고 부른다) 알고있다. 지금 이해할 필요는 없지만 우리는 클라이언트와
+서버가 어떻게 통신하는지를 정의하는 _프로토콜_ 을 정의하려고 하고있다.
 
-In this case, let's assume the user name is a fixed length of 8
-characters, padded with `'\0'`. And then let's assume the data is
-variable length, up to a maximum of 128 characters. Let's have a look a
-sample packet structure that we might use in this situation:
+지금은 사용자의 이름이 `'\0'`으로 패드된 고정된 8개의 문자라고 가정하자.
+데이터는 최대 128개 문자로 구성되는 가변길이 형태라고 하자. 이 상황에서
+쓸 수 있는 예제 패킷 구조를 살펴보자.
 
 1. `len` (1 byte, unsigned)---The total length of the packet, counting
    the 8-byte user name and chat data.
