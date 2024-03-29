@@ -1665,160 +1665,138 @@ t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
 데이터는 최대 128개 문자로 구성되는 가변길이 형태라고 하자. 이 상황에서
 쓸 수 있는 예제 패킷 구조를 살펴보자.
 
-1. `len` (1 byte, unsigned)---The total length of the packet, counting
-   the 8-byte user name and chat data.
+1. `len` (1바이트, 부호 없음)---패킷의 전체 길이, 8바이트의 사용자 이름과
+   대화 데이터의 길이를 센다.
 
-2. `name` (8 bytes)---The user's name, NUL-padded if necessary.
+2. `name` (8 바이트)---사용자의 이름, 필요한 경우 0이 덧대진다.
 
-3. `chatdata` (_n_-bytes)---The data itself, no more than 128 bytes. The
-   length of the packet should be calculated as the length of this data
-   plus 8 (the length of the name field, above).
+3. `chatdata` (_n_ 바이트)---데이터 자체, 최대 128바이트. 패킷의 길이는 이
+   데이터의 길이에 8을 더한 값으로 계산되어야 한다.(위에서 언급한 이름 필드의 길이)
 
-Why did I choose the 8-byte and 128-byte limits for the fields? I pulled
-them out of the air, assuming they'd be long enough. Maybe, though, 8
-bytes is too restrictive for your needs, and you can have a 30-byte name
-field, or whatever. The choice is up to you.
+필자가 8바이트와 128바이트를 필드의 길이 제한으로 선택한 이유가 궁금한가?
+특별한 이유는 없고, 충분히 길 것이라 생각했다. 그러나 아마도 8바이트는 여러분의
+필요에는 조금 못 미칠수도 있다. 그런 경우에는 이름 필드의 길이를 30바이트나
+다른 값으로 설정할 수 있다. 선택은 여러분의 몫이다.
 
-Using the above packet definition, the first packet would consist of the
-following information (in hex and ASCII):
+위의 패킷 정의를 사용하는 첫 번째 패킷은 아래와 같은 정보로 구성될 수 있다.
+(16진수와 아스키 코드로 표시되었다.):
 
 ```
    0A     74 6F 6D 00 00 00 00 00      48 69
-(length)  T  o  m    (padding)         H  i
+(길이)  T  o  m    (패딩)         H  i
 ```
 
-And the second is similar:
+두 번째 패킷도 비슷하다.
 
 ```
    18     42 65 6E 6A 61 6D 69 6E      48 65 79 20 67 75 79 73 20 77 ...
-(length)  B  e  n  j  a  m  i  n       H  e  y     g  u  y  s     w  ...
+(길이)  B  e  n  j  a  m  i  n       H  e  y     g  u  y  s     w  ...
 ```
 
-(The length is stored in Network Byte Order, of course. In this case,
-it's only one byte so it doesn't matter, but generally speaking you'll
-want all your binary integers to be stored in Network Byte Order in your
-packets.)
+(길이는 물론 네트워크 바이트 순서로 기록되어 있다. 이 경우 길이가 단일 바이트이므로
+그것이 중요하지는 않지만, 일반적으로는 여러분의 패킷이 가지는 모든
+이진 정수가 네트워크 바이트 순서로 기록되기를 원할 것이다.)
 
-When you're sending this data, you should be safe and use a command
-similar to [`sendall()`](#sendall), above, so you know all the data is
-sent, even if it takes multiple calls to `send()` to get it all out.
+이 데이터를 보낼 때 여러분은 위에서 제시된 [`sendall()`](#sendall)과 비슷한
+함수를 쓸 수 있다. 그렇게 하면 데이터를 모두 전송하기 위해서 `send()`를 여러
+번 호출하는 한이 있어도 모든 데이터가 전송되는 것을 확신할 수 있다.
 
-Likewise, when you're receiving this data, you need to do a bit of extra
-work. To be safe, you should assume that you might receive a partial
-packet (like maybe we receive "`18 42 65 6E 6A`" from Benjamin, above,
-but that's all we get in this call to `recv()`). We need to call
-`recv()` over and over again until the packet is completely received.
+마찬가지로 이 데이터를 받을 때에도 약간의 추가적인 작업이 필요하다. 이 데이터를
+받을 때에도 부분적인 패킷(예를 들어 위의 벤자민으로부터 `recv()`로 받은 것이
+"`18 42 65 6E 6A`"뿐일 수도 있다.)을 받을 가능성을 염두에 둬야 한다. 전체 패킷을
+받을 때까지 `recv()`를 반복적으로 호출해야 한다.
 
-But how? Well, we know the number of bytes we need to receive in total
-for the packet to be complete, since that number is tacked on the front
-of the packet. We also know the maximum packet size is 1+8+128, or 137
-bytes (because that's how we defined the packet).
+그러나 어떻게 해야할까? 우리는 패킷이 완성되기 위해서 받아야 하는 바이트의
+총 갯수를 알고있다. 갯수가 패킷의 앞쪽에 붙어있기 때문이다. 우리는 또한 패킷의
+최대 크기가 1 + 8 + 128, 즉 137바이트라는 것을 알고있다. (우리가 그렇게 정의했기
+때문이다.)
 
-There are actually a couple things you can do here. Since you know every
-packet starts off with a length, you can call `recv()` just to get the
-packet length. Then once you have that, you can call it again
-specifying exactly the remaining length of the packet (possibly
-repeatedly to get all the data) until you have the complete packet. The
-advantage of this method is that you only need a buffer large enough for
-one packet, while the disadvantage is that you need to call `recv()` at
-least twice to get all the data.
+여기에서는 몇 가지 방식으로 일을 할 수 있다. 모든 패킷이 길이 정보로 시작한다는 것을
+알고있으므로 패킷의 길이를 얻기 위해서 `recv()`를 호출할 수 있다. 그리고
+길이를 가지고 있으면 전체 패킷을 받을 때까지 남은 길이를 명시하면서 `recv()`
+를(아마도 반복적으로) 호출하는 것이다. 이 방식의 장점은 하나의 패킷을 담기에 충분한
+크기의 버퍼만 있으면 된다는 것이고, 단점은 모든 데이터를 받기 위해서 `recv()`를
+최소 두 번 호출해야 한다는 것이다.
 
-Another option is just to call `recv()` and say the amount you're
-willing to receive is the maximum number of bytes in a packet. Then
-whatever you get, stick it onto the back of a buffer, and finally check
-to see if the packet is complete. Of course, you might get some of the
-next packet, so you'll need to have room for that.
+다른 옵션은 `recv()`을 호출할 때 한 패킷의 최대 크기만큼을 받겠다고 지정하는 것이다.
+그 후에 받은 자료를 버퍼의 뒤쪽에 쌓아두고, 패킷이 완성되었는지 확인한다. 물론
+다음 패킷의 일부를 받을 수 있으므로 그것을 위한 여분의 공간이 필요하다.
 
-What you can do is declare an array big enough for two packets. This is
-your work array where you will reconstruct packets as they arrive.
+이를 위해서 두 개의 패킷을 담기에 충분한 배열을 선언하면 된다. 이것은 패킷이
+도착하는대로 재구성하는 일에 사용할 작업 공간이다.
 
-Every time you `recv()` data, you'll append it into the work buffer and
-check to see if the packet is complete. That is, the number of bytes in
-the buffer is greater than or equal to the length specified in the
-header (+1, because the length in the header doesn't include the byte
-for the length itself). If the number of bytes in the buffer is less
-than 1, the packet is not complete, obviously. You have to make a
-special case for this, though, since the first byte is garbage and you
-can't rely on it for the correct packet length.
+자료를 `recv()`처리할 때마다 그것을 작업 버퍼에 덧붙이고 패킷이 완성되었는지
+확인한다. 버퍼에 담긴 바이트의 갯수가 헤더에 명시된 길이보다 많거나 같은지
+확인한다는 뜻이다(사실은 헤더에 헤더 자신의 길이가 포함되지 않으므로 +1을
+해야한다). 만약 버퍼의 바이트 수가 1보다 적다면 물론 패킷은 완성되지 않은
+것이다. 또한 이 경우 버퍼의 첫 바이트를 읽어들인다고 해도 그것은 쓰레기값이므로
+그것을 감안한 처리를 해야한다.
 
-Once the packet is complete, you can do with it what you will. Use it,
-and remove it from your work buffer.
+패킷이 완성되면 여러분은 그것으로 여러분이 원하는 일을 할 수 있다. 패킷을
+사용하거나, 그것을 여러분의 작업 버퍼에서 제거할 수 있다.
 
-Whew! Are you juggling that in your head yet? Well, here's the second of
-the one-two punch: you might have read past the end of one packet and
-onto the next in a single `recv()` call. That is, you have a work buffer
-with one complete packet, and an incomplete part of the next packet!
-Bloody heck. (But this is why you made your work buffer large enough to
-hold _two_ packets---in case this happened!)
+휴! 아직 머릿속이 어지러운가? 여기 원투펀치의 두 번째 부분이 있다. 한 번의
+`recv()`호출로 한 패킷을 넘어서는 분량을 읽어들일 수가 있다. 즉 작업버퍼에
+하나의 완전한 패킷과 다음 패킷의 불완전한 부분이 있을 수 있다는 것이다.
+제기랄. (그러나 이런 경우를 처리하기 위해서 여러분의 작업 버퍼를 _두_ 개의
+패킷을 담기에 충분한 크기로 만들어둔 것이다.)
 
-Since you know the length of the first packet from the header, and
-you've been keeping track of the number of bytes in the work buffer, you
-can subtract and calculate how many of the bytes in the work buffer
-belong to the second (incomplete) packet. When you've handled the first
-one, you can clear it out of the work buffer and move the partial second
-packet down the to front of the buffer so it's all ready to go for the
-next `recv()`.
+첫 패킷의 길이를 헤더를 통해 알고있고 작업 버퍼에 있는 바이트의 수를 추적하고
+있으므로, 뺄셈을 해서 작업 버퍼에 있는 바이트 중 몇 개가 다음(미완성된) 패킷에
+속해있는지 계산할 수 있다. 첫 번째 패킷을 처리한 후에는 그것을 작업 버퍼에서
+제거하고 부분적인 두 번째 패킷을 버퍼의 앞쪽으로 옮겨서 다음 `recv()`를
+처리할 준비를 할 수 있다.
 
-(Some of you readers will note that actually moving the partial second
-packet to the beginning of the work buffer takes time, and the program
-can be coded to not require this by using a circular buffer.
-Unfortunately for the rest of you, a discussion on circular buffers is
-beyond the scope of this article. If you're still curious, grab a data
-structures book and go from there.)
+(독자 여러분 중 일부는 부분적인 두 번째 패킷을 작업 버퍼의 앞쪽으로 옮기는 것에
+시간이 걸리고, 환형 버퍼를 사용하면 그 작업이 필요하지 않다는 것에 주목할 것이다.
+다른 독자들에게는 불행하게도, 환형 버퍼에 대한 논의는 이 글의 범위를 벗어난다.
+흥미가 있다면 데이터 구조 책을 집어들고 거기서부터 시작할 수 있을 것이다.)
 
-I never said it was easy. Ok, I did say it was easy. And it is; you just
-need practice and pretty soon it'll come to you naturally. By
-[i[Excalibur]] Excalibur I swear it!
+쉽다고 한 적은 없다. 사실은, 쉽다고 했다. 또 실제로도 그렇다. 단지 연습이 필요하고
+오래지않아 익숙해질 것이다. [i[Excalibur]] 엑스칼리버에 맹세한다!
 
-## Broadcast Packets---Hello, World!
+## 브로드캐스트(Broadcast) 패킷 --- Hello, World!
 
-So far, this guide has talked about sending data from one host to one
-other host. But it is possible, I insist, that you can, with the proper
-authority, send data to multiple hosts _at the same time_!
+지금까지 이 안내서에서는 데이터를 하나의 호스트에서 다른 호스트로 보내는 일에
+대해서 이야기했다. 그러나 적절한 권한이 있다면 _한 번에_ 여러 호스트에게
+자료를 보낼 수 있다!
 
-With [i[UDP]] UDP (only UDP, not TCP) and standard IPv4, this is done
-through a mechanism called [i[Broadcast]] _broadcasting_. With IPv6,
-broadcasting isn't supported, and you have to resort to the often
-superior technique of _multicasting_, which, sadly I won't be discussing
-at this time. But enough of the starry-eyed future---we're stuck in the
-32-bit present.
+[i[UDP]] UDP(TCP는 안 된다)와 표준 IPv4에서 이것은 [i[Broadcast]]
+_브로드캐스팅(Broadcasting)_ 이라는 매커니즘으로 가능하다. IPv6에서 브로드캐스팅은
+지원되지 않으며, 더 상위의 기술인 *멀티캐스팅(Multicasting)*을 사용해야 한다.
+그러나 이번에는 그것에 대해서 다루지 않을 것이다. 촉망받는 미래에 대해서는
+그만 이야기하자. 우리는 32비트의 현재에 갇혀있다.
 
-But wait! You can't just run off and start broadcasting willy-nilly; You
-have to [i[`setsockopt()` function]] set the socket option
-[i[`SO_BROADCAST` macro]] `SO_BROADCAST` before you can send a broadcast
-packet out on the network. It's like a one of those little plastic
-covers they put over the missile launch switch! That's just how much
-power you hold in your hands!
+잠깐! 그러나 무작정 브로드캐스팅을 시작할 수는 없다. 네트워크에 브로드캐스트 패킷을
+전송하기 전에 [i[`SO_BROADCAST` macro]] `SO_BROADCAST` 소켓 옵션을
+[i[`setsockopt()` function]] 설정해야 한다. 이것은 미사일 발사 스위치에 달아두는
+플라스틱 덮개같은 것이다. 그만큼 강력한 도구라는 뜻이다.
 
-But seriously, though, there is a danger to using broadcast packets, and
-that is: every system that receives a broadcast packet must undo all the
-onion-skin layers of data encapsulation until it finds out what port the
-data is destined to. And then it hands the data over or discards it. In
-either case, it's a lot of work for each machine that receives the
-broadcast packet, and since it is all of them on the local network, that
-could be a lot of machines doing a lot of unnecessary work. When the
-game Doom first came out, this was a complaint about its network code.
+아무튼 진지하게 말하자면 브로드캐스트 패킷을 쓰는 일에는 위험이 따른다. 브로드캐스트
+패킷을 받는 모든 시스템은 반드시 그 데이터가 어떤 포트를 목적지로 삼는지 알아내기
+위해서 패킷의 데이터 캡슐화 계층이라는 양파껍질을 벗겨내야 한다는 점이 바로 그것이다.
+그렇게 하고 난 후에야 시스템은 데이터를 포트에 건네줄지 아니면 무시할지를 결정한다.
+어떤 경우건 그것은 브로드캐스트 패킷을 받는 각각의 장치에게 큰 작업이고, 상당히 많은
+장치들이 불필요한 작업을 할 수 있다. 게임 둠이 처음 세상에 나왔을 때 그것의 네트워크
+코드에 대한 불평이 이런 것이었다.
 
-Now, there is more than one way to skin a cat... wait a minute. Is there
-really more than one way to skin a cat? What kind of expression is that?
-Uh, and likewise, there is more than one way to send a broadcast packet.
-So, to get to the meat and potatoes of the whole thing: how do you
-specify the destination address for a broadcast message? There are two
-common ways:
+자, 고양이 가죽을 벗기는 일에도 여러 방법이 있을 수 있으니 잠깐 기다려보자.
+(역자 주 : 서양의 속담) 잠깐, 무슨 그런 속담이 다 있는가? 정말로 고양이
+가죽을 벗기는 일에 여러 방법이 있는가? 그리고 브로드캐스트 패킷을 보내는
+일에도 여러 방법이 있는가? 핵심을 말하자면 이것이다. 어떻게 브로드캐스트 메시지의
+목적지 주소를 지정할 수 있는가? 두 개의 일반적인 방법이 있다.
 
-1. Send the data to a specific subnet's broadcast address. This is the
-   subnet's network number with all one-bits set for the host portion of
-   the address. For instance, at home my network is `192.168.1.0`, my
-   netmask is `255.255.255.0`, so the last byte of the address is my
-   host number (because the first three bytes, according to the netmask,
-   are the network number). So my broadcast address is `192.168.1.255`.
-   Under Unix, the `ifconfig` command will actually give you all this
-   data. (If you're curious, the bitwise logic to get your broadcast
-   address is `network_number` OR (NOT `netmask`).) You can send this
-   type of broadcast packet to remote networks as well as your local
-   network, but you run the risk of the packet being dropped by the
-   destination's router. (If they didn't drop it, then some random
-   smurf could start flooding their LAN with broadcast traffic.)
+1. 데이터를 특정 서브넷의 브로드캐스트 주소로 보낸다. 이것은 주소의 모든 호스트
+   부분 비트가 1로 설정된 서브넷 네트워크 주소이다. 예를 들어 필자의 네트워크는
+   집에서 `192.168.1.0`이고 넷마스크는 `255.255.255.0`이다. 그러므로 주소의
+   마지막 바이트가 호스트 번호이다(넷마스크에 따라 첫 세 바이트가 네트워크
+   주소이기 때문이다). 그러므로 필자의 브로드캐스트 주소는 `192.168.1.255`
+   이다. 유닉스에서는 `ifconfig` 명령이 이 모든 정보를 줄 것이다. (궁금한 분을
+   위해 적자면 브로드캐스트 주소를 얻기 위한 비트단위 논리연산은 `네트워크 번호`
+   OR (NOT `넷마스크`)이다.) 여러분은 이 종류의 브로드캐스트 패킷을
+   로컬 네트워크 뿐 아니라 원격 네트워크에도 보낼 수 있다. 그러나 이 경우
+   목적지의 라우터가 패킷을 무시할 가능성이 존재한다. (이런 패킷을 무시하지
+   않으면 공격자가 브로드캐스트 통신을 과다하게 발송할 수 있다.)
 
 2. Send the data to the "global" broadcast address. This is
    [i[`255.255.255.255`]] `255.255.255.255`, aka [i[`INADDR_BROADCAST`
