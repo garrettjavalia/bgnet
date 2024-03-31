@@ -100,7 +100,6 @@ W. Richard Stevens이 여러분에게 줄 수 있는 답과 동일한 답을 주
 을 참고하라.
 
 **왜 `select()`가 시그널을 받으면 실패하는가?**
-**Why does `select()` keep falling out on a signal?**
 
 시그널은 중단된 시스템 콜이 `errno`를 `EINTR`로 설정하고 `-1`을 반환하게
 만든다. [i[`sigaction()` function]] `sigaction()`으로 시그널 핸들러를
