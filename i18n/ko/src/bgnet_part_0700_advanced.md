@@ -1798,17 +1798,16 @@ _브로드캐스팅(Broadcasting)_ 이라는 매커니즘으로 가능하다. IP
    목적지의 라우터가 패킷을 무시할 가능성이 존재한다. (이런 패킷을 무시하지
    않으면 공격자가 브로드캐스트 통신을 과다하게 발송할 수 있다.)
 
-2. Send the data to the "global" broadcast address. This is
-   [i[`255.255.255.255`]] `255.255.255.255`, aka [i[`INADDR_BROADCAST`
-   macro]] `INADDR_BROADCAST`. Many machines will automatically bitwise
-   AND this with your network number to convert it to a network
-   broadcast address, but some won't. It varies. Routers do not forward
-   this type of broadcast packet off your local network, ironically
-   enough.
+2. 데이터를 "전역" 브로드캐스트 주소로 보낸다. 이것은 [i[`255.255.255.255`]]
+   `255.255.255.255`, 통칭 [i[`INADDR_BROADCAST`
+   macro]] `INADDR_BROADCAST`다. 많은 장치들은 이것을 자동으로 여러분의 네트워크
+   번호와 비트단위 AND연산 해서 네트워크 브로드캐스트 주소로 변환할 것이다.
+   그러나 일부는 그렇게 하지 않을 것이다. 그것은 장치별로 다르다. 역설적이게도
+   라우터들은 이 종류의 브로드캐스트 패킷을 로컬 네트워크 너머로 전송하지 않는다.
 
-So what happens if you try to send data on the broadcast address without
-first setting the `SO_BROADCAST` socket option? Well, let's fire up good
-old [`talker` and `listener`](#datagram) and see what happens.
+`SO_BROADCAST` 소켓 옵션을 지정하지 않고 브로드캐스트 주소에 데이터를 보내려고 하면
+어떤 일이 생길까? 오래됐지만 유용한 [`talker`와 `listener`](#datagram) 를
+실행해보고 무슨 일이 생기는지 보자.
 
 ```
 $ talker 192.168.1.2 foo
@@ -1819,18 +1818,18 @@ $ talker 255.255.255.255 foo
 sendto: Permission denied
 ```
 
-Yes, it's not happy at all...because we didn't set the `SO_BROADCAST`
-socket option. Do that, and now you can `sendto()` anywhere you want!
+별로 좋지 않은 상황이다. `SO_BROADCAST`을 설정하지 않았기 때문이다. 설정을
+한 뒤에는 원하는 곳 어디에든 `sendto()`를 할 수 있다.
 
-In fact, that's the _only difference_ between a UDP application that can
-broadcast and one that can't. So let's take the old `talker` application
-and add one section that sets the `SO_BROADCAST` socket option. We'll
-call this program [flx[`broadcaster.c`|broadcaster.c]]:
+사실 그것이 브로드캐스트를 할 수 있는 UDP 응용프로그램과 그렇지 않은
+응용프로그램의 *유일한 차이*다. 그러나 오래된 `talker` 응용프로그램에
+`SO_BROADCAST` 소켓 옵션을 설정하는 부분을 하나 추가해보자. 이 프로그램을
+[flx[`broadcaster.c`|broadcaster.c]]라고 부를 것이다.
 
 ```{.c .numberLines}
 /*
-** broadcaster.c -- a datagram "client" like talker.c, except
-**                  this one can broadcast
+** broadcaster.c -- talker.c와 같은 데이터그램 클라이언트, 다만
+**                  이 프로그램은 브로드캐스트를 할 수 있다.
 */
 
 #include <stdio.h>
@@ -1844,23 +1843,23 @@ call this program [flx[`broadcaster.c`|broadcaster.c]]:
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SERVERPORT 4950 // the port users will be connecting to
+#define SERVERPORT 4950 // 사용자들이 연결할 포트
 
 int main(int argc, char *argv[])
 {
     int sockfd;
-    struct sockaddr_in their_addr; // connector's address information
+    struct sockaddr_in their_addr; // 연결자(Connector)의 주소 정보
     struct hostent *he;
     int numbytes;
     int broadcast = 1;
-    //char broadcast = '1'; // if that doesn't work, try this
+    //char broadcast = '1'; // 동작하지 않으면 이것을 써 보라
 
     if (argc != 3) {
         fprintf(stderr,"usage: broadcaster hostname message\n");
         exit(1);
     }
 
-    if ((he=gethostbyname(argv[1])) == NULL) {  // get the host info
+    if ((he=gethostbyname(argv[1])) == NULL) {  // 호스트 정보를 받아온다
         perror("gethostbyname");
         exit(1);
     }
@@ -1870,15 +1869,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // this call is what allows broadcast packets to be sent:
+    // 이 호출이 브로드캐스트 패킷을 보낼 수 있게 만든다
     if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast,
         sizeof broadcast) == -1) {
         perror("setsockopt (SO_BROADCAST)");
         exit(1);
     }
 
-    their_addr.sin_family = AF_INET;     // host byte order
-    their_addr.sin_port = htons(SERVERPORT); // short, network byte order
+    their_addr.sin_family = AF_INET;     // 호스트 바이트 순서
+    their_addr.sin_port = htons(SERVERPORT); // 숏, 네트워크 바이트 순서
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
 
@@ -1897,12 +1896,11 @@ int main(int argc, char *argv[])
 }
 ```
 
-What's different between this and a "normal" UDP client/server
-situation? Nothing! (With the exception of the client being allowed to
-send broadcast packets in this case.) As such, go ahead and run the old
-UDP [`listener`](#datagram) program in one window, and `broadcaster` in
-another. You should be now be able to do all those sends that failed,
-above.
+이 프로그램과 "평범한" UDP 클라이언트/서버의 상황에는 어떤 차이가 있을까?
+아무 것도 없다! (이 경우에는 클라이언트가 브로드캐스트 패킷을 보낼 수 있다는
+점을 빼면) 앞서와 마찬가지로 이전에 언급한 UDP [`listener`](#datagram)를
+한 창에 실행하고 다른 창에 `broadcaster`를 실행하라. 위에서 실패한 전송이
+성공할 것이다.
 
 ```
 $ broadcaster 192.168.1.2 foo
@@ -1913,25 +1911,22 @@ $ broadcaster 255.255.255.255 foo
 sent 3 bytes to 255.255.255.255
 ```
 
-And you should see `listener` responding that it got the packets. (If
-`listener` doesn't respond, it could be because it's bound to an IPv6
-address. Try changing the `AF_INET6` in `listener.c` to `AF_INET` to
-force IPv4.)
+`listener`가 수신한 패킷에 반응하는 것을 볼 수 있어야 한다. (만약 `listener`가
+반응하지 않는다면 그것이 IPv6주소에 연결되어서 그럴 수 있다. `listener.c`의
+`AF_INET6`를 `AF_INET`로 바꿔서 IPv4를 강제해보라.)
 
-Well, that's kind of exciting. But now fire up `listener` on another
-machine next to you on the same network so that you have two copies
-going, one on each machine, and run `broadcaster` again with your
-broadcast address... Hey! Both `listener`s get the packet even though
-you only called `sendto()` once! Cool!
+자, 여기까지도 조금 재미있었다. 그러나 여러분이 가진 다른 장치 중 같은
+네트워크에 있는 것에서 `listener`를 실행해서 각 장치에 1개씩 실행되게 한 후에
+`broadcaster`에 브로드캐스트 주소를 넣고 다시 실행해보자. `sendto()`를 한 번만
+실행했음에도 두 개의 `listener` 모두가 패킷을 받는다! 멋지다!
 
-If the `listener` gets data you send directly to it, but not data on the
-broadcast address, it could be that you have a [i[Firewall]] firewall on
-your local machine that is blocking the packets. (Yes, [i[Pat]] Pat and
-[i[Bapper]] Bapper, thank you for realizing before I did that this is
-why my sample code wasn't working. I told you I'd mention you in the
-guide, and here you are. So _nyah_.)
+만약 `listener`가 실행중인 장치의 아이피 주소를 목적지로 발송된 데이터는 받는데
+브로드캐스트 주소로 보낸 데이터는 받지 못한다면 아마도 [i[Firewall]] 방화벽이
+장치에 있어서 패킷을 막고 있을 것이다. (그래요, [i[Pat]] Pat, [i[Bapper]] Bapper.
+이게 제 샘플 코드가 동작하지 않을 수 있는 이유라는 것을 나보다 먼저 깨달아줘서
+고마워요. 안내서에 여러분을 언급하겠다고 했지요. 바로 이 부분에 적었습니다.)
 
-Again, be careful with broadcast packets. Since every machine on the LAN
-will be forced to deal with the packet whether it `recvfrom()`s it or
-not, it can present quite a load to the entire computing network. They
-are definitely to be used sparingly and appropriately.
+다시 말하지만 브로드캐스트 패킷을 다룰 때에는 주의하라. LAN(역자 주: Local Area Network)
+에 있는 모든 장치들이 `recvfrom()` 수행 여부와 상관없이 패킷을 처리해야 하므로
+전체 컴퓨터 네트워크에 상당한 부하를 줄 수 있다. 브로드캐스트 패킷은 반드시
+가끔씩만, 그리고 적절한 상황에서만 쓰여야 한다.
