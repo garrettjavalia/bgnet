@@ -34,17 +34,16 @@ descriptor]] 소켓 설명자를 반환하고, 여러분은 특화된 [i[`send()
 그리고 여러분이 실행중인 유닉스의 종류에 따라 다른 많은 종류의 소켓들.
 이 문서는 첫 번째 것에 대해서만 다룹니다. 바로 인터넷 소켓입니다.
 
-
 ## 두 종류의 인터넷 소켓
 
 인터넷 소켓이 두 종류라니 무슨 소리냐고요? 사실 거짓말입니다. 더 많은 종류가 있습니다.
 그러나 여러분을 겁먹게 하기 싫었습니다. 여기서는 두 종류에 대해서만 이야기하겠습니다.
 여러분에게 [i[Raw sockets]] "Raw Socket"이라는 것이 있으며 그것이 아주 강력하고
-한 번쯤 살펴보시길 권한다고 말하는 지금 이 문장을 제외하고 말입니다. 
+한 번쯤 살펴보시길 권한다고 말하는 지금 이 문장을 제외하고 말입니다.
 
 "이제 됐고 그 두 종류가 도대체 뭡니까?" 하나는 [i[Stream sockets]]
 "Stream Socket(스트림 소켓)"이고 다른 하나는 [i[Datagram sockets]] "Datagram Socket(데이터그램 소켓)"
-입니다. 앞으로 이 둘을 각각 [i[`SOCK_STREAM` macro]] "`SOCK_STREAM`" 과 
+입니다. 앞으로 이 둘을 각각 [i[`SOCK_STREAM` macro]] "`SOCK_STREAM`" 과
 "`SOCK_DGRAM`"으로 칭하겠습니다. 데이터그램 소켓은 때때로 비연결형/비연결성
 소켓이라고 불립니다. (그러나 그것도 정말로 필요하다면 [i[`connect()` function]] `connect()`
 함수를 사용할 수 있습니다. 아래의 [`connect()`](#connect)를 참고하하십시오.)
@@ -123,8 +122,7 @@ file transfer protocol, FTP의 동생), `dhcpcd` (DHCP 클라이언트),
 대화 메시지를 보낸다면 TCP는 훌륭한 선택입니다. 세계 안에서 초당 40번의 위치 정보
 갱신을 전송한다면 한두 개의 정보가 유실되어도 상관없습니다. 그렇다면 UDP가 좋은 선택입니다.
 
-
-## 저수준 논센스와 네트워크 이론 {#lowlevel}
+## 저수준 넌센스와 네트워크 이론 {#lowlevel}
 
 프로토콜의 계층구조에 대해서 이야기했으니 네트워크가 실제로 어떻게 동작하는지
 이야기할 차례입니다. [i[`SOCK_DGRAM` macro]] `SOCK_DGRAM`패킷이 어떻게 만들어지는지
@@ -141,7 +139,7 @@ file transfer protocol, FTP의 동생), `dhcpcd` (DHCP 클라이언트),
 (때때로 [i[Data encapsulation-->footer]] 푸터로도 감싸집니다).
 그리고 전체가 다시 다음 프로토콜에 의해 감싸집니다(말하자면 [i[UDP]] UDP같은 것).
 그리고 다시 [i[IP]] IP로 감싸지고, 또 다시 하드웨어(물리) 계층(예를 들어 [i[Ethernet]]
-이더넷(Ethernet)에 의해 최종적인 프로토콜로 감싸집니다. 
+이더넷(Ethernet)에 의해 최종적인 프로토콜로 감싸집니다.
 
 다른 컴퓨터가 패킷을 받으면 하드웨어는 이더넷 헤더를 벗겨내고, 커널이 IP와 UDP헤더를 벗겨냅니다.
 그리고 TFTP프로그램이 TFTP헤더를 벗겨내고, 마침내 데이터를 가지게 됩니다.
@@ -161,13 +159,13 @@ AUI(Attachment Unit Interface), 등등)(역자 주 : 여기에 언급되는 물�
 길게 말하지 않고 이제 전체 모델의 계층을 제시하겠습니다.
 네트워크 과목 시험을 위해서 이것을 기억하십시오.
 
-* 응용(Application)
-* 표현(Presentation)
-* 세션(Session)
-* 전송(Transport)
-* 네트워크(Network)
-* 데이터 링크(Data Link)
-* 물리(Physical)
+- 응용(Application)
+- 표현(Presentation)
+- 세션(Session)
+- 전송(Transport)
+- 네트워크(Network)
+- 데이터 링크(Data Link)
+- 물리(Physical)
 
 물리 계층은 하드웨어입니다(직렬통신, 이더넷 등). 응용 계층은 여러분이 상상할
 수 있는 한 최대한 물리 계층에서 먼 것입니다. 사용자가 실제로 네트워크와
@@ -176,10 +174,10 @@ AUI(Attachment Unit Interface), 등등)(역자 주 : 여기에 언급되는 물�
 사실 이 모델은 너무나 일반적이어서 정말로 원한다면 자동차 정비 안내서에도
 쓸 수 있을 것입니다. 유닉스와 좀 더 일치하는 계층화 모델은 이렇습니다.
 
-* 응용 계층(Application Layer) (_텔넷, ftp 등._)
-* 호스트 간 전송 계층(Host-to-Host Transport Layer) (_TCP, UDP_)
-* 인터넷 계층(Internet Layer) (_IP와 라우팅_)
-* 네트워크 접근 계층(Network Access Layer) (_이더넷, 와이파이(wi-fi), 기타 등등_)
+- 응용 계층(Application Layer) (_텔넷, ftp 등._)
+- 호스트 간 전송 계층(Host-to-Host Transport Layer) (_TCP, UDP_)
+- 인터넷 계층(Internet Layer) (_IP와 라우팅_)
+- 네트워크 접근 계층(Network Access Layer) (_이더넷, 와이파이(wi-fi), 기타 등등_)
 
 이 시점까지 오면 여러분은 아마도 이 계층들이 원본 데이터의 캡슐화에 어떻게 대응하는지
 아실 수 있을 듯 합니다.

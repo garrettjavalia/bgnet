@@ -1,152 +1,139 @@
-# Common Questions
+# 일반적인 질문들
 
-**Where can I get those header files?**
+**이 헤더파일들은 어디서 찾을 수 있는가?**
 
-[i[Header files]] If you don't have them on your system already, you
-probably don't need them. Check the manual for your particular platform.
-If you're building for [i[Windows]] Windows, you only need to `#include
-<winsock.h>`.
+[i[Header files]] 여러분의 시스템에 헤더파일이 없다면 아마도 그것이 필요하지
+않을 것이다. 사용중인 플랫폼의 설명서를 참고하라. [i[Windows]] Windows를 위해
+작업하고 있다면 `#include <winsock.h>`만 하면 된다.
 
-**What do I do when `bind()` reports [i[Address already in use]]
-"Address already in use"?**
+**`bind()`가 [i[Address already in use]] "Address already in use"
+를 보고하면 어떻게 해야하는가?**
 
-You have to use [i[`setsockopt()` function]] `setsockopt()` with the
-[i[`SO_REUSEADDR` macro]] `SO_REUSEADDR` option on the listening socket.
-Check out the [i[`bind()` function]] [section on `bind()`](#bind) and
-the [i[`select()` function]] [section on `select()`](#select) for an
-example.
+리스닝 소켓에 [i[`setsockopt()` function]] `setsockopt()`를
+[i[`SO_REUSEADDR` macro]] `SO_REUSEADDR`옵션과 함께 사용해야 한다.
+예제가 필요하다면 [i[`bind()` function]] [`bind()`에 관한 절](#bind)과
+[i[`select()` function]] [`select()`에 관한 절](#select)을 참고하라.
 
-**How do I get a list of open sockets on the system?**
+**시스템에 열린 소켓의 목록을 얻으려면 어떻게 해야하는가?**
 
-Use the [i[`netstat` command]] `netstat`. Check the `man` page for full
-details, but you should get some good output just typing:
+[i[`netstat` command]] `netstat`를 사용하라. 완전한 정보에 대해서는 `man`
+을 참고해야 하지만 아래와 같이 입력해도 약간의 유용한 출력을 얻을 수 있다.
 
 ```
 $ netstat
 ```
 
-The only trick is determining which socket is associated with which
-program.  `:-)`
+비결은 어떤 소켓이 어떤 프로그램과 연결되어 있는지 알아내는 것이다. `:-)`
 
-**How can I view the routing table?**
+**라우팅 테이블을 보려면 어떻게 해야하는가?**
 
-Run the [i[`route` command]] `route` command (in `/sbin` on most
-Linuxes) or the command [i[`netstat` command]] `netstat -r`. Or the
-command [i[`ip route` command]] `ip route`.
+[i[`route` command]] `route`명령(대개의 리눅스 장치에서 `/sbin`에 있다)
+을 실행하라. 아니면 [i[`netstat` command]] `netstat -r` 명령을 실행하라.
+혹은 [i[`ip route` command]] `ip route` 명령일 수도 있다.
 
-**How can I run the client and server programs if I only have one
-computer?  Don't I need a network to write network programs?**
+**컴퓨터가 하나밖에 없다면 어떻게 클라이언트와 서버 프로그램을 실행하는가?
+네트워크 프로그램을 작성하려면 네트워크가 있어야 하는 것 아닌가?**
 
-Fortunately for you, virtually all machines implement a [i[Loopback
-device]] loopback network "device" that sits in the kernel and pretends
-to be a network card. (This is the interface listed as "`lo`" in the
-routing table.)
+여러분에게는 다행히고 사실상 모든 장치가 커널에 자리잡고 네트워크 카드인 척 하는
+[i[Loopback device]] 루프백 네트워크 "장치"를 구현한다. (이것은 라우팅 테이블에서
+"`lo`"라는 이름으로 표시되는 인터페이스이다.)
 
-Pretend you're logged into a machine named [i[Goat]] "`goat`". Run the
-client in one window and the server in another. Or start the server in
-the background ("`server &`") and run the client in the same window. The
-upshot of the loopback device is that you can either `client goat` or
-[i[`localhost`]] `client localhost` (since "`localhost`" is likely
-defined in your `/etc/hosts` file) and you'll have the client talking to
-the server without a network!
+여러분이 [i[Goat]] "`goat`"라는 이름의 장치에 로그인했다고 하자. 클라이언트를
+하나의 창에서 실행하고 서버를 다른 창에서 실행하자. 아니면 서버를 백그라운드에서
+실행하고("`server &`") 클라이언트를 같은 창에서 실행하자. 루프백 장치는 여러분이
+`client goat`와 [i[`localhost`]] `client localhost`("`localhost`"는 여러분의
+`/etc/hosts`파일에 정의되어 있을 것이다.) 중 어떤 것이든 할 수 있게 해 줄 것이고
+네트워크 없이도 서버와 대화하는 클라이언트 프로그램을 시험할 수 있을 것이다.
 
-In short, no changes are necessary to any of the code to make it run on
-a single non-networked machine! Huzzah!
+간단히 말하자면 네트워크 없는 단일 장치에서 코드를 실행하기 위해서 코드를 변경할
+필요는 없다.
 
-**How can I tell if the remote side has closed connection?**
+**원격지 측에서 연결을 닫았는지 어떻게 알 수 있는가?**
 
-You can tell because `recv()` will return `0`.
+`recv()`가 `0`을 돌려주는 것으로 알 수 있다.
 
-**How do I implement a [i[`ping` command]] "ping" utility? What is
-[i[ICMP]] ICMP?  Where can I find out more about [i[Raw sockets]] raw
-sockets and `SOCK_RAW`?**
+**[i[`ping` command]] "ping" 유틸리티를 만들려면 어떻게 해야하는가?
+[i[ICMP]] ICMP는 무엇인가? [i[Raw sockets]] raw 소켓과 `SOCK_RAW`
+에 대해서는 어디에서 더 알아볼 수 있는가?**
 
 [i[`SOCK_RAW` macro]]
 
-All your raw sockets questions will be answered in [W. Richard Stevens'
-UNIX Network Programming books](#books). Also, look in the `ping/`
-subdirectory in Stevens' UNIX Network Programming source code,
-[fl[available online|http://www.unpbook.com/src.html]].
+raw 소켓에 대한 모든 질문은 [W. Richard Stevens' UNIX Network Programming books](#books)
+에서 답을 얻을 수 있다. 또한 [fl[온라인으로 사용 가능한|http://www.unpbook.com/src.html]]
+Stevens' UNIX Network Programming source code에서 `ping/` 하위디렉터리를
+살펴보라.
 
-**How do I change or shorten the timeout on a call to `connect()`?**
+**`connect()`에 대한 제한시간을 변경하거나 단축할 수 있는가?**
 
-Instead of giving you exactly the same answer that W. Richard Stevens
-would give you, I'll just refer you to [fl[`lib/connect_nonb.c` in the
-UNIX Network Programming source code|http://www.unpbook.com/src.html]].
+W. Richard Stevens이 여러분에게 줄 수 있는 답과 동일한 답을 주는 대신,
+[fl[UNIX Network Programming source code의 `lib/connect_nonb.c`|http://www.unpbook.com/src.html]]
+를 안내해주겠다.
 
-The gist of it is that you make a socket descriptor with `socket()`,
-[set it to non-blocking](#blocking), call `connect()`, and if all goes
-well `connect()` will return `-1` immediately and `errno` will be set to
-`EINPROGRESS`. Then you call [`select()`](#select) with whatever timeout
-you want, passing the socket descriptor in both the read and write sets.
-If it doesn't timeout, it means the `connect()` call completed. At this
-point, you'll have to use `getsockopt()` with the `SO_ERROR` option to
-get the return value from the `connect()` call, which should be zero if
-there was no error.
+요점은 `socket()`으로 소켓 설명자를 만든 후 [논 블로킹으로 만든 후에](#blocking)
+`connect()`를 호출할 때 모든 것이 잘 돌아간다면 `connect()`는 즉시 `-1`을
+반환할 것이고 `errno`는 `EINPROGRESS`로 설정될 것이라는 것이다. 그 후
+[`select()`](#select)를 호출할 때 소켓 설명자를 읽기와 쓰기 집합에 모두 넣으면서
+여러분이 원하는 제한시간을 지정하면 된다. 시간초과가 발생하지 않으면 `connect()`
+이 완료되었다는 의미다. 이 시점에서 `getsockopt()`을 `SO_ERROR`옵션과 함께
+호출해서 `connect()`호출의 반환값을 얻을 수 있고, 오류가 없었다면 그 값은
+0이어야 한다.
 
-Finally, you'll probably want to set the socket back to be blocking
-again before you start transferring data over it.
+마지막으로 여러분은 아마도 해당 소켓에 데이터를 전송하기 전에 소켓을 다시
+블로킹 모드로 설정하고 싶을 것이다.
 
-Notice that this has the added benefit of allowing your program to do
-something else while it's connecting, too. You could, for example, set
-the timeout to something low, like 500 ms, and update an indicator
-onscreen each timeout, then call `select()` again. When you've called
-`select()` and timed-out, say, 20 times, you'll know it's time to give
-up on the connection.
+이 방식은 프로그램이 연결을 시작하는 동안 다른 일을 할 수 있게 해 주는
+장점도 있음에 주목하라. 예를 들어 500ms정도의 짧은 제한시간을 설정한 후
+`select()`를 다시 호출하자. `select()`가 20번 정도 시간초과를 일으킨다면
+연결을 포기할 때가 되었음을 알 수 있다.
 
-Like I said, check out Stevens' source for a perfectly excellent
-example.
+말했듯이 완벽하게 훌륭한 예제가 필요하다면 Stevens의 코드를 참고하라.
 
-**How do I build for Windows?**
+**Windows를 위해 빌드하려면 어떻게 하는가?**
 
-First, delete Windows and install Linux or BSD. `};-)`. No, actually,
-just see the [section on building for Windows](#windows) in the
-introduction.
+먼저 윈도우를 삭제한 후 리눅스나 BSD를 설치하라. `};-)`. 사실 그럴 필요는
+없고, 도입부의 [윈도우즈에서 빌드하기를 위한 절](#windows)을 살펴보라.
 
-**How do I build for Solaris/SunOS? I keep getting linker errors when I
-try to compile!**
+**Solaris/SunOS에서 빌드하려면 어떻게 하는가? 컴파일을 시도하면 계속 링커 오류가 발생한다!**
 
-The linker errors happen because Sun boxes don't automatically compile
-in the socket libraries. See the [section on building for
-Solaris/SunOS](#solaris) in the introduction for an example of how to do
-this.
+링커 에러는 Sun사의 장치들이 자동적으로 소켓 라이브러리를 링크하지 않기 때문에
+발생한다. 컴파일을 위해서는 도입부의 [Solaris/SunOS를 위한 절](#solaris)
+을 참고하라.
 
+**왜 `select()`가 시그널을 받으면 실패하는가?**
 **Why does `select()` keep falling out on a signal?**
 
-Signals tend to cause blocked system calls to return `-1` with `errno`
-set to `EINTR`. When you set up a signal handler with [i[`sigaction()`
-function]] `sigaction()`, you can set the flag [i[`SA_RESTART` macro]]
-`SA_RESTART`, which is supposed to restart the system call after it was
-interrupted.
+시그널은 중단된 시스템 콜이 `errno`를 `EINTR`로 설정하고 `-1`을 반환하게
+만든다. [i[`sigaction()` function]] `sigaction()`으로 시그널 핸들러를
+설정하면 [i[`SA_RESTART` macro]] `SA_RESTART` 플래그를 설정할 수 있는데
+이것이 방해받은(Interrupted) 시스템 콜이 재개되게 해 줄 것이다.
 
-Naturally, this doesn't always work.
+태생적으로 이런 방식이 늘 작동하는 것은 아니다.(역자 주 :
+시스템콜/인터럽션과 관련된 처리는 시스템마다 다를 수 있다.)
 
-My favorite solution to this involves a [i[`goto` statement]] `goto`
-statement. You know this irritates your professors to no end, so go for
-it!
+내가 선호하는 해결책은 [i[`goto` statement]] `goto`문을 사용한다.
+물론 이것이 교수님들을 아주 짜증나게 할 수 있지만 쓸만하다.
 
 ```{.c .numberLines}
 select_restart:
 if ((err = select(fdmax+1, &readfds, NULL, NULL, NULL)) == -1) {
     if (errno == EINTR) {
-        // some signal just interrupted us, so restart
+        // 어떤 시그널이 우리에게 인터럽트를 걸었다. 그러니 재시작하자.
         goto select_restart;
     }
-    // handle the real error here:
+    // 진짜 오류는 여기서 처리하자
     perror("select");
-} 
+}
 ```
 
-Sure, you don't _need_ to use `goto` in this case; you can use other
-structures to control it. But I think the `goto` statement is actually
-cleaner.
+물론 여기에서 `goto`를 쓸 *필요*는 없다. 처리를 위해 다른 구조를 쓸 수 있다.
+그러나 필자는 `goto`문이 사실 더 깔끔하다고 생각한다. (역자 주 : 그래도
+역자는 goto문을 쓰는 일을 추천하지 않는다.)
 
-**How can I implement a timeout on a call to `recv()`?**
+**`recv()`에 대한 호출에 시간제한을 적용하려면 어떻게 해야하는가?**
 
-[i[`recv()` function-->timeout]] Use [i[`select()` function]]
-[`select()`](#select)! It allows you to specify a timeout parameter for
-socket descriptors that you're looking to read from. Or, you could wrap
-the entire functionality in a single function, like this:
+[i[`select()` function]] [`select()`](#select)를 [i[`recv()` function-->timeout]]사용하라!
+그것이 읽어들이려는 소켓 설명자에 시간제한 매개변수를 지정하라 수 있게 해준다.
+아니면 모든 기능을 아래와 같이 하나의 함수에 감쌀 수 있다.
 
 ```{.c .numberLines}
 #include <unistd.h>
@@ -160,246 +147,225 @@ int recvtimeout(int s, char *buf, int len, int timeout)
     int n;
     struct timeval tv;
 
-    // set up the file descriptor set
+    // 파일 설명자 집합 생성
     FD_ZERO(&fds);
     FD_SET(s, &fds);
 
-    // set up the struct timeval for the timeout
+    // 시간 제한을 위한 timeval 구조체 생성
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
 
-    // wait until timeout or data received
+    // 데이터를 받거나 시간이 초과될 때까지 기다린다
     n = select(s+1, &fds, NULL, NULL, &tv);
     if (n == 0) return -2; // timeout!
     if (n == -1) return -1; // error
 
-    // data must be here, so do a normal recv()
+    // 여기에 데이터가 있어야한다. 그러니 평범한 recv()를 한다
     return recv(s, buf, len, 0);
 }
 .
 .
 .
-// Sample call to recvtimeout():
-n = recvtimeout(s, buf, sizeof buf, 10); // 10 second timeout
+// recvtimeout()에 대한 호출 예시:
+n = recvtimeout(s, buf, sizeof buf, 10); // 시간제한 10초
 
 if (n == -1) {
-    // error occurred
+    // 오류가 발생했다
     perror("recvtimeout");
 }
 else if (n == -2) {
-    // timeout occurred
+    // 시간이 초과되었다
 } else {
-    // got some data in buf
+    // 버퍼에 데이터가 들어있다
 }
 .
 .
-. 
+.
 ```
 
-Notice that [i[`recvtimeout()` function]] `recvtimeout()` returns `-2`
-in case of a timeout. Why not return `0`? Well, if you recall, a return
-value of `0` on a call to `recv()` means that the remote side closed the
-connection. So that return value is already spoken for, and `-1` means
-"error", so I chose `-2` as my timeout indicator.
+[i[`recvtimeout()` function]] `recvtimeout()`이 시간초과 상황에서 `-2`를
+돌려준다는 점에 주목하라. 왜 `0`이 아닌지 궁금한가? `recv()`가 원격지 연결이
+닫혔을 때 `0`을 돌려준다는 점을 떠올려보자. 그러니 그 값은 쓸 수가 없고,
+`-1`은 "오류"를 의미한다. 그래서 필자는 시간초과를 가리키는 값으로 `-2`를 썼다.
 
-**How do I [i[Encryption]] encrypt or compress the data before sending
-it through the socket?**
+**소켓에 데이터를 보내기 전에 [i[Encryption]] 암호화하거나 압축하려면 어떻게 해야하는가?**
 
-One easy way to do encryption is to use [i[SSL]] SSL (secure sockets
-layer), but that's beyond the scope of this guide. [i[OpenSSL]] (Check
-out the [fl[OpenSSL project|https://www.openssl.org/]] for more info.)
+데이터를 암호화 하기 위한 간편한 방법 중 하나는 [i[SSL]] SSL (secure sockets
+layer)를 사용하는 것이다. 그러나 그것은 이 안내서의 범위를 벗어난다. [i[OpenSSL]]
+(더 많은 정보가 필요하면 [fl[OpenSSL project|https://www.openssl.org/]] 를 확인하라.)
 
-But assuming you want to plug in or implement your own [i[Compression]]
-compressor or encryption system, it's just a matter of thinking of your
-data as running through a sequence of steps between both ends. Each step
-changes the data in some way.
+그러나 만약 여러분이 자신만의 [i[Compression]] 압축기나 암호화 체계를 만들거나
+써 보고 싶다면, 여러분의 데이터가 양 끝 사이에서 정해진 단계를 거친다는 점을
+생각해보라. 각 단계는 데이터를 특정한 방법으로 바꾼다.
 
-1. server reads data from file (or wherever)
-2. server encrypts/compresses data  (you add this part)
-3. server `send()`s encrypted data
+1. 서버가 데이터를 파일(또는 다른 것)에서 읽어들인다
+2. 서버가 데이터를 암호화/압축한다(여러분이 이 단계를 추가한다)
+3. 서버가 암호화된 데이터를 `send()`한다
 
-Now the other way around:
+반대편은 이렇다.
 
-1. client `recv()`s encrypted data
-2. client decrypts/decompresses data  (you add this part)
-3. client writes data to file (or wherever)
+1. 클라이언트가 암호화된 데이터를 `recv()`한다
+2. 클라이언트가 데이터를 복호화/압축해제한다(여러분이 이 단계를 추가한다)
+3. 클라이언트가 데이터를 파일(또는 다른 것)에 쓴다
 
-If you're going to compress and encrypt, just remember to compress
-first. `:-)`
+만약 압축과 암호화를 모두 할 생각이라면 압축을 먼저 해야한다는 점을 기억하라. `:-)`
+(역자 주 : 최소한 순서는 일관되어야 한다.)
 
-Just as long as the client properly undoes what the server does, the
-data will be fine in the end no matter how many intermediate steps you
-add.
+클라이언트가 서버가 했던 작업을 제대로 거꾸로 수행하기만 한다면 여러분이
+얼마나 많은 단계를 추가하던 데이터는 무사히 도착할 것이다.
 
-So all you need to do to use my code is to find the place between where
-the data is read and the data is sent (using `send()`) over the network,
-and stick some code in there that does the encryption.
+그러므로 여러분이 필자의 코드를 쓰기 위해서 할 일은 데이터를 네트워크에서
+읽고 보내는 코드의 중간 지점을 찾아내서 암호화를 하는 코드를 끼워넣는 것이다.
 
-**What is this "`PF_INET`" I keep seeing? Is it related to `AF_INET`?**
+**"`PF_INET`"이 계속 등장하는데 무엇인가? `AF_INET`와 관계가 있는가?**
 
 [i[`PF_INET` macro]] [i[`AF_INET` macro]]
 
-Yes, yes it is. See [the section on `socket()`](#socket) for details.
+그렇다. 관계가 있다. 자세한 사항은 [`socket()`에 대한 절](#socket)을 참고하라.
 
-**How can I write a server that accepts shell commands from a client and
-executes them?**
+**클라이언트에게서 셀 커맨드를 받아서 실행하는 서버는 어떻게 만드는가?**
 
-For simplicity, lets say the client `connect()`s, `send()`s, and
-`close()`s the connection (that is, there are no subsequent system calls
-without the client connecting again).
+단순함을 위해서 클라이언트가 `connect()`와 `send()` 후에 연결을 `close()`
+처리한다고 가정하자. (즉 클라이언트가 연결을 닫지 않고 후속 시스템 콜을 보내는
+일은 없다는 의미이다.)
 
-The process the client follows is this:
+클라이언트의 과정은 이렇다.
 
-1. `connect()` to server
+1. 서버에 `connect()`
 2. `send("/sbin/ls > /tmp/client.out")`
-3. `close()` the connection
+3. 연결에 대한 `close()` 처리
 
-Meanwhile, the server is handling the data and executing it:
+한편 서버는 데이터를 받아서 실행한다.
 
-1. `accept()` the connection from the client
-2. `recv(str)` the command string
-3. `close()` the connection
-4. `system(str)` to run the command
+1. 클라이언트의 연결 요청에 대한 `accept()`
+2. 명령 문자열에 대한 `recv(str)`
+3. 연결에 대한 `close()`
+4. 명령을 실행하기 위해서 `system(str)`
 
-[i[Security]] _Beware!_  Having the server execute what the client says
-is like giving remote shell access and people can do things to your
-account when they connect to the server. For instance, in the above
-example, what if the client sends "`rm -rf ~`"? It deletes everything in
-your account, that's what!
+[i[Security]] _주의하라!_ 클라이언트가 말하는 것을 서버가 실행한다는 것은
+원격 셀 접근 권한을 주는 것과 비슷한 일이고 그들이 서버에 접속할 때 여러분의
+계정으로 무엇인가 할 수 있다는 의미이다. 위의 예제에서 클라이언트가 "`rm -rf ~`"를
+보내면 어떻게 되겠는가? 여러분의 계정이 가진 모든 것을 삭제할 것이다!
 
-So you get wise, and you prevent the client from using any except for a
-couple utilities that you know are safe, like the `foobar` utility:
+그러니 지혜롭게 여러분이 안전하다고 확신하는 몇 개의 유틸리티, 예를 들어
+`foobar` 외의 것을 클라이언트가 실행하지 못하도록 하는 것이 좋다.
 
 ```{.c}
 if (!strncmp(str, "foobar", 6)) {
     sprintf(sysstr, "%s > /tmp/server.out", str);
     system(sysstr);
-} 
+}
 ```
 
-But you're still unsafe, unfortunately: what if the client enters
-"`foobar; rm -rf ~`"? The safest thing to do is to write a little
-routine that puts an escape ("`\`") character in front of all
-non-alphanumeric characters (including spaces, if appropriate) in the
-arguments for the command.
+그러나 불행히도 이것만으로는 여전히 위험하다. 클라이언트가 "`foobar; rm -rf ~`"
+를 입력한다면 어떻게 되겠는가? 가장 안전한 방식은 명령의 매개변수에 들어가는
+숫자나 영문자가 아닌 모든 문자(필요하다면 공백 문자도) 앞에 탈출 ("`\`")
+문자를 붙이는 것이다.
 
-As you can see, security is a pretty big issue when the server starts
-executing things the client sends.
+보다시피 보안은 클라이언트가 보낸 것을 서버가 실행할 때에 큰 문제가 된다.
 
-**I'm sending a slew of data, but when I `recv()`, it only receives 536
-bytes or 1460 bytes at a time. But if I run it on my local machine, it
-receives all the data at the same time. What's going on?**
+**나는 꽤 큰 데이터를 보내는데 `recv()`를 해보면 한번에 536바이트나 1460바이트
+씩만 받아온다. 그러나 이것을 로컬 장치에서 실행하면 한 번에 모든 데이터를 받아온다.
+왜 이런 것인가?**
 
-You're hitting the [i[MTU]] MTU---the maximum size the physical medium
-can handle. On the local machine, you're using the loopback device which
-can handle 8K or more no problem. But on Ethernet, which can only handle
-1500 bytes with a header, you hit that limit. Over a modem, with 576 MTU
-(again, with header), you hit the even lower limit.
+[i[MTU]] MTU에 도달한 것이다. 이것은 물리계층이 전송가능한 최대 크기이다.
+로컬 장치에서는 루프백 장치를 쓰기에 8K나 그 이상의 크기도 문제없이 다룰 수 있다.
+그러나 이더넷에서는 헤더를 포함해 1500바이트가 한계이다. 모뎀을 쓴다면
+(마찬가지로 헤더를 포함해)576바이트가 한계이다.
 
-You have to make sure all the data is being sent, first of all. (See the
-[`sendall()`](#sendall) function implementation for details.) Once
-you're sure of that, then you need to call `recv()` in a loop until all
-your data is read.
+일단 모든 데이터가 전송되었음을 확실히 해야한다. (자세한 정보는[`sendall()`](#sendall)
+함수의 구현을 확인하라.) 전송이 잘 되었음이 확실하다면 모든 데이터를 읽어들일
+때까지 `recv()`를 반복문 내부에서 호출해야 한다.
 
-Read the section [Son of Data Encapsulation](#sonofdataencap) for
-details on receiving complete packets of data using multiple calls to
-`recv()`.
+여러 번의 `recv()`호출을 통해 완전한 패킷을 수신하는 작업에 대해 자세한
+정보가 필요하다면 [망할 데이터 캡슐화](#sonofdataencap) 절을 참고하라.
 
-**I'm on a Windows box and I don't have the `fork()` system call or any
-kind of `struct sigaction`. What to do?**
+**나는 윈도우 장치를 써서 `fork()`시스템 호출이 없고 `struct sigaction`같은
+것도 없다. 어떻게 해야하는가?**
 
-[i[`fork()` function]] If they're anywhere, they'll be in POSIX
-libraries that may have shipped with your compiler. Since I don't have a
-Windows box, I really can't tell you the answer, but I seem to remember
-that Microsoft has a POSIX compatibility layer and that's where `fork()`
-would be. (And maybe even `sigaction`.)
+[i[`fork()` function]] 이것이 있다면 그것은 컴파일러와 함께 있는 POSIX
+라이브러리에 있을 것이다. 필자는 윈도우 장치를 가지고 있지 않으므로 그에 대해
+정확한 답을 줄 수 없다. 그러나 기억하기로는 마이크로소프트가 POSIX 호환성
+계층을 만들었고 `fork()`도 거기에 있을 것이다. (어쩌면 `sigaction`도 있을 것이다.)
+(역자 주 : 그러나 윈도우에서는 윈도우의 처리법을 사용하는 것이 의도한 결과를
+정확히 만드는 더 나은 방법이 될 것입니다.)
 
-Search the help that came with VC++ for "fork" or "POSIX" and see if it
-gives you any clues.
+VC++에 딸려오는 도움말에서 "fork"나 "POSIX"를 검색하고 도움이 될만한 것이
+있는지 살펴보라. (역자 주 : VC++ 자체도 Visual Studio가 가진 기능 중
+일부의 오래된 이름에 불과합니다. 이 글이 최초에 작성된 것은 90년대임을 기억하십시오.)
 
-If that doesn't work at all, ditch the `fork()`/`sigaction` stuff and
-replace it with the Win32 equivalent: [i[`CreateProcess()` function]]
-`CreateProcess()`. I don't know how to use `CreateProcess()`---it takes
-a bazillion arguments, but it should be covered in the docs that came
-with VC++.
+그것이 전혀 작동하지 않는다면, `fork()`/`sigaction`과 관련된 것들을 떼어내고
+그것의 Win32 대응인 [i[`CreateProcess()` function]] `CreateProcess()`로
+교체하라. 필자는 `CreateProcess()`를 어떻게 쓰는지는 모른다. 그것은 수억개의
+인수를 받지만 아마도 VC++과 같이 오는 문서에 설명이 있을 것이다.
 
 [[book-pagebreak]]
 
-**[i[Firewall]] I'm behind a firewall---how do I let people outside the
-firewall know my IP address so they can connect to my machine?**
+**[i[Firewall]] 나는 방화벽 뒤에 있다. 방화벽 너머의 사람들이 나의 IP 주소를
+알고 나의 장치에 접근하게 하려면 어떻게 해야하는가?**
 
-Unfortunately, the purpose of a firewall is to prevent people outside
-the firewall from connecting to machines inside the firewall, so
-allowing them to do so is basically considered a breach of security.
+불행히도 방화벽의 목적은 방화벽 바깥의 사람들이 방화벽 안의 장치에
+접근하는 것을 막는 것이다. 그러므로 그것을 허용하는 것은 보안에 헛점을 만든다.
 
-This isn't to say that all is lost. For one thing, you can still often
-`connect()` through the firewall if it's doing some kind of masquerading
-or NAT or something like that. Just design your programs so that you're
-always the one initiating the connection, and you'll be fine.
+그러나 모든 것이 안 된다고 말하려고 이 이야기를 꺼낸 것은 아니다. 방화벽이
+마스커레이딩이나 NAT처리같은 것을 한다면 여전히 `connect()`로 방화벽 너머에
+접근할 수 있다. 여러분의 프로그램이 언제나 연결을 게시하는 쪽이 되도록 한다면
+문제는 없을 것이다.
 
-[i[Firewall-->poking holes in]] If that's not satisfactory, you can ask
-your sysadmins to poke a hole in the firewall so that people can connect
-to you. The firewall can forward to you either through it's NAT
-software, or through a proxy or something like that.
+[i[Firewall-->poking holes in]] 만약 그것으로는 충분하지 않다면, 시스템
+관리자에게 부탁해서 방화벽에 구멍을 내서 여러분에게 연결할 수 있도록 해야한다.
+방화벽은 그것의 NAT프로그램이나 프록시 등을 써서 여러분에게 연결을 전달(Forward)
+해줄 수 있다.
 
-Be aware that a hole in the firewall is nothing to be taken lightly. You
-have to make sure you don't give bad people access to the internal
-network; if you're a beginner, it's a lot harder to make software secure
-than you might imagine.
+방화벽의 구멍은 가볍게 볼 것이 아니라는 점을 기억하라. 나쁜 사람들에게 내부
+네트워크에 대한 접근 권한을 주지 않도록 해야한다. 초보자라면 소프트웨어를
+안전하게 만드는 것이 생각보다 어렵다는 것을 알아야한다.
 
-Don't make your sysadmin mad at me. `;-)`
+여러분의 시스템 관리자가 필자를 탓하는 일이 없게 해달라. `;-)`
 
-**[i[Packet sniffer]] [i[Promiscuous mode]] How do I write a packet
-sniffer? How do I put my Ethernet interface into promiscuous mode?**
+**[i[Packet sniffer]] [i[Promiscuous mode]] 패킷 스니퍼는 어떻게 작성하는가?
+어떻게 하면 내 이더넷 인터페이스를 무차별 모드로 설정할 수 있는가?**
 
-For those not in the know, when a network card is in "promiscuous mode",
-it will forward ALL packets to the operating system, not just those that
-were addressed to this particular machine. (We're talking Ethernet-layer
-addresses here, not IP addresses--but since ethernet is lower-layer than
-IP, all IP addresses are effectively forwarded as well. See the section
-[Low Level Nonsense and Network Theory](#lowlevel) for more info.)
+모르는 이들을 위해 설명하자면, 네트워크 카드가 "무차별 모드(promiscuous mode)"
+일 때 목적지 주소가 실행중인 장치가 아닌 패킷까지 전부 운영체제에 전달한다.
+(우리는 IP 주소가 아닌 이더넷 계층 주소에 대해서 이야기하는 것이다. 그러나
+이더넷은 IP보다 낮은 계층이므로, 사실상 모든 IP주소에 대한 통신이 전달된다.
+더 자세한 내용은 [저수준 넌센스와 네트워크 이론](#lowlevel)을 참고하라.)
 
-This is the basis for how a packet sniffer works. It puts the interface
-into promiscuous mode, then the OS gets every single packet that goes by
-on the wire.  You'll have a socket of some type that you can read this
-data from.
+이것이 패킷 스니퍼 동작의 기본 원리이다. 패킷 스니퍼는 인터페이스를 무차별 모드로
+만들고, 운영체제는 그 장치를 통해 전달되는 모든 패킷을 받게 된다. 여러분은
+이런 데이터를 읽을 수 있는 몇 가지 종류의 소켓을 쓸 수 있다.
 
-Unfortunately, the answer to the question varies depending on the
-platform, but if you Google for, for instance, "windows promiscuous
-[i[`ioctl()` function]] ioctl" you'll probably get somewhere.  For
-Linux, there's what looks like a [fl[useful Stack Overflow
-thread|https://stackoverflow.com/questions/21323023/]], as well.
+불행히도 질문에 대한 답은 플랫폼에 따라 다르다. 그러나 인터넷을 찾아보면,
+예를 들어 "windows promiscuous [i[`ioctl()` function]] ioctl"을 검색한다면
+도움이 되는 정볼르 얻을 수 있을것이다. 리눅스를 위해서는 [fl[useful Stack Overflow
+thread|https://stackoverflow.com/questions/21323023/]] 같은 정보가 있다.
 
-**How can I set a custom [i[Timeout-->setting]] timeout value for a TCP
-or UDP socket?**
+**어떻게 하면 TCP나 UDP소켓에 대해서 사용자 정의한 [i[Timeout-->setting]] 제한시간
+값을 사용할 수 있는가?**
 
-It depends on your system. You might search the net for [i[`SO_RCVTIMEO`
-macro]] `SO_RCVTIMEO` and [i[`SO_SNDTIMEO` macro]] `SO_SNDTIMEO` (for
-use with [i[`setsockopt()` function]] `setsockopt()`) to see if your
-system supports such functionality.
+시스템에 따라 다르다. 여러분의 시스템이 어떤 기능을 지원하는지 알아내기 위해서
+(그리고 그것을 [i[`setsockopt()` function]] `setsockopt()`에 쓰기 위해서)
+[i[`SO_RCVTIMEO` macro]] `SO_RCVTIMEO`나 [i[`SO_SNDTIMEO` macro]] `SO_SNDTIMEO`
+같은 것을 인터넷에서 찾아봐야 할 것이다.
 
-The Linux man page suggests using `alarm()` or `setitimer()` as a
-substitute.
+리눅스의 맨페이지는 `alarm()`나 `setitimer()`를 대체재로 쓸 것을 권한다.
 
 [[book-pagebreak]]
 
-**How can I tell which ports are available to use? Is there a list of
-"official" port numbers?**
+**어떤 포트가 사용 가능한 상태인지는 어떻게 알아내는가? "공식적인" 포트 번호 목록같은 것이 있는가?**
 
-Usually this isn't an issue. If you're writing, say, a web server, then
-it's a good idea to use the well-known port 80 for your software. If
-you're writing just your own specialized server, then choose a port at
-random (but greater than 1023) and give it a try.
+보통 이것은 문제가 되지 않는다. 여러분이 웹 서버를 작성한다고 하면, 80번같이
+잘 알려진 포트를 쓰는 것이 좋다. 여러분만의 특별한 목적의 서버를 작성한다면
+무작위의 포트 번호(그러나 1023보다 큰 것으로)를 고르고 시도해보라.
 
-If the port is already in use, you'll get an "Address already in use"
-error when you try to `bind()`. Choose another port. (It's a good idea
-to allow the user of your software to specify an alternate port either
-with a config file or a command line switch.)
+만약 포트가 이미 사용중이라면 `bind()`를 시도할 때 "Address already in use"
+오류가 발생할 것이다. 다른 포트를 고르라. (여러분의 소프트웨어의 사용자가
+설정 파일이나 명령줄 스위치로 대체 포트를 지정할 수 있게 하는 것이 좋다.)
 
-There is a [fl[list of official port
-numbers|https://www.iana.org/assignments/port-numbers]] maintained by
-the Internet Assigned Numbers Authority (IANA). Just because something
-(over 1023) is in that list doesn't mean you can't use the port. For
-instance, Id Software's DOOM uses the same port as "mdqs", whatever that
-is. All that matters is that no one else _on the same machine_ is using
-that port when you want to use it.
+인터넷 할당 번호 관리 기관(the Internet Assigned Numbers Authority, IANA)
+이 관리하는 [fl[공식 포트 번호|https://www.iana.org/assignments/port-numbers]]
+가 있다. (1023보다 큰) 어떤 번호가 저 목록에 없다고 해서 그 포트를 쓸 수
+없는 것은 아니다. 예를 들어 Id Software의 DOOM은 "mdqs"(이것이 무엇이든)
+와 같은 포트를 쓴다. 중요한 것은 _같은 장치_ 의 누구도 당신이 그 포트를
+쓰고 싶을 때 그 포트를 쓰고 있지 않으면 된다는 것이다.

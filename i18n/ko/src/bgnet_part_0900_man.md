@@ -2,55 +2,52 @@
 
 [i[man pages]<]
 
-In the Unix world, there are a lot of manuals. They have little sections
-that describe individual functions that you have at your disposal.
+유닉스의 세상에는 많은 설명서들이 있다. 거기에는 여러분이 쓸 수 있는 개별
+함수에 대한 짧은 절이 있다.
 
-Of course, `manual` would be too much of a thing to type. I mean, no one
-in the Unix world, including myself, likes to type that much. Indeed I
-could go on and on at great length about how much I prefer to be terse
-but instead I shall be brief and not bore you with long-winded diatribes
-about how utterly amazingly brief I prefer to be in virtually all
-circumstances in their entirety.
+물론 `manual`은 타자로 치기에 너무 길 것이다. 그 말인즉 필자를 포함해
+유닉스 세상의 누구도 그 만큼을 치고 싶어하지 않는다. 물론 필자는
+본인이 얼마나 간결한 것을 선호하는지에 대해서 이렇게 저렇게 길게 늘여서
+말할 수 있을 것이다. 그러나 필자는 본인이 얼마나 완전히 놀라우리만치
+사실상 총체적인 모든 상황에서 간결하기를 선호하는지에 대해서 긴 웅변을
+늘어놓는 대신 짧게 말하도록 하겠다.
 
-_[Applause]_
+_[박수 소리]_
 
-Thank you. What I am getting at is that these pages are called "man
-pages" in the Unix world, and I have included my own personal truncated
-variant here for your reading enjoyment. The thing is, many of these
-functions are way more general purpose than I'm letting on, but I'm only
-going to present the parts that are relevant for Internet Sockets
-Programming.
+이 글을 읽어주는 독자들에게 감사한다. 필자가 말하는 바는 이런 페이지들이
+유닉스 세상에서 "man page"라고 불린다는 것이다. 그리고 독자 여러분의 읽는
+재미를 위해서 필자의 개인적인 축약판을 여기에 포함해두었다. 그 말인 즉
+이 함수들 대개는 필자의 사용법보다 훨씬 더 범용적이지만 필자는 인터넷
+소켓 프로그래밍에 연관된 부분만을 제시할 것이라는 의미이다.
 
-But wait! That's not all that's wrong with my man pages:
+그러나 잠깐! 필자의 man page에서 잘못된 부분은 이것만이 아니다.
 
-* They are incomplete and only show the basics from the guide.
-* There are many more man pages than this in the real world.
-* They are different than the ones on your system.
-* The header files might be different for certain functions on your
-  system.
-* The function parameters might be different for certain functions on
-  your system.
+- 그것은 불완전하고 안내서의 기본적인 부분만을 보여준다.
+- 현실 세계에는 여기에 있는 것보다 훨씬 많은 man page들이 있다.
+- 여러분의 시스템에 있는 것과 다를 수 있다.
+- 여러분의 시스템에 있는 특정 함수에 대해서는 헤더파일이 다를 수 있다.
+- 여러분의 시스템에 있는 특정 함수에 대해서는 함수 매개변수가 다를 수 있다.
 
-If you want the real information, check your local Unix man pages by
-typing `man whatever`, where "whatever" is something that you're
-incredibly interested in, such as "`accept`". (I'm sure Microsoft Visual
-Studio has something similar in their help section. But "man" is better
-because it is one byte more concise than "help". Unix wins again!)
+진짜 정보를 원한다면 `man whatever`를 입력해서 여러분의 로컬 유닉스 맨 페이지를
+참고하라. "whatever"는 예를 들자면 "`accept`"처럼 여러분이 큰 관심을 갖는 사안이다.
+(마이크로포스트 비주얼 스튜디오도 그들의 도움말 부분에 이것과 유사한 것을 가지고
+있다고 생각한다. 그러나 "man"이 "help"보다 1바이트 더 간결하므로 더 좋다.
+이번에도 유닉스가 이겼다!)
 
-So, if these are so flawed, why even include them at all in the Guide?
-Well, there are a few reasons, but the best are that (a) these versions
-are geared specifically toward network programming and are easier to
-digest than the real ones, and (b) these versions contain examples!
+그래서 이 정보들에 흠이 있다면 애초에 안내서에 첨부한 이유는 무엇인가?
+말하자면 몇 가지 이유가 있다. 그러나 그 중 가장 좋은 이유는 바로
+(a) 이 버전들은 네트워크 프로그래밍을 위해 특별히 재구성되었고 원본보다
+이해하기 쉬우며 (b) 이 버전들에는 예제가 있다!
 
-Oh! And speaking of the examples, I don't tend to put in all the error
-checking because it really increases the length of the code. But you
-should absolutely do error checking pretty much any time you make any of
-the system calls unless you're totally 100% sure it's not going to fail,
-and you should probably do it even then!
+예제 이야기가 나왔으니 더 이야기하자면 코드의 길이가 너무 길어지는 점을 염려해서
+오류 검사 코드를 모두 넣지는 않았다. 그러나 여러분은 여러분의 시스템 콜이
+100% 성공할 것이라고 가정하지 않는 이상 오류 확인을 언제나 해야한다.
+그리고 사실 그런 확신이 있어도 검사를 하는 것이 좋다!
 
 [i[man pages]>]
 
 [[manbreak]]
+
 ## `accept()` {#acceptman}
 
 [i[`accept()` function]i]
@@ -76,11 +73,11 @@ for subsequent communication with the newly connected client.
 The old socket that you are using for listening is still there, and will
 be used for further `accept()` calls as they come in.
 
-| Parameter | Description                                                   |
-|-----------|---------------------------------------------------------------|
-| `s`       | The `listen()`ing socket descriptor.                          | 
-| `addr`    | This is filled in with the address of the site that's connecting to you.|
-| `addrlen` | This is filled in with the `sizeof()` the structure returned in the `addr` parameter. You can safely ignore it if you assume you're getting a `struct sockaddr_in` back, which you know you are, because that's the type you passed in for `addr`.|
+| Parameter | Description                                                                                                                                                                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `s`       | The `listen()`ing socket descriptor.                                                                                                                                                                                                               |
+| `addr`    | This is filled in with the address of the site that's connecting to you.                                                                                                                                                                           |
+| `addrlen` | This is filled in with the `sizeof()` the structure returned in the `addr` parameter. You can safely ignore it if you assume you're getting a `struct sockaddr_in` back, which you know you are, because that's the type you passed in for `addr`. |
 
 `accept()` will normally block, and you can use `select()` to peek on
 the listening socket descriptor ahead of time to see if it's "ready to
@@ -135,8 +132,8 @@ new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 [`socket()`](#socketman), [`getaddrinfo()`](#getaddrinfoman),
 [`listen()`](#listenman), [`struct sockaddr_in`](#structsockaddrman)
 
-
 [[manbreak]]
+
 ## `bind()` {#bindman}
 
 [i[`bind()` function]i]
@@ -239,8 +236,8 @@ bind(s, (struct sockaddr*)&myaddr, sizeof myaddr);
 [`getaddrinfo()`](#getaddrinfoman), [`socket()`](#socketman), [`struct
 sockaddr_in`](#structsockaddrman), [`struct in_addr`](#structsockaddrman)
 
-
 [[manbreak]]
+
 ## `connect()` {#connectman}
 
 [i[`connect()` function]i]
@@ -320,8 +317,8 @@ connect(sockfd, res->ai_addr, res->ai_addrlen);
 
 [`socket()`](#socketman), [`bind()`](#bindman)
 
-
 [[manbreak]]
+
 ## `close()` {#closeman}
 
 [i[`close()` function]i]
@@ -377,8 +374,8 @@ close(s);  // not much to it, really.
 
 [`socket()`](#socketman), [`shutdown()`](#shutdownman)
 
-
 [[manbreak]]
+
 ## `getaddrinfo()`, `freeaddrinfo()`, `gai_strerror()` {#getaddrinfoman}
 
 [i[`getaddrinfo()` function]i]
@@ -406,7 +403,7 @@ struct addrinfo {
   int     ai_flags;          // AI_PASSIVE, AI_CANONNAME, ...
   int     ai_family;         // AF_xxx
   int     ai_socktype;       // SOCK_xxx
-  int     ai_protocol;       // 0 (auto) or IPPROTO_TCP, IPPROTO_UDP 
+  int     ai_protocol;       // 0 (auto) or IPPROTO_TCP, IPPROTO_UDP
 
   socklen_t  ai_addrlen;     // length of ai_addr
   char   *ai_canonname;      // canonical name for nodename
@@ -499,7 +496,7 @@ error code in the return value.
 // namely a stream socket to www.example.com on port 80 (http)
 // either IPv4 or IPv6
 
-int sockfd;  
+int sockfd;
 struct addrinfo hints, *servinfo, *p;
 int rv;
 
@@ -543,7 +540,7 @@ freeaddrinfo(servinfo); // all done with this structure
 // namely a stream socket on port 3490, on this host's IP
 // either IPv4 or IPv6.
 
-int sockfd;  
+int sockfd;
 struct addrinfo hints, *servinfo, *p;
 int rv;
 
@@ -587,8 +584,8 @@ freeaddrinfo(servinfo); // all done with this structure
 
 [`gethostbyname()`](#gethostbynameman), [`getnameinfo()`](#getnameinfoman)
 
-
 [[manbreak]]
+
 ## `gethostname()` {#gethostnameman}
 
 [i[`gethostname()` function]i]
@@ -637,8 +634,8 @@ printf("My hostname: %s\n", hostname);
 
 [`gethostbyname()`](#gethostbynameman)
 
-
 [[manbreak]]
+
 ## `gethostbyname()`, `gethostbyaddr()` {#gethostbynameman}
 
 [i[`gethostbyname()` function]i]
@@ -659,7 +656,7 @@ struct hostent *gethostbyaddr(const char *addr, int len, int type);
 ### Description {.unnumbered .unlisted}
 
 _PLEASE NOTE: these two functions are superseded by `getaddrinfo()` and
-`getnameinfo()`!_  In particular, `gethostbyname()` doesn't work well
+`getnameinfo()`!_ In particular, `gethostbyname()` doesn't work well
 with IPv6.
 
 These functions map back and forth between host names and IP addresses.
@@ -694,14 +691,14 @@ So what is this [i[`struct hostent` type]i] `struct hostent` that gets
 returned? It has a number of fields that contain information about the
 host in question.
 
-| Field                | Description                                       |
-|----------------------|---------------------------------------------------|
-| `char *h_name`       | The real canonical host name.                     |
-| `char **h_aliases`   | A list of aliases that can be accessed with arrays---the last element is `NULL` |
-| `int h_addrtype`     | The result's address type, which really should be `AF_INET` for our purposes. |
-| `int length`         | The length of the addresses in bytes, which is 4 for IP (version 4) addresses. |
+| Field                | Description                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `char *h_name`       | The real canonical host name.                                                                                                                                |
+| `char **h_aliases`   | A list of aliases that can be accessed with arrays---the last element is `NULL`                                                                              |
+| `int h_addrtype`     | The result's address type, which really should be `AF_INET` for our purposes.                                                                                |
+| `int length`         | The length of the addresses in bytes, which is 4 for IP (version 4) addresses.                                                                               |
 | `char **h_addr_list` | A list of IP addresses for this host. Although this is a `char**`, it's really an array of `struct in_addr*`s in disguise. The last array element is `NULL`. |
-| `h_addr`             | A commonly defined alias for `h_addr_list[0]`. If you just want any old IP address for this host (yeah, they can have more than one) just use this field. |
+| `h_addr`             | A commonly defined alias for `h_addr_list[0]`. If you just want any old IP address for this host (yeah, they can have more than one) just use this field.    |
 
 ### Return Value {.unnumbered .unlisted}
 
@@ -712,7 +709,7 @@ Instead of the normal `perror()` and all that stuff you'd normally use
 for error reporting, these functions have parallel results in the
 variable `h_errno`, which can be printed using the functions
 [i[`herror()` function]i] `herror()` or [i[`hstrerror()` function]i]
-`hstrerror()`.  These work just like the classic `errno`, `perror()`,
+`hstrerror()`. These work just like the classic `errno`, `perror()`,
 and `strerror()` functions you're used to.
 
 ### Example {.unnumbered .unlisted}
@@ -782,8 +779,8 @@ printf("Host name: %s\n", he->h_name);
 [`perror()`](#perrorman), [`strerror()`](#perrorman), [`struct
 in_addr`](#structsockaddrman)
 
-
 [[manbreak]]
+
 ## `getnameinfo()` {#getnameinfoman}
 
 [i[`getnameinfo()` function]i]
@@ -819,7 +816,7 @@ pointed to by the `host` and `serv` parameters. Of course, you have to
 specify the max lengths of these buffers in `hostlen` and `servlen`.
 
 Finally, there are several flags you can pass, but here a a couple good
-ones.  `NI_NOFQDN` will cause the `host` to only contain the host name,
+ones. `NI_NOFQDN` will cause the `host` to only contain the host name,
 not the whole domain name. `NI_NAMEREQD` will cause the function to fail
 if the name cannot be found with a DNS lookup (if you don't specify this
 flag and the name can't be found, `getnameinfo()` will put a string
@@ -854,8 +851,8 @@ printf("service: %s\n", service); // e.g. "http"
 
 [`getaddrinfo()`](#getaddrinfoman), [`gethostbyaddr()`](#gethostbynameman)
 
-
 [[manbreak]]
+
 ## `getpeername()` {#getpeernameman}
 
 [i[`getpeername()` function]i]
@@ -926,8 +923,8 @@ printf("Peer port      : %d\n", port);
 [`gethostname()`](#gethostnameman), [`gethostbyname()`](#gethostbynameman),
 [`gethostbyaddr()`](#gethostbynameman)
 
-
 [[manbreak]]
+
 ## `errno` {#errnoman}
 
 [i[`errno` variable]i]
@@ -993,8 +990,8 @@ if (select(n, &readfds, NULL, NULL) == -1) {
 
 [`perror()`](#perrorman), [`strerror()`](#perrorman)
 
-
 [[manbreak]]
+
 ## `fcntl()` {#fcntlman}
 
 [i[`fcntl()` function]i]
@@ -1021,10 +1018,10 @@ should be set to [i[`F_SETFL` macro]i] `F_SETFL`, and `arg` can be one of
 the following commands. (Like I said, there's more to `fcntl()` than I'm
 letting on here, but I'm trying to stay socket-oriented.)
 
-| `cmd`        | Description                                                |
-|--------------|------------------------------------------------------------|
-| [i[`O_NONBLOCK` macro]i]`O_NONBLOCK` | Set the socket to be non-blocking. See the section on [blocking](#blocking) for more details.|
-| [i[`O_ASYNC` macro]i]`O_ASYNC`    | Set the socket to do asynchronous I/O. When data is ready to be `recv()`'d on the socket, the signal [i[`SIGIO` signal]] `SIGIO` will be raised. This is rare to see, and beyond the scope of the guide. And I think it's only available on certain systems.|
+| `cmd`                                | Description                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [i[`O_NONBLOCK` macro]i]`O_NONBLOCK` | Set the socket to be non-blocking. See the section on [blocking](#blocking) for more details.                                                                                                                                                                |
+| [i[`O_ASYNC` macro]i]`O_ASYNC`       | Set the socket to do asynchronous I/O. When data is ready to be `recv()`'d on the socket, the signal [i[`SIGIO` signal]] `SIGIO` will be raised. This is rare to see, and beyond the scope of the guide. And I think it's only available on certain systems. |
 
 ### Return Value {.unnumbered .unlisted}
 
@@ -1048,8 +1045,8 @@ fcntl(s, F_SETFL, O_ASYNC);     // set to asynchronous I/O
 
 [Blocking](#blocking), [`send()`](#sendman)
 
-
 [[manbreak]]
+
 ## `htons()`, `htonl()`, `ntohs()`, `ntohl()` {#htonsman}
 
 [i[`htons()` function]i]
@@ -1074,7 +1071,7 @@ uint16_t ntohs(uint16_t netshort);
 
 Just to make you really unhappy, different computers use different byte
 orderings internally for their multibyte integers (i.e. any integer
-that's larger than a `char`).  The upshot of this is that if you
+that's larger than a `char`). The upshot of this is that if you
 `send()` a two-byte `short int` from an Intel box to a Mac (before they
 became Intel boxes, too, I mean), what one computer thinks is the number
 `1`, the other will think is the number `256`, and vice-versa.
@@ -1100,15 +1097,15 @@ to write your own.
 
 Anyway, the way these functions work is that you first decide if you're
 converting _from_ host (your machine's) byte order or from network byte
-order.  If "host", the the first letter of the function you're going to
-call is "h".  Otherwise it's "n" for "network". The middle of the
+order. If "host", the the first letter of the function you're going to
+call is "h". Otherwise it's "n" for "network". The middle of the
 function name is always "to" because you're converting from one "to"
 another, and the penultimate letter shows what you're converting _to_.
 The last letter is the size of the data, "s" for short, or "l" for long.
 Thus:
 
 | Function  | Description                   |
-|-----------|-------------------------------|
+| --------- | ----------------------------- |
 | `htons()` | `h`ost `to` `n`etwork `s`hort |
 | `htonl()` | `h`ost `to` `n`etwork `l`ong  |
 | `ntohs()` | `n`etwork `to` `h`ost `s`hort |
@@ -1133,8 +1130,8 @@ send(s, &network_byte_order, sizeof(uint32_t), 0);
 some_short == ntohs(htons(some_short)); // this expression is true
 ```
 
-
 [[manbreak]]
+
 ## `inet_ntoa()`, `inet_aton()`, `inet_addr` {#inet_ntoaman}
 
 [i[`inet_ntoa()` function]i]
@@ -1222,8 +1219,8 @@ antelope.sin_addr.s_addr = inet_addr("10.0.0.1");
 [`inet_ntop()`](#inet_ntopman), [`inet_pton()`](#inet_ntopman),
 [`gethostbyname()`](#gethostbynameman), [`gethostbyaddr()`](#gethostbynameman)
 
-
 [[manbreak]]
+
 ## `inet_ntop()`, `inet_pton()` {#inet_ntopman}
 
 [i[`inet_ntop()` function]i]
@@ -1268,7 +1265,7 @@ couple of macros to help you out. The maximum lengths are:
 
 Other times, you might have a string containing an IP address in
 readable form, and you want to pack it into a `struct sockaddr_in` or a
-`struct sockaddr_in6`.  In that case, the opposite function
+`struct sockaddr_in6`. In that case, the opposite function
 `inet_pton()` is what you're after.
 
 `inet_pton()` also takes an address family (either `AF_INET` or
@@ -1352,9 +1349,8 @@ char *get_ip_str(const struct sockaddr *sa, char *s, size_t maxlen)
 
 [`getaddrinfo()`](#getaddrinfoman)
 
-
-
 [[manbreak]]
+
 ## `listen()` {#listenman}
 
 [i[`listen()` function]i]
@@ -1423,8 +1419,8 @@ listen(sockfd, 10); // set s up to be a server (listening) socket
 
 [`accept()`](#acceptman), [`bind()`](#bindman), [`socket()`](#socketman)
 
-
 [[manbreak]]
+
 ## `perror()`, `strerror()` {#perrorman}
 
 [i[`perror()` function]i]
@@ -1486,8 +1482,8 @@ if (listen(s, 10) == -1) {
 
 [`errno`](#errnoman)
 
-
 [[manbreak]]
+
 ## `poll()` {#pollman}
 
 [i[`poll()` function]i]
@@ -1533,22 +1529,22 @@ set `fd` to a negative number, this `struct pollfd` is ignored and its
 `revents` field is set to zero) and then construct the `events` field by
 bitwise-ORing the following macros:
 
-| Macro     | Description                                                  |
-|-----------|--------------------------------------------------------------|
-| `POLLIN`  | Alert me when data is ready to `recv()` on this socket.      |
-| `POLLOUT` | Alert me when I can `send()` data to this socket without blocking.|
-| `POLLPRI` | Alert me when out-of-band data is ready to `recv()` on this socket.|
+| Macro     | Description                                                         |
+| --------- | ------------------------------------------------------------------- |
+| `POLLIN`  | Alert me when data is ready to `recv()` on this socket.             |
+| `POLLOUT` | Alert me when I can `send()` data to this socket without blocking.  |
+| `POLLPRI` | Alert me when out-of-band data is ready to `recv()` on this socket. |
 
 Once the `poll()` call returns, the `revents` field will be constructed
 as a bitwise-OR of the above fields, telling you which descriptors
 actually have had that event occur. Additionally, these other fields
 might be present:
 
-| Macro      | Description                                                 |
-|------------|-------------------------------------------------------------|
-| `POLLERR`  | An error has occurred on this socket.                       |
-| `POLLHUP`  | The remote side of the connection hung up.                  |
-| `POLLNVAL` | Something was wrong with the socket descriptor `fd`---maybe it's uninitialized?|
+| Macro      | Description                                                                     |
+| ---------- | ------------------------------------------------------------------------------- |
+| `POLLERR`  | An error has occurred on this socket.                                           |
+| `POLLHUP`  | The remote side of the connection hung up.                                      |
+| `POLLNVAL` | Something was wrong with the socket descriptor `fd`---maybe it's uninitialized? |
 
 ### Return Value {.unnumbered .unlisted}
 
@@ -1609,8 +1605,8 @@ if (rv == -1) {
 
 [`select()`](#selectman)
 
-
 [[manbreak]]
+
 ## `recv()`, `recvfrom()` {#recvman}
 
 [i[`recv()` function]i]
@@ -1652,11 +1648,11 @@ what is actually supported on your system. You bitwise-or these
 together, or just set `flags` to `0` if you want it to be a regular
 vanilla `recv()`.
 
-| Macro         | Description                                              |
-|---------------|----------------------------------------------------------|
-| [i[Out-of-band data]][i[`MSG_OOB` macro]i]`MSG_OOB` | Receive Out of Band data. This is how to get data that has been sent to you with the `MSG_OOB` flag in `send()`. As the receiving side, you will have had signal [i[`SIGURG` macro]i] `SIGURG` raised telling you there is urgent data. In your handler for that signal, you could call `recv()` with this `MSG_OOB` flag.|
-| [i[`MSG_PEEK` macro]i]`MSG_PEEK`                    | If you want to call `recv()` "just for pretend", you can call it with this flag. This will tell you what's waiting in the buffer for when you call `recv()` "for real" (i.e. _without_ the `MSG_PEEK` flag. It's like a sneak preview into the next `recv()` call.| 
-| [i[`MSG_WAITALL` macro]i]`MSG_WAITALL`              | Tell `recv()` to not return until all the data you specified in the `len` parameter. It will ignore your wishes in extreme circumstances, however, like if a signal interrupts the call or if some error occurs or if the remote side closes the connection, etc. Don't be mad with it.| 
+| Macro                                               | Description                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [i[Out-of-band data]][i[`MSG_OOB` macro]i]`MSG_OOB` | Receive Out of Band data. This is how to get data that has been sent to you with the `MSG_OOB` flag in `send()`. As the receiving side, you will have had signal [i[`SIGURG` macro]i] `SIGURG` raised telling you there is urgent data. In your handler for that signal, you could call `recv()` with this `MSG_OOB` flag. |
+| [i[`MSG_PEEK` macro]i]`MSG_PEEK`                    | If you want to call `recv()` "just for pretend", you can call it with this flag. This will tell you what's waiting in the buffer for when you call `recv()` "for real" (i.e. _without_ the `MSG_PEEK` flag. It's like a sneak preview into the next `recv()` call.                                                         |
+| [i[`MSG_WAITALL` macro]i]`MSG_WAITALL`              | Tell `recv()` to not return until all the data you specified in the `len` parameter. It will ignore your wishes in extreme circumstances, however, like if a signal interrupts the call or if some error occurs or if the remote side closes the connection, etc. Don't be mad with it.                                    |
 
 When you call `recv()`, it will block until there is some data to read.
 If you want to not block, set the socket to non-blocking or check with
@@ -1735,8 +1731,8 @@ printf("from IP address %s\n",
 [`send()`](#sendman), [`sendto()`](#sendman), [`select()`](#selectman),
 [`poll()`](#pollman), [Blocking](#blocking)
 
-
 [[manbreak]]
+
 ## `select()` {#selectman}
 
 [i[`select()` function]i]
@@ -1787,16 +1783,16 @@ seconds, to which is added `tv_usec`, the number of microseconds
 
 The helper macros do the following:
 
-| Macro                            | Description                           |
-|----------------------------------|---------------------------------------|
-| [i[`FD_SET()` macro]i]`FD_SET(int fd, fd_set *set);`     | Add `fd` to the `set`.|
-| [i[`FD_CLR()` macro]i]`FD_CLR(int fd, fd_set *set);`     | Remove `fd` from the `set`.|
-| [i[`FD_ISSET()` macro]i]`FD_ISSET(int fd, fd_set *set);` | Return true if `fd` is in the `set`.|
-| [i[`FD_ZERO()` macro]i]`FD_ZERO(fd_set *set);`           | Clear all entries from the `set`.|
+| Macro                                                    | Description                          |
+| -------------------------------------------------------- | ------------------------------------ |
+| [i[`FD_SET()` macro]i]`FD_SET(int fd, fd_set *set);`     | Add `fd` to the `set`.               |
+| [i[`FD_CLR()` macro]i]`FD_CLR(int fd, fd_set *set);`     | Remove `fd` from the `set`.          |
+| [i[`FD_ISSET()` macro]i]`FD_ISSET(int fd, fd_set *set);` | Return true if `fd` is in the `set`. |
+| [i[`FD_ZERO()` macro]i]`FD_ZERO(fd_set *set);`           | Clear all entries from the `set`.    |
 
 Note for Linux users: Linux's `select()` can return "ready-to-read" and
 then not actually be ready to read, thus causing the subsequent `read()`
-call to block.  You can work around this bug by setting [i[`O_NONBLOCK`
+call to block. You can work around this bug by setting [i[`O_NONBLOCK`
 macro]] `O_NONBLOCK` flag on the receiving socket so it errors with
 `EWOULDBLOCK`, then ignoring this error if it occurs. See the [`fcntl()`
 man page](#fcntlman) for more info on setting a socket to non-blocking.
@@ -1857,8 +1853,8 @@ if (rv == -1) {
 
 [`poll()`](#pollman)
 
-
 [[manbreak]]
+
 ## `setsockopt()`, `getsockopt()` {#setsockoptman}
 
 [i[`setsockopt()` function]i]
@@ -1886,18 +1882,18 @@ system-dependent anyway. But I will talk about the basics.
 
 Obviously, these functions get and set certain options on a socket. On a
 Linux box, all the socket information is in the man page for socket in
-section 7.  (Type: "`man 7 socket`" to get all these goodies.)
+section 7. (Type: "`man 7 socket`" to get all these goodies.)
 
 As for parameters, `s` is the socket you're talking about, level should
 be set to [i[`SOL_SOCKET` macro]i] `SOL_SOCKET`. Then you set the
 `optname` to the name you're interested in. Again, see your man page for
 all the options, but here are some of the most fun ones:
 
-| `optname`         | Description                                          |
-|-------------------|------------------------------------------------------|
-| [i[`SO_BINDTODEVICE` macro]i]`SO_BINDTODEVICE` | Bind this socket to a symbolic device name like `eth0` instead of using `bind()` to bind it to an IP address. Type the command `ifconfig` under Unix to see the device names.|
-| [i[`SO_REUSEADDR` macro]i]`SO_REUSEADDR      ` | Allows other sockets to `bind()` to this port, unless there is an active listening socket bound to the port already. This enables you to get around those "Address already in use" error messages when you try to restart your server after a crash.|
-| [i[`SO_BROADCAST` macro]i]`SOCK_DGRAM`         | Allows UDP datagram (`SOCK_DGRAM`) sockets to send and receive packets sent to and from the broadcast address. Does nothing---_NOTHING!!_---to TCP stream sockets! Hahaha!|
+| `optname`                                      | Description                                                                                                                                                                                                                                          |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [i[`SO_BINDTODEVICE` macro]i]`SO_BINDTODEVICE` | Bind this socket to a symbolic device name like `eth0` instead of using `bind()` to bind it to an IP address. Type the command `ifconfig` under Unix to see the device names.                                                                        |
+| [i[`SO_REUSEADDR` macro]i]`SO_REUSEADDR      ` | Allows other sockets to `bind()` to this port, unless there is an active listening socket bound to the port already. This enables you to get around those "Address already in use" error messages when you try to restart your server after a crash. |
+| [i[`SO_BROADCAST` macro]i]`SOCK_DGRAM`         | Allows UDP datagram (`SOCK_DGRAM`) sockets to send and receive packets sent to and from the broadcast address. Does nothing---_NOTHING!!_---to TCP stream sockets! Hahaha!                                                                           |
 
 As for the parameter `optval`, it's usually a pointer to an `int`
 indicating the value in question. For booleans, zero is false, and
@@ -1949,8 +1945,8 @@ if (optval != 0) {
 
 [`fcntl()`](#fcntlman)
 
-
 [[manbreak]]
+
 ## `send()`, `sendto()` {#sendman}
 
 [i[`send()` function]i]
@@ -1986,12 +1982,12 @@ information about how the data is to be sent. Set `flags` to zero if you
 want it to be "normal" data. Here are some of the commonly used flags,
 but check your local `send()` man pages for more details:
 
-| Macro           | Description                                            |
-|-----------------|--------------------------------------------------------|
-| [i[`MSG_OOB` macro]i]`MSG_OOB`             | Send as [i[Out-of-band data]] "out of band" data. TCP supports this, and it's a way to tell the receiving system that this data has a higher priority than the normal data. The receiver will receive the signal [i[`SIGURG` macro]i] `SIGURG` and it can then receive this data without first receiving all the rest of the normal data in the queue.|
-| [i[`MSG_DONTROUTE` macro]i]`MSG_DONTROUTE` | Don't send this data over a router, just keep it local.|
-| [i[`MSG_DONTWAIT` macro]i]`MSG_DONTWAIT`   | If `send()` would block because outbound traffic is clogged, have it return [i[`EAGAIN` macro]] `EAGAIN`.  This is like a "enable [i[Non-blocking sockets]] non-blocking just for this send."  See the section on [blocking](#blocking)  for more details.|
-| [i[`MSG_NOSIGNAL` macro]i]`MSG_NOSIGNAL`   | If you `send()` to a remote host which is no longer `recv()`ing, you'll typically get the signal [i[`SIGPIPE` macro]] `SIGPIPE`. Adding this flag prevents that signal from being raised.|
+| Macro                                      | Description                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [i[`MSG_OOB` macro]i]`MSG_OOB`             | Send as [i[Out-of-band data]] "out of band" data. TCP supports this, and it's a way to tell the receiving system that this data has a higher priority than the normal data. The receiver will receive the signal [i[`SIGURG` macro]i] `SIGURG` and it can then receive this data without first receiving all the rest of the normal data in the queue. |
+| [i[`MSG_DONTROUTE` macro]i]`MSG_DONTROUTE` | Don't send this data over a router, just keep it local.                                                                                                                                                                                                                                                                                                |
+| [i[`MSG_DONTWAIT` macro]i]`MSG_DONTWAIT`   | If `send()` would block because outbound traffic is clogged, have it return [i[`EAGAIN` macro]] `EAGAIN`. This is like a "enable [i[Non-blocking sockets]] non-blocking just for this send." See the section on [blocking](#blocking) for more details.                                                                                                |
+| [i[`MSG_NOSIGNAL` macro]i]`MSG_NOSIGNAL`   | If you `send()` to a remote host which is no longer `recv()`ing, you'll typically get the signal [i[`SIGPIPE` macro]] `SIGPIPE`. Adding this flag prevents that signal from being raised.                                                                                                                                                              |
 
 ### Return Value {.unnumbered .unlisted}
 
@@ -2035,7 +2031,7 @@ send(stream_socket, secret_message, strlen(secret_message)+1, MSG_OOB);
 //dgram_socket = socket(...
 
 // send secret message normally:
-sendto(dgram_socket, secret_message, strlen(secret_message)+1, 0, 
+sendto(dgram_socket, secret_message, strlen(secret_message)+1, 0,
        (struct sockaddr*)&dest, sizeof dest);
 ```
 
@@ -2043,8 +2039,8 @@ sendto(dgram_socket, secret_message, strlen(secret_message)+1, 0,
 
 [`recv()`](#recvman), [`recvfrom()`](#recvman)
 
-
 [[manbreak]]
+
 ## `shutdown()` {#shutdownman}
 
 [i[`shutdown()` function]i]
@@ -2102,8 +2098,8 @@ shutdown(s, SHUT_WR);
 
 [`close()`](#closeman)
 
-
 [[manbreak]]
+
 ## `socket()` {#socketman}
 
 [i[`socket()` function]i]
@@ -2131,11 +2127,11 @@ In usual usage, you get the values for these parameters from a call to
 `getaddrinfo()`, as shown in the example below. But you can fill them in
 by hand if you really want to.
 
-| Parameter  | Description                                                 |
-|------------|-------------------------------------------------------------|
-| `domain`   | `domain` describes what kind of socket you're interested in. This can, believe me, be a wide variety of things, but since this is a socket guide, it's going to be [i[`PF_INET` macro]i] `PF_INET` for IPv4, and `PF_INET6` for IPv6.|
-| `type`     | Also, the `type` parameter can be a number of things, but you'll probably be setting it to either [i[`SOCK_STREAM` macro]i] `SOCK_STREAM` for reliable TCP sockets (`send()`, `recv()`) or [i[`SOCK_DGRAM` macro]i] `SOCK_DGRAM` for unreliable fast UDP sockets (`sendto()`, `recvfrom()`). (Another interesting socket type is [i[`SOCK_RAW` macro]i] `SOCK_RAW` which can be used to construct packets by hand. It's pretty cool.)| 
-| `protocol` | Finally, the `protocol` parameter tells which protocol to use with a certain socket type. Like I've already said, for instance, `SOCK_STREAM` uses TCP. Fortunately for you, when using `SOCK_STREAM` or `SOCK_DGRAM`, you can just set the protocol to 0, and it'll use the proper protocol automatically. Otherwise, you can use [i[`getprotobyname()` function]] `getprotobyname()` to look up the proper protocol number.|
+| Parameter  | Description                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain`   | `domain` describes what kind of socket you're interested in. This can, believe me, be a wide variety of things, but since this is a socket guide, it's going to be [i[`PF_INET` macro]i] `PF_INET` for IPv4, and `PF_INET6` for IPv6.                                                                                                                                                                                                 |
+| `type`     | Also, the `type` parameter can be a number of things, but you'll probably be setting it to either [i[`SOCK_STREAM` macro]i] `SOCK_STREAM` for reliable TCP sockets (`send()`, `recv()`) or [i[`SOCK_DGRAM` macro]i] `SOCK_DGRAM` for unreliable fast UDP sockets (`sendto()`, `recvfrom()`). (Another interesting socket type is [i[`SOCK_RAW` macro]i] `SOCK_RAW` which can be used to construct packets by hand. It's pretty cool.) |
+| `protocol` | Finally, the `protocol` parameter tells which protocol to use with a certain socket type. Like I've already said, for instance, `SOCK_STREAM` uses TCP. Fortunately for you, when using `SOCK_STREAM` or `SOCK_DGRAM`, you can just set the protocol to 0, and it'll use the proper protocol automatically. Otherwise, you can use [i[`getprotobyname()` function]] `getprotobyname()` to look up the proper protocol number.         |
 
 ### Return Value {.unnumbered .unlisted}
 
@@ -2165,8 +2161,8 @@ sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 [`accept()`](#acceptman), [`bind()`](#bindman),
 [`getaddrinfo()`](#getaddrinfoman), [`listen()`](#listenman)
 
-
 [[manbreak]]
+
 ## `struct sockaddr` and pals {#structsockaddrman}
 
 [i[`struct sockaddr` type]i]
