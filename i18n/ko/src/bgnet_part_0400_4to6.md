@@ -2,7 +2,7 @@
 
 [i[IPv6]]
 
-"아무튼 저는 IPv6에서 동작하려면 제 코드의 어디를 바꿔야 하는지 알고싶단 말입니다!
+"아무튼 저는 IPv6에서 동작하려면 제 코드의 어디를 바꿔야 하는지 알고싶단 말이에요!
 당장 알려주세요!"
 
 종아요! 좋습니다!
@@ -17,13 +17,13 @@
    작업을 할 필요가 없게 해 줍니다.
 
 2. IP 버전에 관계된 것을 하드코딩하는 곳을 찾아낼 때마다 헬퍼 함수로
-   감싸두는 처리를 해 두십시오.
+   감싸두는 처리를 해두세요.
 
-3. `AF_INET`를 `AF_INET6`로 바꾸십시오.
+3. `AF_INET`를 `AF_INET6`로 바꾸세요.
 
-4. `PF_INET`를 `PF_INET6`로 바꾸십시오.
+4. `PF_INET`를 `PF_INET6`로 바꾸세요.
 
-5. `INADDR_ANY` 대입을 `in6addr_any`대입으로 바꾸십시오. 이런 차이가 있습니다:
+5. `INADDR_ANY` 대입을 `in6addr_any`대입으로 바꾸세요. 이런 차이가 있습니다:
 
    ```{.c}
    struct sockaddr_in sa;
@@ -41,11 +41,11 @@
    ```
 
 6. `struct sockaddr_in` 대신에 `struct sockaddr_in6`을 사용하시고, 필요한
-   필드에 "6"을 적절히 덧붙이십시오. (위의 [`struct`s](#structs)을
+   필드에 "6"을 적절히 덧붙이세요. (위의 [`struct`s](#structs)을
    참고하세요) `sin6_zero`필드는 없습니다.
 
 7. `struct in_addr` 대신에 `struct in6_addr`를 사용하시고, 필요한
-   필드에 "6"을 적절히 덧붙이십시오. (위의 [`struct`s](#structs)을
+   필드에 "6"을 적절히 덧붙이세요. (위의 [`struct`s](#structs)을
    참고하세요)
 
 8. `inet_aton()`이나 `inet_addr()` 대신에 `inet_pton()`을 사용하세요.
