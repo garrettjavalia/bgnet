@@ -186,20 +186,20 @@ Winsock에 대한 정보를 더 얻고싶다면 [마이크로소프트의 공식
 
 마지막으로 윈도우에는 [i[`fork()` function]] `fork()`가 없다고 들었습니다.
 불행히도 제 예제코드 중 일부는 `fork()`를 사용합니다. 아마 그것을 동작하게 하려면
-POSIX라이브러리에 링크하거나 다른 작업이 필요할 것입니다. 아니면 [i[`CreateProcess()` function]] `CreateProcess()`
-를 대신 쓸 수도 있습니다. `fork()`는 인수를 받지 않지만 `CreateProcess()`는
-인수를 4800만개 정도 받습니다. 그게 부담스럽다면 [i[`CreateThread()`
-function]] `CreateThread()` 이 조금 더 쓰기 쉬울겁니다. 불행히도
-멀티스레딩에 대한 논의는 이 문서의 범위를 벗어납니다. 저는 이 정도 까지밖에
-말씀드릴 수가 없습니다.
+POSIX라이브러리에 링크하거나 다른 작업이 필요할 것입니다.
+아니면 [i[`CreateProcess()` function]] `CreateProcess()`를 대신 쓸 수도 있습니다.
+`fork()`는 인수를 받지 않지만 `CreateProcess()`는 인수를 4800만개 정도 받습니다.
+그게 부담스럽다면 [i[`CreateThread()` function]] `CreateThread()`
+이 조금 더 쓰기 쉬울겁니다. 불행히도 멀티스레딩에 대한 논의는 이 문서의
+범위를 벗어납니다. 저는 이 정도 까지밖에 말씀드릴 수가 없습니다.
 
-정말 마지막으로, Steven Mitchell이 [fl[몇몇 예제들을 Winsock으로 변환했습니다.|https://www.tallyhawk.net/WinsockExamples/]]
-확인해보십시오.
+정말 마지막으로, Steven Mitchell이 [fl[많은 예제를 Winsock으로 변환했습니다.|https://www.tallyhawk.net/WinsockExamples/]]
+확인해보세요.
 
 ## 이메일 정책
 
 저는 대체로 [i[Emailing Beej]] 이메일로 오는 문의사항에 답을 드리고자 하니
-이메일 보내기를 주저하지 마십시오. 그러나 응답을 보장하지는 못합니다. 저는 바쁜
+이메일 보내기를 주저하지 마세요. 그러나 응답을 보장하지는 못합니다. 저는 바쁜
 삶을 살고 있고 제가 여러분이 가진 궁금증에 대답할 수 없는 때가 많이 있습니다.
 그런 경우라면 저는 그 메시지를 그냥 삭제합니다. 개인적인 감정이 아닙니다.
 그저 여러분이 필요로 하는 자세한 답을 할 시간이 없을 것이라 생각하기 때문입니다.
@@ -228,15 +228,16 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 
 ## Note for Translators 번역가들을 위한 노트
 
-[i[Translating the Guide]] 이 안내서를 다른 언어로 번역하고 싶다면 [`beej@beej.us`](beej@beej.us)에게
-메일을 보내주십시오. 당신의 번역본의 링크를 제 메인 페이지에 걸어두겠습니다.
-당신의 이름과 연락처 정보를 번역본에 추가하셔도 좋습니다.
+[i[Translating the Guide]] 이 안내서를 다른 언어로 번역하고 싶다면
+[`beej@beej.us`](beej@beej.us)에 메일을 보내주십시오. 당신의 번역본의
+링크를 제 메인 페이지에 걸어두겠습니다. 당신의 이름과 연락처 정보를 번역본에
+추가하시는 것도 환영합니다.
 
 이 원본 마크다운 문서는 UTF-8로 인코드 되었습니다.
 
 아래의 Copyright, Distribution, and Legal 절을 참고하세요.
 
-제가 번역본을 호스트하길 바란다면, 말씀해주십시오. 여러분이 호스트하길 원한다면
+제가 번역본을 호스트하길 바란다면, 말씀해주세요. 여러분이 호스트하길 원한다면
 그것도 링크하겠습니다. 어느 쪽이든 좋습니다.
 
 ## Copyright, Distribution, and Legal {#legal}
@@ -288,14 +289,14 @@ Contact [`beej@beej.us`](mailto:beej@beej.us) for more information.
 ## 헌사
 
 이 안내서를 쓸 수 있도록 저를 과거에 도와주신, 그리고 미래에 도와주실 모든 분들에게
-감사합니다. 이 안내서를 만들기 위해 사용한 자유 소프트웨어와 패키지(GNU, Linux,
+감사드립니다. 이 안내서를 만들기 위해 사용한 자유 소프트웨어와 패키지(GNU, Linux,
 Slackware, vim, Python, Inkscape, pandoc, 기타 등등...)를 만든 모든
 분들에게 감사드립니다. 또한 이 안내서의 발전을 위한 제안을 해주시고 응원의 말씀을
 보내주신 수천명의 사람들에게 감사드립니다.
 
-이 안내서를 컴퓨터 세계에서 나의 가장 위대한 영웅이자 영감을 주는 이들에게 바칩니다.
+이 안내서를 컴퓨터 세계에서 나의 가장 위대한 영웅이자 영감을 주는 이들인
 Donald Knuth, Bruce Schneier, W. Richard Stevens, Steve The Woz Wozniak,
-독자 여러분, 그리고 모든 자유 및 공개 소프트웨어 커뮤니티
+독자 여러분, 그리고 모든 자유 및 공개 소프트웨어 커뮤니티에 바칩니다.
 
 ## 출판 정보
 
