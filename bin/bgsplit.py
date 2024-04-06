@@ -193,6 +193,8 @@ class InventoryHTMLParser(HTMLParser):
     def handle_unknowndecl(self, data):
         self.process(f"<![{data}]>")
 
+INDEX_FILE_NAME = 'index.html'
+
 class SplitHTMLParser(HTMLParser):
     """
     The Second Pass HTML parser.
@@ -211,6 +213,8 @@ class SplitHTMLParser(HTMLParser):
         self.out_file = None
         self.current_section_id = None
         self.page_nav = ""
+        self.handlingIndex = True
+        self.switch_output_file(INDEX_FILE_NAME)
 
         super().__init__(convert_charrefs=False)
 
@@ -218,7 +222,7 @@ class SplitHTMLParser(HTMLParser):
         old_href = attr_get(attrs, "href")
 
         # If this isn't an internal link, bail out
-        if old_href[0] != "#":
+        if old_href is None or old_href[0] != "#":
             return
         
         old_id = old_href[1:]   # Strip hash
@@ -292,7 +296,8 @@ class SplitHTMLParser(HTMLParser):
         file_path = os.path.sep.join((self.out_directory, file_name))
         self.out_file = open(file_path, "w")
 
-        self.write_header()
+        if file_name != INDEX_FILE_NAME:
+          self.write_header()
 
     def output(self, s):
         if self.out_file is not None:
