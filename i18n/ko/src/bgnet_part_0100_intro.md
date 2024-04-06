@@ -25,7 +25,7 @@ IPv6에 대한 안내를 갱신했습니다. 재밌게 보십시오!
 이 문서에 포함된 코드는 Gnu의 [i[Compilers-->GCC]] `gcc` 컴파일러를 사용하는
 리눅스 PC에서 컴파일 되었습니다. 그러나 그 코드들은 `gcc`를 사용하는 어떤
 실행환경에서도 빌드가 되어야 합니다. 그 말인즉 여러분이 윈도우를 위해서 프로그램을
-만들고 있다면 해당사항이 없다는 의미입니다. 그런 경우라면 [윈도우즈 프로그래밍을 위한 절](#windows)을 참고하십시오.
+만들고 있다면 해당사항이 없다는 의미입니다. 그런 경우라면 [윈도우즈 프로그래밍을 위한 절](#windows)을 참고하세요.
 
 ## 공식 홈페이지와 책 구매
 
@@ -89,7 +89,7 @@ char yes='1';
 [fl[Linux|https://www.linux.com/]], [i[BSD]] [fl[BSD|https://bsd.org/]],
 아니면 다른 종류의 유닉스를 써 보라고 권하고 싶습니다.
 
-하지만 사람들은 하던대로 하고싶어하기 마련이고, 윈도우를 쓰는 친구들은 이
+하지만 사람들은 하던대로 하고싶어하기 마련이고, 윈도우를 쓰는 분들은 이
 문서의 정보가 그들에게도 약간의 차이만 빼면 보통 적용된다는 것을 알면 기뻐할 것입니다.
 
 여러분이 진지하게 고려해봐야 할 다른 것은 [i[WSL]] [i[Windows
@@ -104,20 +104,20 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]] 입니다. 이것은 간�
 
 그러나 여러분 중 몇몇은 순수한 Windows방식으로 이걸 하고싶을지도 모르겠습니다.
 그렇다면 아주 배짱이 두둑한 일이 되겠군요. 그렇게 하고싶다면 당장 집 밖으로 가서
-유닉스를 돌릴 기계를 사십시오! 장난입니다. 요새는 윈도우에 (좀 더) 친화적으로 행동하려고
+유닉스를 돌릴 기계를 사세요! 장난입니다. 요새는 윈도우에 (좀 더) 친화적으로 행동하려고
 노력하고 있습니다.
 
 [i[Winsock]]
 
-이게 여러분이 해야 할 일입니다. 첫 번째로 제가 이 문서에서 언급하는 거의 모든 시스템
-헤더 파일을 무시하십시오. 그 대신 아래의 헤더파일을 포함하십시오.
+여러분이 할 일은 이렇습니다. 첫 번째로 제가 이 문서에서 언급하는 거의 모든 시스템
+헤더 파일을 무시하세요. 그 대신 아래의 헤더파일을 포함하세요.
 
 ```{.c}
 #include <winsock2.h>
 #include <ws2tcpip.h>
 ```
 
-`winsock`은 "새로운"(1994년 기준으로) 윈도우즈 소켓 라이브러리입니다.
+`winsock`은 "새로운"(대략 1994년 기준으로) 윈도우즈 소켓 라이브러리입니다.
 
 불행하게도 여러분이 `windows.h`를 인클루드하면 그것이 자동으로 버전1인 오래된 `winsock.h`
 를 끌어오고 `winsock2.h`와 충돌을 일으킬 것입니다. 정말 재밌지요.
@@ -126,10 +126,10 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]] 입니다. 이것은 간�
 아래의 매크로를 정의해야 합니다.
 
 ```{.c}
-#define WIN32_LEAN_AND_MEAN  // 이렇게 적으십시오.
+#define WIN32_LEAN_AND_MEAN  // 이렇게 적으세요.
 
-#include <windows.h>         // 이제 이걸 인클루드해도 됩니다.
-#include <winsock2.h>        // 이것도요.
+#include <windows.h>         // 이제 이것을 인클루드해도 됩니다.
+#include <winsock2.h>        // 이것도 해도 됩니다.
 ```
 
 잠깐! 소켓 라이브러리를 쓰기 전에 [i[`WSAStartup()` function]]
@@ -161,14 +161,14 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]] 입니다. 이것은 간�
     }
 ```
 
-저기 보이는 [i[`WSACleanup()` function]] `WSACleanup()` 호출부를 주목하십시오.
+저기 보이는 [i[`WSACleanup()` function]] `WSACleanup()` 호출부를 주목하세요.
 Winsock라이브러리를 다 쓴 후에 저것을 호출해야 합니다.
 
 또한 컴파일러에게 `ws2_32.lib`라는 Winsock2 라이브러리를 링크하라고 말해줘야 합니다.
 VC++에서는 `프로젝트` 메뉴에서 `설정`으로 가서 `링크`탭을 클릭하고 "오브젝트/라이브러리 모듈"
 이라는 제목이 붙은 상자를 찾으십시오. 그리고 거기에 "ws2_32.lib"나 여러분이 원하는
-다른 라이브러리를 추가하십시오.
-(옮긴이 주) 최신 Visual Studio에서는 [이 링크|https://learn.microsoft.com/en-us/cpp/build/reference/dot-lib-files-as-linker-input?view=msvc-170]를 참고해보십시오.
+다른 라이브러리를 추가하세요.
+(역자 주: 최신 Visual Studio에서는 [이 링크|https://learn.microsoft.com/en-us/cpp/build/reference/dot-lib-files-as-linker-input?view=msvc-170]를 참고하세요.)
 
 직접 해 본 것은 아닙니다.
 
@@ -180,9 +180,9 @@ VC++에서는 `프로젝트` 메뉴에서 `설정`으로 가서 `링크`탭을 �
 
 여러분이 쓸 수 있는 소켓 클래스도 있습니다.
 [i[`CSocket` class]][`CSocket`](https://learn.microsoft.com/en-us/cpp/mfc/reference/csocket-class?view=msvc-170)입니다.
-자세한 정보는 컴파일러의 도움말 페이지를 참고하십시오.
+자세한 정보는 컴파일러의 도움말 페이지를 참고하세요.
 
-Winsock에 대한 정보를 더 얻고싶다면 [마이크로소프트의 공식 홈페이지](https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-start-page-2)를 참고하십시오.
+Winsock에 대한 정보를 더 얻고싶다면 [마이크로소프트의 공식 홈페이지](https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-start-page-2)를 참고하세요.
 
 마지막으로 윈도우에는 [i[`fork()` function]] `fork()`가 없다고 들었습니다.
 불행히도 제 예제코드 중 일부는 `fork()`를 사용합니다. 아마 그것을 동작하게 하려면
@@ -209,7 +209,7 @@ function]] `CreateThread()` 이 조금 더 쓰기 쉬울겁니다. 불행히도
 접하는 에러메시지, 문제 해결에 도움이 될 만한 다른 정보)를 첨부해주신다면
 제 응답을 받을 확률이 올라갈 것입니다. 더 자세한 지침은 ESR의 문서인
 [fl[How To Ask Questions The Smart
-Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하십시오.
+Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 
 여러분이 제 회신을 받지 못한다면, 문제를 더 파고들어보고, 답을 찾기 위해 노력해보십시오.
 그래도 확실한 답을 얻지 못했다면 그동안 알아낸 정보를 가지고 저에게 다시
@@ -234,7 +234,7 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하십시오.
 
 이 원본 마크다운 문서는 UTF-8로 인코드 되었습니다.
 
-아래의 Copyright, Distribution, and Legal 절을 참고하십시오.
+아래의 Copyright, Distribution, and Legal 절을 참고하세요.
 
 제가 번역본을 호스트하길 바란다면, 말씀해주십시오. 여러분이 호스트하길 원한다면
 그것도 링크하겠습니다. 어느 쪽이든 좋습니다.

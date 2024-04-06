@@ -12,7 +12,7 @@
 있는 내용은 이정도입니다.)
 
 1. 우선 `struct sockaddr` 정보를 얻어내기 위해서 수작업 대신
-   [i[`getaddrinfo()` function]] [`getaddrinfo()`](#structs) 함수를 사용하십시오.
+   [i[`getaddrinfo()` function]] [`getaddrinfo()`](#structs) 함수를 사용하세요.
    이렇게 하면 여러분은 IP버전에 신경쓰지 않을 수 있고, 뒤따르는 많은 후속
    작업을 할 필요가 없게 해 줍니다.
 
@@ -28,7 +28,7 @@
    ```{.c}
    struct sockaddr_in sa;
    struct sockaddr_in6 sa6;
-   
+
    sa.sin_addr.s_addr = INADDR_ANY;  // use my IPv4 address
    sa6.sin6_addr = in6addr_any; // use my IPv6 address
    ```
@@ -42,23 +42,23 @@
 
 6. `struct sockaddr_in` 대신에 `struct sockaddr_in6`을 사용하시고, 필요한
    필드에 "6"을 적절히 덧붙이십시오. (위의 [`struct`s](#structs)을
-   참고하십시오) `sin6_zero`필드는 없습니다.
+   참고하세요) `sin6_zero`필드는 없습니다.
 
 7. `struct in_addr` 대신에 `struct in6_addr`를 사용하시고, 필요한
    필드에 "6"을 적절히 덧붙이십시오. (위의 [`struct`s](#structs)을
-   참고하십시오)
+   참고하세요)
 
-8. `inet_aton()`이나 `inet_addr()` 대신에 `inet_pton()`을 사용하십시오.
+8. `inet_aton()`이나 `inet_addr()` 대신에 `inet_pton()`을 사용하세요.
 
-9. `inet_ntoa()` 대신에 `inet_ntop()`을 사용하십시오.
+9. `inet_ntoa()` 대신에 `inet_ntop()`을 사용하세요.
 
-10. `gethostbyname()`대신에 더 뛰어난 `getaddrinfo()`를 사용하십시오.
+10. `gethostbyname()`대신에 더 뛰어난 `getaddrinfo()`를 사용하세요.
 
 11. `gethostbyaddr()` 대신에 더 뛰어난 [i[`getnameinfo()` function]]
-    `getnameinfo()`를 사용하십시오. (`gethostbyaddr()`가 IPv6을 위해서도
+    `getnameinfo()`를 사용하세요. (`gethostbyaddr()`가 IPv6을 위해서도
     여전히 작동하기는 합니다).
 
 12. `INADDR_BROADCAST`는 더 이상 작동하지 않습니다. 대신 IPv6 멀티캐스트를
-    사용하십시오.
+    사용하세요.
 
 _끝_!

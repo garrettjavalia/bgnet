@@ -46,7 +46,7 @@ descriptor]] 소켓 설명자를 반환하고, 여러분은 특화된 [i[`send()
 입니다. 앞으로 이 둘을 각각 [i[`SOCK_STREAM` macro]] "`SOCK_STREAM`" 과
 "`SOCK_DGRAM`"으로 칭하겠습니다. 데이터그램 소켓은 때때로 비연결형/비연결성
 소켓이라고 불립니다. (그러나 그것도 정말로 필요하다면 [i[`connect()` function]] `connect()`
-함수를 사용할 수 있습니다. 아래의 [`connect()`](#connect)를 참고하하십시오.)
+함수를 사용할 수 있습니다. 아래의 [`connect()`](#connect)를 참고하하세요.)
 
 스트림 소켓은 신뢰성있는 양방향 연결 통신 스트림입니다. 이 소켓에 두 개의 아이템을
 "1, 2"의 순서로 출력하면, 반대쪽 끝에 "1, 2"의 순서로 도착합니다. 또한 스트림소켓은
@@ -65,11 +65,11 @@ Hypertext Transfer Protocol [i[HTTP protocol]] (HTTP)도 스트림 소켓을 사
 > 이 안내서는 `telnet`과 유사한 프로그램인 [flx[`telnot`|telnot.c]]과 같이 제공됩니다.
 > 이 안내서가 필요로 하는 일은 다 할 수 있을 것입니다.
 > 텔넷이 사실은 [flrfc[spec'd networking protocol|854]]이며, `telnot`
-> 은 이 프로토콜을 전혀 구현하지 않는다는 사실을 기억하십시오.
+> 은 이 프로토콜을 전혀 구현하지 않는다는 사실을 기억하세요.
 
 "스트림 소켓이 어떻게 이렇게 수준높은 데이터 전송 품질을 달성하나요?"
 스트림 소켓은 "Transmission Control Protocol"혹은 [i[TCP]] "TCP"
-(TCP에 대한 지나치게 자세한 정보는 [flrfc[RFC 793|793]]를 참고하십시오)
+(TCP에 대한 지나치게 자세한 정보는 [flrfc[RFC 793|793]]를 참고하세요)
 라고 불리는 프로토콜을 사용합니다. TCP는 여러분의 데이터가 순서대로 도착하고
 오류가 없음을 보장합니다. "TCP"를 "TCP/IP"의 반절로 이미 들어보셨을
 것입니다. "IP"는 "Internet Protocol(인터넷 프로토콜)"의 약어입니다.
@@ -86,7 +86,7 @@ Hypertext Transfer Protocol [i[HTTP protocol]] (HTTP)도 스트림 소켓을 사
 
 데이터그램 소켓도 라우팅을 위해서 IP를 사용할 것입니다. 그러나 TCP를
 사용하지는 않습니다. 데이터그램 소켓은 "User Datagram Protocol" 또는
-[i[UDP]] "UDP"를 사용합니다. ([flrfc[RFC 768|768]]를 참고하십시오)
+[i[UDP]] "UDP"를 사용합니다. ([flrfc[RFC 768|768]]를 참고하세요)
 
 "왜 비연결성인가요?" 간단히 말하자면 스트림 소켓과 달리 열린 연결을 유지할
 필요가 없기 때문입니다. 패킷을 만들고, 목적지 정보를 담은 IP헤더를 붙이고
@@ -157,7 +157,7 @@ AUI(Attachment Unit Interface), 등등)(역자 주 : 여기에 언급되는 물�
 투명(역자 주 : 알 필요가 없거나 알 수 없음)합니다.
 
 길게 말하지 않고 이제 전체 모델의 계층을 제시하겠습니다.
-네트워크 과목 시험을 위해서 이것을 기억하십시오.
+네트워크 과목 시험을 위해서 이것을 기억하세요.
 
 - 응용(Application)
 - 표현(Presentation)

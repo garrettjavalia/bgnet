@@ -291,7 +291,7 @@ if (!strncmp(str, "foobar", 6)) {
 
 VC++에 딸려오는 도움말에서 "fork"나 "POSIX"를 검색하고 도움이 될만한 것이
 있는지 살펴보라. (역자 주 : VC++ 자체도 Visual Studio가 가진 기능 중
-일부의 오래된 이름에 불과합니다. 이 글이 최초에 작성된 것은 90년대임을 기억하십시오.)
+일부의 오래된 이름에 불과합니다. 이 글이 최초에 작성된 것은 90년대임을 기억하세요.)
 
 그것이 전혀 작동하지 않는다면, `fork()`/`sigaction`과 관련된 것들을 떼어내고
 그것의 Win32 대응인 [i[`CreateProcess()` function]] `CreateProcess()`로
