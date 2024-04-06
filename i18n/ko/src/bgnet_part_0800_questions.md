@@ -366,5 +366,5 @@ thread|https://stackoverflow.com/questions/21323023/]] 같은 정보가 있다.
 이 관리하는 [fl[공식 포트 번호|https://www.iana.org/assignments/port-numbers]]
 가 있다. (1023보다 큰) 어떤 번호가 저 목록에 없다고 해서 그 포트를 쓸 수
 없는 것은 아니다. 예를 들어 Id Software의 DOOM은 "mdqs"(이것이 무엇이든)
-와 같은 포트를 쓴다. 중요한 것은 _같은 장치_ 의 누구도 당신이 그 포트를
+와 같은 포트를 쓴다. 중요한 것은 _같은 장치_ 의 누구도 여러분이 그 포트를
 쓰고 싶을 때 그 포트를 쓰고 있지 않으면 된다는 것이다.
