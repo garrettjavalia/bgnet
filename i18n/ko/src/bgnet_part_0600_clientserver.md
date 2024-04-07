@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
 
 클라이언트를 실행하기 전에 서버를 실행하지 않으면 `connect()`는
 [i[Connection refused]] "Connection refused"를 반환한다는 점을
-기억하세요. 아주 유용하다.
+기억하세요. 아주 유용합니다.
 
 [i[Client-->stream]>]
 

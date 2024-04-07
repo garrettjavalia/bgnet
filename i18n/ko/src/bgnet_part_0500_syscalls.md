@@ -97,14 +97,14 @@ freeaddrinfo(servinfo); // 연결리스트를 해제
 매개변수에 특정한 주소를 넣을 수 있습니다.)
 
 이렇게 함수를 호출합니다. 오류가 있다면(`getaddrinfo()`이 0이 아닌 값을 돌려준다면)
-보다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있습니다. 만약 모든
-것이 제대로 동작한다면 `servinfo`는 각각이 우리가 나중에 쓸 수 있는
+보시다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있습니다. 만약 모든
+것이 제대로 동작한다면 `servinfo`는 우리가 나중에 쓸 수 있는
 `struct sockaddr`나 비슷한 것을 가진 `struct addrinfo`의 연결리스트를 가리킬
-것입니다. 멋지다!
+것입니다. 근사하네요!
 
 마지막으로 `getaddrinfo()`가 은혜롭게 우리에게 할당해 준 연결리스트를
 다 썼다면 우리는 `freeaddrinfo()`을 호출해서 그것을 할당 해제할 수 있습니다.
-(반드시 해야합니다.)
+(사실 반드시 해야합니다.)
 
 여기에 여러분이 특정한 주소, 예를 들어 "www.example.net"의 3490포트에
 잡속하고자 하는 클라이언트일 경우의 호출 예제가 있습니다. 다시 말씀드리지만
@@ -114,27 +114,27 @@ freeaddrinfo(servinfo); // 연결리스트를 해제
 ```{.c .numberLines}
 int status;
 struct addrinfo hints;
-struct addrinfo *servinfo;  // 결과물을 가리킬 것임
+struct addrinfo *servinfo;  // 결과물을 가리키게 됩니다
 
-memset(&hints, 0, sizeof hints); // 반드시 비워둘 것
+memset(&hints, 0, sizeof hints); // 반드시 비워둬야 합니다
 hints.ai_family = AF_UNSPEC;     // IPv4나 IPv6은 신경쓰지 않음
 hints.ai_socktype = SOCK_STREAM; // TCP 스트림 소켓
 
 // 연결 준비
 status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 
-// servinfo는 이제 1개 혹은 그 이상의 addrinfo 구조체에 대한 연결리스트를 가리킨다
+// servinfo는 이제 1개 혹은 그 이상의 addrinfo 구조체에 대한 연결리스트를 가리킵니다
 
 // 등등.
 ```
 
-`servinfo`은 모든 종류의 주소 정보를 가진 연결리스트라고 계속 이야기하고 있습니다.
-이 정보를 보기 위한 짧은 시연 프로그램을 작성해보자. [flx[이 짧은 프로그램|showip.c]]
+`servinfo`는 모든 종류의 주소 정보를 가진 연결리스트라고 거듭 말했습니다.
+이 정보를 보기 위한 짧은 시연 프로그램을 작성해봅시다. [flx[이 짧은 프로그램|showip.c]]
 은 여러분이 명령줄에 적는 호스트의 IP주소들을 출력합니다.
 
 ```{.c .numberLines}
 /*
-** showip.c -- 명령줄에서 주어진 호스트의 주소들을 출력합니다.
+** showip.c -- 명령줄에서 주어진 호스트의 주소들을 출력합니다
 */
 
 #include <stdio.h>
@@ -171,7 +171,8 @@ int main(int argc, char *argv[])
         void *addr;
         char *ipver;
 
-        // 주소 자체에 대한 포인터를 받는다. IPv4와 IPv6은 필드가 다르다.
+        // 주소 자체에 대한 포인터를 받습니다.
+        // IPv4와 IPv6은 필드가 다릅니다.
         if (p->ai_family == AF_INET) { // IPv4
             struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
@@ -182,23 +183,24 @@ int main(int argc, char *argv[])
             ipver = "IPv6";
         }
 
-        // IP주소를 문자열로 변환하고 출력합니다.
+        // IP주소를 문자열로 변환하고 출력합니다
         inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
         printf("  %s: %s\n", ipver, ipstr);
     }
 
-    freeaddrinfo(res); // 연결 목록을 해제합니다.
+    freeaddrinfo(res); // 연결 목록을 해제합니다
 
     return 0;
 }
 ```
 
-보다시피 이 코드는 여러분이 명령줄에 넘기는 것이 무엇이든 `getaddrinfo()`을
+보시다시피 이 코드는 여러분이 명령줄에 넘기는 것이 무엇이든 `getaddrinfo()`을
 호출합니다. 그리고 `res`에 연결목록의 포인터를 넘겨줍니다. 그래서 우리는
 이 목록을 순회해서 출력하거나 다른 일을 할 수 있습니다.
 
-(저 예제코드에는 IP 버전에 따라 다른 종류의 `struct sockaddr`을 처리해야 하는
-흉한 부분이 있습니다. 그 점에 대해서 사과합니다. 그러나 더 나은 방법이 있는지는 모르겠다.)
+(저 예제코드에는 IP 버전에 따라 다른 종류의 `struct sockaddr`을 처리해야 한다는
+점에서 흉한 부분이 있습니다. 그 점에 대해서 사과드립니다. 그러나 더 나은 방법이
+있는지는 잘 모르겠습니다.)
 
 실행 예제! 모두가 스크린샷을 좋아합니다.
 
@@ -216,11 +218,11 @@ IP addresses for ipv6.example.com:
 ```
 
 이제 저것을 다룰 수 있으니, `getaddrinfo()`에서 얻은 결과를 다른 소켓 함수에
-넘기고 결과적으로는 네트워크 연결을 성립할 수 있도록 해 보자! 계속 읽어보라!
+넘기고 결과적으로는 네트워크 연결을 성립할 수 있도록 해 봅시다! 계속 읽어보세요!
 
 ## `socket()`---파일 설명자를 받아오라! {#socket}
 
-더 이상 미룰 수가 없을 듯 하다. 이제 [i[`socket()` function]] `socket()`
+더 이상 미룰 수가 없을 듯 합니다. 이제 [i[`socket()` function]] `socket()`
 시스템 콜에 대해서 이야기해야 합니다. 개요는 이렇다.
 
 ```{.c}
@@ -240,13 +242,13 @@ int socket(int domain, int type, int protocol);
 을 쓸 수도 있습니다.)
 
 (이 `PF_INET`은 `sin_family`필드에 넣어주는 [i[`AF_INET` macro]]`AF_INET`와 유사한 것입니다.
-이것을 이해하려면 짧은 이야기가 필요하다. 아주 먼 옛날에는 어쩌면 하나의 주소 계통(Address Family)
+이것을 이해하려면 짧은 이야기가 필요합니다. 아주 먼 옛날에는 어쩌면 하나의 주소 계통(Address Family)
 ("`AF_INET`"안에 들어있는 "AF")가 여러 종류의 프로토콜 계통(Protocol Family)("`PF_INET`"의
 "PF"))을 지원할 것이라고 생각하던 시절이 있었다. 그런 일은 일어나지 않았다. 그리고 모두 행복하게
 오래오래 잘 살았다. 이런 이야기다. 그래서 할 수 있는 가장 정확한 일은
 `struct sockaddr_in`에서 `AF_INET`을 쓰고 `socket()`에서 `PF_INET`을 사용하는 것입니다.
 
-아무튼 이제 충분하다. 여러분이 정말로 하고싶은 일은 `getaddrinfo()`을
+아무튼 이제 충분합니다. 여러분이 정말로 하고싶은 일은 `getaddrinfo()`을
 호출한 결과로 돌아오는 값을 아래와 같이 `socket()`에 직접 넘겨주는 것입니다.
 
 ```{.c .numberLines}
@@ -281,7 +283,7 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 네트워크 게임들은 "192.168.5.10의 3490포트에 연결합니다"라고 말할 때 이런
 작업을 합니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
 연관짓기 위해서 사용합니다. 만약 여러분이 [i[`connect()`] function] `connect()`만
-할 생각이라면 `bind()`는 불필요하다. 그러나 재미를 위해 읽어두자.
+할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어두자.
 
 이것이 `bind()` 시스템 콜의 개요다.
 
