@@ -235,7 +235,7 @@ int socket(int domain, int type, int protocol);
 그러나 이 인수들이 무엇인지 모를 것입니다. 이것들은 어떤 종류의 소켓을 원하는지
 정할 수 있게 해 줍니다.(IPv4 또는 IPv6, 스트림 혹은 데이터그램, TCP 혹은 UDP)
 
-사용자들이 그 값을 직접 적어야 했고, 지금도 그렇게 할 수 있습니다.
+사용자가 그 값을 직접 적어야 했고, 지금도 그렇게 할 수 있습니다.
 (`domain`은 `PF_INET`이나 `PF_INET6`이고, `type`은 `SOCK_STREAM`또는 `SOCK_DGRAM`
 이며, `protocol`은 주어진 `type`에 적절한 값을 자동으로 선택하게 하려면 `0`을
 넘겨주거나 "tcp"나 "udp" 중 원하는 프로토콜의 값을 얻기 위해서 `getprotobyname()`
@@ -244,8 +244,8 @@ int socket(int domain, int type, int protocol);
 (이 `PF_INET`은 `sin_family`필드에 넣어주는 [i[`AF_INET` macro]]`AF_INET`와 유사한 것입니다.
 이것을 이해하려면 짧은 이야기가 필요합니다. 아주 먼 옛날에는 어쩌면 하나의 주소 계통(Address Family)
 ("`AF_INET`"안에 들어있는 "AF")가 여러 종류의 프로토콜 계통(Protocol Family)("`PF_INET`"의
-"PF"))을 지원할 것이라고 생각하던 시절이 있었다. 그런 일은 일어나지 않았다. 그리고 모두 행복하게
-오래오래 잘 살았다. 이런 이야기다. 그래서 할 수 있는 가장 정확한 일은
+"PF"))을 지원할 것이라고 생각하던 시절이 있었습니다. 그러나 그런 일은 일어나지 않았습니다.
+그리고 모두 행복하게 오래오래 잘 살았다고 합니다. 이런 이야기입니다. 그래서 할 수 있는 가장 정확한 일은
 `struct sockaddr_in`에서 `AF_INET`을 쓰고 `socket()`에서 `PF_INET`을 사용하는 것입니다.
 
 아무튼 이제 충분합니다. 여러분이 정말로 하고싶은 일은 `getaddrinfo()`을
@@ -256,7 +256,7 @@ int s;
 struct addrinfo hints, *res;
 
 // 탐색 시작
-// ["hints"구조체는 이미 채운 것으로 친다]
+// ["hints"구조체는 이미 채운 것으로 가정합니다]
 getaddrinfo("www.example.com", "http", &hints, &res);
 
 // 다시 말하지면 원래는 (이 안내서의 예제들이 하듯이) 첫 번째 것이 좋다고
@@ -268,7 +268,7 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 ```
 
 `socket()`은 단순하게 이후의 시스템 호출에서 쓸 수 있는 _소켓 설명자_ 를 돌려줍니다.
-오류가 있으면 -1을 돌려줍니다. 전역 변수인 `errno`가 오류의 값으로 설정된다.
+오류가 있으면 -1을 돌려줍니다. 전역 변수인 `errno`가 오류의 값으로 설정됩니다.
 (자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하세요.)
 
 좋습니다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것입니다.
