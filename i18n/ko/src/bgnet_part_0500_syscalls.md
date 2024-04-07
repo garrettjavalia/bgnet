@@ -38,8 +38,6 @@ _(아래의 예제 코드들은 대개 필수적인 에러코드를 간략함을
 
 이제 살펴봅시다!
 
-(역자 주 : 아래에서부터 입니다, 하세요 등의 표현 대신 이다, 하라 등의 간결한 어미를 섞어서 씁니다.)
-
 ```{.c}
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -73,33 +71,33 @@ int status;
 struct addrinfo hints;
 struct addrinfo *servinfo;  // 결과를 가리킬 것이다
 
-memset(&hints, 0, sizeof hints); // 구조체를 확실히 비워두라
+memset(&hints, 0, sizeof hints); // 구조체를 확실히 비워두세요
 hints.ai_family = AF_UNSPEC;     // IPv4 이든 IPv6 이든 상관없다
 hints.ai_socktype = SOCK_STREAM; // TCP 스트림 소켓
-hints.ai_flags = AI_PASSIVE;     // 내 주소를 넣어달라
+hints.ai_flags = AI_PASSIVE;     // 내 주소를 넣어라
 
 if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
     exit(1);
 }
 
-// servinfo는 이제 1개 혹은 그 이상의 addrinfo 구조체에 대한 연결리스트를 가리킨다
+// servinfo는 이제 1개 혹은 그 이상의 addrinfo 구조체에 대한 연결리스트를 가리킵니다
 
-// ... servinfo가 더이상 필요없을 때까지 모든 작업을 한다...
+// ... servinfo가 더이상 필요없을 때까지 모든 작업을 합니다...
 
 freeaddrinfo(servinfo); // 연결리스트를 해제
 ```
 
 `ai_family`을 `AF_UNSPEC`으로 설정해서 IPv4든 IPv6이든 신경쓰지 않음을 나타낸
-것에 주목하라. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있다.
+것에 주목하라. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있습니다.
 
-`AI_PASSIVE`도 볼 수 있다. 이것은 `getaddrinfo()`에게 소켓 구조체에
+`AI_PASSIVE`도 볼 수 있습니다. 이것은 `getaddrinfo()`에게 소켓 구조체에
 내 로컬 호스트의 주소를 할당해달라고 말해준다. 이것은 여러분이 하드코딩할 필요를
 없애주기에 좋다. (아니면 위에서 `NULL`을 넣은 `getaddrinfo()`의 첫 번째
-매개변수에 특정한 주소를 넣을 수 있다. )
+매개변수에 특정한 주소를 넣을 수 있습니다. )
 
 이렇게 함수를 호출한다. 오류가 있다면(`getaddrinfo()`이 0이 아닌 값을 돌려준다면)
-보다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있다. 만약 모든
+보다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있습니다. 만약 모든
 것이 제대로 동작한다면 `servinfo`는 각각이 우리가 나중에 쓸 수 있는
 `struct sockaddr`나 비슷한 것을 가진 `struct addrinfo`의 연결리스트를 가리킬
 것이다. 멋지다!
@@ -130,7 +128,7 @@ status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 // 등등.
 ```
 
-`servinfo`은 모든 종류의 주소 정보를 가진 연결리스트라고 계속 이야기하고 있다.
+`servinfo`은 모든 종류의 주소 정보를 가진 연결리스트라고 계속 이야기하고 있습니다.
 이 정보를 보기 위한 짧은 시연 프로그램을 작성해보자. [flx[이 짧은 프로그램|showip.c]]
 은 여러분이 명령줄에 적는 호스트의 IP주소들을 출력한다.
 
@@ -197,10 +195,10 @@ int main(int argc, char *argv[])
 
 보다시피 이 코드는 여러분이 명령줄에 넘기는 것이 무엇이든 `getaddrinfo()`을
 호출한다. 그리고 `res`에 연결목록의 포인터를 넘겨준다. 그래서 우리는
-이 목록을 순회해서 출력하거나 다른 일을 할 수 있다.
+이 목록을 순회해서 출력하거나 다른 일을 할 수 있습니다.
 
 (저 예제코드에는 IP 버전에 따라 다른 종류의 `struct sockaddr`을 처리해야 하는
-흉한 부분이 있다. 그 점에 대해서 사과한다. 그러나 더 나은 방법이 있는지는 모르겠다.)
+흉한 부분이 있습니다. 그 점에 대해서 사과한다. 그러나 더 나은 방법이 있는지는 모르겠다.)
 
 실행 예제! 모두가 스크린샷을 좋아합니다.
 
@@ -235,11 +233,11 @@ int socket(int domain, int type, int protocol);
 그러나 이 인수들이 무엇인지 모를 것이다. 이것들은 어떤 종류의 소켓을 원하는지
 정할 수 있게 해 준다.(IPv4 또는 IPv6, 스트림 혹은 데이터그램, TCP 혹은 UDP)
 
-사용자들이 그 값을 직접 적어야 했고, 지금도 그렇게 할 수 있다.
+사용자들이 그 값을 직접 적어야 했고, 지금도 그렇게 할 수 있습니다.
 (`domain`은 `PF_INET`이나 `PF_INET6`이고, `type`은 `SOCK_STREAM`또는 `SOCK_DGRAM`
 이며, `protocol`은 주어진 `type`에 적절한 값을 자동으로 선택하게 하려면 `0`을
 넘겨주거나 "tcp"나 "udp" 중 원하는 프로토콜의 값을 얻기 위해서 `getprotobyname()`
-을 쓸 수도 있다.)
+을 쓸 수도 있습니다.)
 
 (이 `PF_INET`은 `sin_family`필드에 넣어주는 [i[`AF_INET` macro]]`AF_INET`와 유사한 것이다.
 이것을 이해하려면 짧은 이야기가 필요하다. 아주 먼 옛날에는 어쩌면 하나의 주소 계통(Address Family)
@@ -351,21 +349,21 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 ```
 
 위의 코드에서 당신의 로컬 IP 주소에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
-`s_addr`필드에 `INADDR_ANY`을 대입할 수 있다. IPv6버전의 `INADDR_ANY`은
+`s_addr`필드에 `INADDR_ANY`을 대입할 수 있습니다. IPv6버전의 `INADDR_ANY`은
 당신의 `struct sockaddr_in6`의 `sin6_addr`필드에 대입해야 하는 전역변수인
 `in6addr_any`이다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
-있다.)
+있습니다.)
 
 `bind()`을 쓸 때 주의해야 할 것 : 포트 번호는 낮은 것을 쓰지 말 것.
 [i[Port]] 1024번 아래의 모든 포트는 예약되어 있다(슈퍼유저가 아닌 이상)!
 그 위의 포트 번호는 (다른 프로그램이 이미
-쓰고 있지 않다면) 65535까지 아무 것이나 쓸 수 있다.
+쓰고 있지 않다면) 65535까지 아무 것이나 쓸 수 있습니다.
 
 눈치챌 수 있듯이 때때로 서버를 다시 실행하려고 하면 `bind()`가 실패하고
-[i[Address already in use]] "주소가 이미 사용중입니다.."라고 할 때가 있다.
+[i[Address already in use]] "주소가 이미 사용중입니다.."라고 할 때가 있습니다.
 그것은 연결되었던 소켓 중 일부가 여전히 커널에서 대기중이고 포트를 사용하고
 있다는 것을 의미한다. 여러분은 그것이 정리될 때까지 1분 정도를 기다리거나
-당신의 프로그램이 포트를 재사용할 수 있도록 하는 코드를 넣을 수도 있다.
+당신의 프로그램이 포트를 재사용할 수 있도록 하는 코드를 넣을 수도 있습니다.
 
 [i[`setsockopt()` function]]
 [i[`SO_REUSEADDR` macro]]

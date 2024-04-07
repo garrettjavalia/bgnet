@@ -43,7 +43,7 @@ ISBN [flr[978-0321637734|advunix]].
 
 [i[References-->web-based]<]
 
-인터넷에는 아래와 같은 정보가 있다.
+인터넷에는 아래와 같은 정보가 있습니다.
 
 **[fl[BSD Sockets: A Quick And Dirty
 Primer|https://cis.temple.edu/~giorgio/old/cis307s96/readings/docs/sockets.html]]**
