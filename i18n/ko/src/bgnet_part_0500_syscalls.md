@@ -94,9 +94,9 @@ freeaddrinfo(servinfo); // 연결리스트를 해제
 `AI_PASSIVE`도 볼 수 있습니다. 이것은 `getaddrinfo()`에게 소켓 구조체에
 내 로컬 호스트의 주소를 할당해달라고 말해줍니다. 이것은 여러분이 하드코딩할 필요를
 없애주기에 좋습니다. (아니면 위에서 `NULL`을 넣은 `getaddrinfo()`의 첫 번째
-매개변수에 특정한 주소를 넣을 수 있습니다. )
+매개변수에 특정한 주소를 넣을 수 있습니다.)
 
-이렇게 함수를 호출한다. 오류가 있다면(`getaddrinfo()`이 0이 아닌 값을 돌려준다면)
+이렇게 함수를 호출합니다. 오류가 있다면(`getaddrinfo()`이 0이 아닌 값을 돌려준다면)
 보다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있습니다. 만약 모든
 것이 제대로 동작한다면 `servinfo`는 각각이 우리가 나중에 쓸 수 있는
 `struct sockaddr`나 비슷한 것을 가진 `struct addrinfo`의 연결리스트를 가리킬
@@ -130,11 +130,11 @@ status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 
 `servinfo`은 모든 종류의 주소 정보를 가진 연결리스트라고 계속 이야기하고 있습니다.
 이 정보를 보기 위한 짧은 시연 프로그램을 작성해보자. [flx[이 짧은 프로그램|showip.c]]
-은 여러분이 명령줄에 적는 호스트의 IP주소들을 출력한다.
+은 여러분이 명령줄에 적는 호스트의 IP주소들을 출력합니다.
 
 ```{.c .numberLines}
 /*
-** showip.c -- 명령줄에서 주어진 호스트의 주소들을 출력한다.
+** showip.c -- 명령줄에서 주어진 호스트의 주소들을 출력합니다.
 */
 
 #include <stdio.h>
@@ -182,23 +182,23 @@ int main(int argc, char *argv[])
             ipver = "IPv6";
         }
 
-        // IP주소를 문자열로 변환하고 출력한다.
+        // IP주소를 문자열로 변환하고 출력합니다.
         inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
         printf("  %s: %s\n", ipver, ipstr);
     }
 
-    freeaddrinfo(res); // 연결 목록을 해제한다.
+    freeaddrinfo(res); // 연결 목록을 해제합니다.
 
     return 0;
 }
 ```
 
 보다시피 이 코드는 여러분이 명령줄에 넘기는 것이 무엇이든 `getaddrinfo()`을
-호출한다. 그리고 `res`에 연결목록의 포인터를 넘겨줍니다. 그래서 우리는
+호출합니다. 그리고 `res`에 연결목록의 포인터를 넘겨줍니다. 그래서 우리는
 이 목록을 순회해서 출력하거나 다른 일을 할 수 있습니다.
 
 (저 예제코드에는 IP 버전에 따라 다른 종류의 `struct sockaddr`을 처리해야 하는
-흉한 부분이 있습니다. 그 점에 대해서 사과한다. 그러나 더 나은 방법이 있는지는 모르겠다.)
+흉한 부분이 있습니다. 그 점에 대해서 사과합니다. 그러나 더 나은 방법이 있는지는 모르겠다.)
 
 실행 예제! 모두가 스크린샷을 좋아합니다.
 
@@ -221,7 +221,7 @@ IP addresses for ipv6.example.com:
 ## `socket()`---파일 설명자를 받아오라! {#socket}
 
 더 이상 미룰 수가 없을 듯 하다. 이제 [i[`socket()` function]] `socket()`
-시스템 콜에 대해서 이야기해야 한다. 개요는 이렇다.
+시스템 콜에 대해서 이야기해야 합니다. 개요는 이렇다.
 
 ```{.c}
 #include <sys/types.h>
@@ -259,7 +259,7 @@ getaddrinfo("www.example.com", "http", &hints, &res);
 
 // 다시 말하지면 원래는 (이 안내서의 예제들이 하듯이) 첫 번째 것이 좋다고
 // 가정하는 대신 getaddrinfo()에 대해서 오류 확인을 하고
-// "res"링크드 리스트를 순회해야 한다.
+// "res"링크드 리스트를 순회해야 합니다.
 // client/server절의 진짜 예제들을 참고하세요.
 
 s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -271,7 +271,7 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
 좋습니다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것이다.
 실제로 쓰기 위해서는 안내서를 더 읽고 이것이 동작하게 하기 위한 시스템 호출을
-더 해야 한다.
+더 해야 합니다.
 
 ## `bind()`---나는 어떤 포트에 있는가? {#bind}
 
@@ -279,8 +279,8 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 싶을 것이다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
 으로 특정 포트에서 들어오는 연결을 듣고자(listen) 할 때 이루어진다. ---다중 사용자
 네트워크 게임들은 "192.168.5.10의 3490포트에 연결합니다"라고 말할 때 이런
-작업을 한다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
-연관짓기 위해서 사용한다. 만약 여러분이 [i[`connect()`] function] `connect()`만
+작업을 합니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
+연관짓기 위해서 사용합니다. 만약 여러분이 [i[`connect()`] function] `connect()`만
 할 생각이라면 `bind()`는 불필요하다. 그러나 재미를 위해 읽어두자.
 
 이것이 `bind()` 시스템 콜의 개요다.
@@ -316,7 +316,7 @@ getaddrinfo(NULL, "3490", &hints, &res);
 
 sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
-// getaddrinfo()에 넘겼던 포트에 바인드한다.
+// getaddrinfo()에 넘겼던 포트에 바인드합니다.
 
 bind(sockfd, res->ai_addr, res->ai_addrlen);
 ```
@@ -325,7 +325,7 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 알려줍니다. 특정한 로컬 IP주소에 바인드하고싶다면 `AI_PASSIVE`을 버리고
 `getaddrinfo()`의 첫 번째 인수로 IP주소를 넣으라.
 
-`bind()`도 오류가 발생하면 `-1`을 돌려주고 `errno`을 오류의 값으로 설정한다.
+`bind()`도 오류가 발생하면 `-1`을 돌려주고 `errno`을 오류의 값으로 설정합니다.
 
 많은 오래된 코드들이 `bind()`을 호출하기 전에 `struct sockaddr_in`을 직접
 채워넣는다. 이것은 분명히 IPv4 전용이지만 같은 일을 IPv6에 대해서도 못 할
@@ -362,7 +362,7 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 눈치챌 수 있듯이 때때로 서버를 다시 실행하려고 하면 `bind()`가 실패하고
 [i[Address already in use]] "주소가 이미 사용중입니다.."라고 할 때가 있습니다.
 그것은 연결되었던 소켓 중 일부가 여전히 커널에서 대기중이고 포트를 사용하고
-있다는 것을 의미한다. 여러분은 그것이 정리될 때까지 1분 정도를 기다리거나
+있다는 것을 의미합니다. 여러분은 그것이 정리될 때까지 1분 정도를 기다리거나
 당신의 프로그램이 포트를 재사용할 수 있도록 하는 코드를 넣을 수도 있습니다.
 
 [i[`setsockopt()` function]]
