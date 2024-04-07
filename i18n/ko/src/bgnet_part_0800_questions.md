@@ -131,7 +131,7 @@ if ((err = select(fdmax+1, &readfds, NULL, NULL, NULL)) == -1) {
 **`recv()`에 대한 호출에 시간제한을 적용하려면 어떻게 해야하는가?**
 
 [i[`select()` function]] [`select()`](#select)를 [i[`recv()` function-->timeout]]사용하라!
-그것이 읽어들이려는 소켓 설명자에 시간제한 매개변수를 지정하라 수 있게 해준다.
+그것이 읽어들이려는 소켓 설명자에 시간제한 매개변수를 지정하라 수 있게 해줍니다.
 아니면 모든 기능을 아래와 같이 하나의 함수에 감쌀 수 있습니다.
 
 ```{.c .numberLines}
