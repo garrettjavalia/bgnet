@@ -25,7 +25,6 @@ from calls to `getaddrinfo()` succeed and return a valid entry in the
 linked list. Both of these situations are properly addressed in the
 stand-alone programs, though, so use those as a model.)_
 
-
 ## `getaddrinfo()`---Prepare to launch!
 
 [i[`getaddrinfo()` function]] This is a real workhorse of a function
@@ -38,7 +37,7 @@ information by hand into a `struct sockaddr_in`, and use that in your
 calls.
 
 This is no longer necessary, thankfully. (Nor is it desirable, if you
-want to write code that works for both IPv4 and IPv6!)  In these modern
+want to write code that works for both IPv4 and IPv6!) In these modern
 times, you now have the function `getaddrinfo()` that does all kinds of
 good stuff for you, including DNS and service name lookups, and fills
 out the `struct`s you need, besides!
@@ -232,7 +231,6 @@ Now that we have that under control, we'll use the results we get from
 `getaddrinfo()` to pass to other socket functions and, at long last, get
 our network connection established! Keep reading!
 
-
 ## `socket()`---Get the File Descriptor! {#socket}
 
 I guess I can put it off no longer---I have to talk about the
@@ -242,7 +240,7 @@ I guess I can put it off no longer---I have to talk about the
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int socket(int domain, int type, int protocol); 
+int socket(int domain, int type, int protocol);
 ```
 
 But what are these arguments? They allow you to say what kind of socket
@@ -295,7 +293,6 @@ details, and a quick note on using `errno` in multithreaded programs).
 Fine, fine, fine, but what good is this socket? The answer is that it's
 really no good by itself, and you need to read on and make more system
 calls for it to make any sense.
-
 
 ## `bind()`---What port am I on? {#bind}
 
@@ -381,7 +378,7 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 
 In the above code, you could also assign `INADDR_ANY` to the `s_addr`
 field if you wanted to bind to your local IP address (like the
-`AI_PASSIVE` flag, above).  The IPv6 version of `INADDR_ANY` is a global
+`AI_PASSIVE` flag, above). The IPv6 version of `INADDR_ANY` is a global
 variable `in6addr_any` that is assigned into the `sin6_addr` field of
 your `struct sockaddr_in6`. (There is also a macro `IN6ADDR_ANY_INIT`
 that you can use in a variable initializer.)
@@ -400,7 +397,7 @@ can either wait for it to clear (a minute or so), or add code to your
 program allowing it to reuse the port, like this:
 
 [i[`setsockopt()` function]]
- [i[`SO_REUSEADDR` macro]]
+[i[`SO_REUSEADDR` macro]]
 
 ```{.c .numberLines}
 int yes=1;
@@ -410,7 +407,7 @@ int yes=1;
 if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
     perror("setsockopt");
     exit(1);
-} 
+}
 ```
 
 [i[`bind()` function]] One small extra final note about `bind()`: there
@@ -420,7 +417,6 @@ don't care what your local port is (as is the case with `telnet` where
 you only care about the remote port), you can simply call `connect()`,
 it'll check to see if the socket is unbound, and will `bind()` it to an
 unused local port if necessary.
-
 
 ## `connect()`---Hey, you! {#connect}
 
@@ -440,7 +436,7 @@ The `connect()` call is as follows:
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int connect(int sockfd, struct sockaddr *serv_addr, int addrlen); 
+int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 ```
 
 `sockfd` is our friendly neighborhood socket file descriptor, as
@@ -490,7 +486,6 @@ about our local port number; we only care where we're going (the remote
 port). The kernel will choose a local port for us, and the site we
 connect to will automatically get this information from us. No worries.
 
-
 ## `listen()`---Will somebody please call me? {#listen}
 
 [i[`listen()` function]] OK, time for a change of pace. What if you
@@ -502,11 +497,11 @@ function]] `accept()` (see below).
 The `listen()` call is fairly simple, but requires a bit of explanation:
 
 ```{.c}
-int listen(int sockfd, int backlog); 
+int listen(int sockfd, int backlog);
 ```
 
 `sockfd` is the usual socket file descriptor from the `socket()` system
-call.  [i[`listen()` function-->backlog]] `backlog` is the number of
+call. [i[`listen()` function-->backlog]] `backlog` is the number of
 connections allowed on the incoming queue. What does that mean? Well,
 incoming connections are going to wait in this queue until you
 `accept()` them (see below) and this is the limit on how many can queue
@@ -517,7 +512,7 @@ Again, as per usual, `listen()` returns `-1` and sets `errno` on error.
 
 Well, as you can probably imagine, we need to call `bind()` before we
 call `listen()` so that the server is running on a specific port. (You
-have to be able to tell your buddies which port to connect to!)  So if
+have to be able to tell your buddies which port to connect to!) So if
 you're going to be listening for incoming connections, the sequence of
 system calls you'll make is:
 
@@ -526,14 +521,13 @@ getaddrinfo();
 socket();
 bind();
 listen();
-/* accept() goes here */ 
+/* accept() goes here */
 ```
 
 I'll just leave that in the place of sample code, since it's fairly
 self-explanatory. (The code in the `accept()` section, below, is more
 complete.) The really tricky part of this whole sha-bang is the call to
 `accept()`.
-
 
 ## `accept()`---"Thank you for calling port 3490."
 
@@ -546,7 +540,7 @@ to you a _brand new socket file descriptor_ to use for this single
 connection! That's right, suddenly you have _two socket file
 descriptors_ for the price of one! The original one is still listening
 for more new connections, and the newly created one is finally ready to
-`send()` and `recv()`. We're there! 
+`send()` and `recv()`. We're there!
 
 The call is as follows:
 
@@ -554,7 +548,7 @@ The call is as follows:
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen); 
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 ```
 
 `sockfd` is the `listen()`ing socket descriptor. Easy enough. `addr`
@@ -621,7 +615,6 @@ Again, note that we will use the socket descriptor `new_fd` for all
 connection ever, you can `close()` the listening `sockfd` in order to
 prevent more incoming connections on the same port, if you so desire.
 
-
 ## `send()` and `recv()`---Talk to me, baby! {#sendrecv}
 
 These two functions are for communicating over stream sockets or
@@ -632,13 +625,13 @@ datagram sockets, you'll need to see the section on [`sendto()` and
 [i[`send()` function]] The `send()` call:
 
 ```{.c}
-int send(int sockfd, const void *msg, int len, int flags); 
+int send(int sockfd, const void *msg, int len, int flags);
 ```
 
 `sockfd` is the socket descriptor you want to send data to (whether it's
 the one returned by `socket()` or the one you got with `accept()`).
 `msg` is a pointer to the data you want to send, and `len` is the length
-of that data in bytes.  Just set `flags` to `0`. (See the `send()` man
+of that data in bytes. Just set `flags` to `0`. (See the `send()` man
 page for more information concerning flags.)
 
 Some sample code might be:
@@ -653,17 +646,17 @@ len = strlen(msg);
 bytes_sent = send(sockfd, msg, len, 0);
 .
 .
-. 
+.
 ```
 
 `send()` returns the number of bytes actually sent out---_this might be
-less than the number you told it to send!_  See, sometimes you tell it
+less than the number you told it to send!_ See, sometimes you tell it
 to send a whole gob of data and it just can't handle it. It'll fire off
 as much of the data as it can, and trust you to send the rest later.
 Remember, if the value returned by `send()` doesn't match the value in
 `len`, it's up to you to send the rest of the string. The good news is
 this: if the packet is small (less than 1K or so) it will _probably_
-manage to send the whole thing all in one go.  Again, `-1` is returned
+manage to send the whole thing all in one go. Again, `-1` is returned
 on error, and `errno` is set to the error number.
 
 [i[`recv()` function]] The `recv()` call is similar in many respects:
@@ -687,7 +680,6 @@ side has closed the connection on you! A return value of `0` is
 There, that was easy, wasn't it? You can now pass data back and forth on
 stream sockets! Whee! You're a Unix Network Programmer!
 
-
 ## `sendto()` and `recvfrom()`---Talk to me, DGRAM-style {#sendtorecv}
 
 [i[`SOCK_DGRAM` macro]] "This is all fine and dandy," I hear you saying,
@@ -700,7 +692,7 @@ right! The destination address! Here's the scoop:
 
 ```{.c}
 int sendto(int sockfd, const void *msg, int len, unsigned int flags,
-           const struct sockaddr *to, socklen_t tolen); 
+           const struct sockaddr *to, socklen_t tolen);
 ```
 
 As you can see, this call is basically the same as the call to `send()`
@@ -724,7 +716,7 @@ Equally similar are `recv()` and [i[`recvfrom()` function]]
 
 ```{.c}
 int recvfrom(int sockfd, void *buf, int len, unsigned int flags,
-             struct sockaddr *from, int *fromlen); 
+             struct sockaddr *from, int *fromlen);
 ```
 
 Again, this is just like `recv()` with the addition of a couple fields.
@@ -756,7 +748,6 @@ Remember, if you [i[`connect()` function-->on datagram sockets]]
 datagram socket and the packets still use UDP, but the socket interface
 will automatically add the destination and source information for you.
 
-
 ## `close()` and `shutdown()`---Get outta my face!
 
 Whew! You've been `send()`ing and `recv()`ing data all day long, and
@@ -765,7 +756,7 @@ descriptor. This is easy. You can just use the regular Unix file
 descriptor [i[`close()` function]] `close()` function:
 
 ```{.c}
-close(sockfd); 
+close(sockfd);
 ```
 
 This will prevent any more reads and writes to the socket. Anyone
@@ -778,14 +769,14 @@ allows you to cut off communication in a certain direction, or both ways
 (just like `close()` does). Synopsis:
 
 ```{.c}
-int shutdown(int sockfd, int how); 
+int shutdown(int sockfd, int how);
 ```
 
 `sockfd` is the socket file descriptor you want to shutdown, and `how`
 is one of the following:
 
 | `how` | Effect                                                     |
-|:-----:|------------------------------------------------------------|
+| :---: | ---------------------------------------------------------- |
 |  `0`  | Further receives are disallowed                            |
 |  `1`  | Further sends are disallowed                               |
 |  `2`  | Further sends and receives are disallowed (like `close()`) |
@@ -808,7 +799,6 @@ Nothing to it.
 [i[Winsock]] Winsock that you should call [i[`closesocket()` function]]
 `closesocket()` instead of `close()`.)
 
-
 ## `getpeername()`---Who are you?
 
 [i[`getpeername()` function]] This function is so easy.
@@ -822,7 +812,7 @@ connected stream socket. The synopsis:
 ```{.c}
 #include <sys/socket.h>
 
-int getpeername(int sockfd, struct sockaddr *addr, int *addrlen); 
+int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
 ```
 
 `sockfd` is the descriptor of the connected stream socket, `addr` is a
@@ -841,7 +831,6 @@ computer is running an ident daemon, this is possible. This, however, is
 beyond the scope of this document. Check out [flrfc[RFC 1413|1413]] for
 more info.)
 
-
 ## `gethostname()`---Who am I?
 
 [i[`gethostname()` function]] Even easier than `getpeername()` is the
@@ -856,7 +845,7 @@ pertain to socket programming. Anyway, here's the breakdown:
 ```{.c}
 #include <unistd.h>
 
-int gethostname(char *hostname, size_t size); 
+int gethostname(char *hostname, size_t size);
 ```
 
 The arguments are simple: `hostname` is a pointer to an array of chars that will

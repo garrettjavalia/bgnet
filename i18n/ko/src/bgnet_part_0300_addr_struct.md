@@ -325,7 +325,7 @@ struct sockaddr {
 ("Internet"의 "in")을 만들었습니다.
 
 그리고 _이것이 중요한 부분입니다_: `struct sockaddr_in`에 대한 포인터는
-`struct sockaddr`에 대한 포인터르 형변환 될 수 있고 그 반대도 가능합니다.
+`struct sockaddr`에 대한 포인터로 형변환 될 수 있고 그 반대도 가능합니다.
 그래서 `connect()`가 `struct sockaddr*`을 원하더라도 `struct sockaddr_in`을
 사용할 수 있고 마지막에 형변환만 하면 되는 것입니다!
 

@@ -271,21 +271,22 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 오류가 있으면 -1을 돌려줍니다. 전역 변수인 `errno`가 오류의 값으로 설정됩니다.
 (자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하세요.)
 
-좋습니다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것입니다.
+좋습니다. 그러면 이제 이 소켓을 어디에 쓸 수 있을까요? 정답은 아직 못 쓴다는 것입니다.
 실제로 쓰기 위해서는 안내서를 더 읽고 이것이 동작하게 하기 위한 시스템 호출을
 더 해야 합니다.
 
-## `bind()`---나는 어떤 포트에 있는가? {#bind}
+## `bind()`---나는 어떤 포트에 있을까? {#bind}
 
-[i[`bind()` function]] 소켓을 가지면 여러분의 기계의 [i[Port]] 포트에 연동하고
+[i[`bind()` function]] 소켓을 가지면 여러분의 장치의 [i[Port]] 포트에 연동하고
 싶을 것입니다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
-으로 특정 포트에서 들어오는 연결을 듣고자(listen) 할 때 이루어진다. ---다중 사용자
+으로 특정 포트에서 들어오는 연결을 듣고자(listen) 할 때 이루어집니다. ---다중 사용자
 네트워크 게임들은 "192.168.5.10의 3490포트에 연결합니다"라고 말할 때 이런
-작업을 합니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
+작업을 합니다.)(역자 주 : 90년대~2000년대 초의 멀티플레이어 게임들이 접속시에
+이런 문구를 흔히 보여줬습니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
 연관짓기 위해서 사용합니다. 만약 여러분이 [i[`connect()`] function] `connect()`만
-할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어두자.
+할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어봅시다.
 
-이것이 `bind()` 시스템 콜의 개요다.
+이것이 `bind()` 시스템 콜의 개요입니다.
 
 ```{.c}
 #include <sys/types.h>
@@ -298,19 +299,19 @@ int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 여러분의 주소, 말하자면 포트와 [i[IP address]] IP주소를 가진 `struct sockaddr`
 에 대한 포인터입니다. `addrlen`은 그 주소의 바이트 단위 길이입니다.
 
-으엑. 한 번에 많이 배웠다. 프로그램이 실행되는 호스트의 3490번 포트에
-소켓을 바인드하는 예제를 보자.
+으엑. 한 번에 많이 배웠습니다. 프로그램이 실행되는 호스트의 3490번 포트에
+소켓을 바인드하는 예제를 봅시다.
 
 ```{.c .numberLines}
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()으로 구조체에 정보를 불러온다.
+// 먼저 getaddrinfo()으로 구조체에 정보를 불러옵니다
 
 memset(&hints, 0, sizeof hints);
-hints.ai_family = AF_UNSPEC;  // IPv4나 IPv6 중 아무 것이나 쓴다
+hints.ai_family = AF_UNSPEC;  // IPv4나 IPv6 중 아무 것이나 씁니다
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;     // IP는 나의 아이피로 채운다.
+hints.ai_flags = AI_PASSIVE;     // IP는 나의 아이피로 채웁니다
 
 getaddrinfo(NULL, "3490", &hints, &res);
 
@@ -325,17 +326,17 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 
 `AI_PASSIVE`플래그를 써서 프로그램에게 실행중인 호스트의 IP에 바인드하라고
 알려줍니다. 특정한 로컬 IP주소에 바인드하고싶다면 `AI_PASSIVE`을 버리고
-`getaddrinfo()`의 첫 번째 인수로 IP주소를 넣으라.
+`getaddrinfo()`의 첫 번째 인수로 IP주소를 넣으세요.
 
 `bind()`도 오류가 발생하면 `-1`을 돌려주고 `errno`을 오류의 값으로 설정합니다.
 
 많은 오래된 코드들이 `bind()`을 호출하기 전에 `struct sockaddr_in`을 직접
-채워넣는다. 이것은 분명히 IPv4 전용이지만 같은 일을 IPv6에 대해서도 못 할
-이유는 없다. 단지 `getaddrinfo()`을 쓰는 편이 일반적으로 더 쉽다. 어쨌든
+채워넣습니다. 이것은 분명히 IPv4 전용이지만 같은 일을 IPv6에 대해서도 못 할
+이유는 없습니다. 단지 `getaddrinfo()`을 쓰는 편이 일반적으로 더 쉽습니다. 어쨌든
 예전 코드는 이런 방식입니다.
 
 ```{.c .numberLines}
-// !!! 이것은 예전 방식이다 !!!
+// !!! 이것은 예전 방식입니다 !!!
 
 int sockfd;
 struct sockaddr_in my_addr;
@@ -356,8 +357,8 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 `in6addr_any`입니다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
 있습니다.)
 
-`bind()`을 쓸 때 주의해야 할 것 : 포트 번호는 낮은 것을 쓰지 말 것.
-[i[Port]] 1024번 아래의 모든 포트는 예약되어 있다(슈퍼유저가 아닌 이상)!
+`bind()`를 호출할 때 주의해야 할 점 : 포트 번호는 낮은 것을 쓰지 마세요.
+[i[Port]] 1024번 아래의 모든 포트는 예약되어 있습니다(슈퍼유저가 아닌 이상)!
 그 위의 포트 번호는 (다른 프로그램이 이미
 쓰고 있지 않다면) 65535까지 아무 것이나 쓸 수 있습니다.
 
@@ -381,17 +382,17 @@ if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
 }
 ```
 
-[i[`bind()` function]] `bind()`에 대해서 한마디 더: 이 함수를 호출할 필요가
+[i[`bind()` function]] `bind()`에 대해서 한마디 더 : 이 함수를 호출할 필요가
 전혀 없는 경우도 있습니다. [i[`connect()` function]] `connect()`를 호출해서
 원격 장치에 연결하려고 하고, 로컬 포트에 대해서는 신경쓰지 않는다면(`telnet`의
-경우 처럼 원격지 포트만 신경쓰는 경우) `connect()`가 자동으로 소켓이 바인드되지
+경우처럼 원격지 포트만 신경쓰는 경우) `connect()`가 자동으로 소켓이 바인드되지
 않았는지 확인하고 필요하다면 사용하지 않은 로컬 포트에 `bind()`해줄 것입니다.
 
-## `connect()`---이봐, 안녕! {#connect}
+## `connect()`---거기 안녕! {#connect}
 
 [i[`connect()` function]] 몇 분만 여러분이 텔넷 응용프로그램이 되었다고 생각해봅시다.
 여러분의 사용자들이 소켓 파일 설명자를 얻기 위해서 여러분에게 명령을 내립니다
-(영화 [i[TRON]] _트론_ 에서처럼요). 여러분은 그에 따라 `socket()`을 호출합니다.
+(영화 [i[TRON]] *트론*에서처럼요). 여러분은 그에 따라 `socket()`을 호출합니다.
 다음으로 사용자가 여러분에게 "`10.12.110.57`"의 "`23`"번 포트(텔넷 표준 포트)에
 연결하라고 합니다. 어떻게 해야할까요?
 
@@ -415,14 +416,14 @@ int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 
 모든 정보는 멋진 `getaddrinfo()`호출의 결과에서 추출할 수 있습니다.
 
-이해가 되기 시작합니까? 여기서는 대답을 들을 수 없으니 그럴 것이라 생각하겠습니다.
+이해가 되기 시작하나요? 저는 대답을 들을 수 없으니 그럴 것이라 생각하겠습니다.
 "`www.example.com`"의 `3490`포트로 소켓 연결을 만드는 예제를 살펴봅시다:
 
 ```{.c .numberLines}
 struct addrinfo hints, *res;
 int sockfd;
 
-// getaddrinfo()으로 주소 구조체를 채웁니다:
+// getaddrinfo()으로 주소 구조체를 채웁니다
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;
@@ -430,7 +431,7 @@ hints.ai_socktype = SOCK_STREAM;
 
 getaddrinfo("www.example.com", "3490", &hints, &res);
 
-// 소켓을 만듭니다:
+// 소켓을 만듭니다
 
 sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
@@ -443,7 +444,7 @@ connect(sockfd, res->ai_addr, res->ai_addrlen);
 을 직접 채워넣었습니다. 그렇게 하고싶다면 해도 됩니다. 위에 있는 [`bind()` 절](#bind)
 에서 비슷한 내용을 참고하세요.
 
-`connect()`의 복귀값을 확인하는 것을 잊지 마세요. 오류가 발생하면 `-1`을
+`connect()`의 복귀값을 확인하는 것을 잊지마세요. 오류가 발생하면 `-1`을
 돌려주고 `errno`변수를 설정할 것입니다.
 
 [i[`bind()` function-->implicit]]
@@ -453,11 +454,11 @@ connect(sockfd, res->ai_addr, res->ai_addrlen);
 (원격지 포트). 커널이 우리 대신 로컬 포트를 고를 것입니다. 우리가 접속하는
 사이트는 이 정보를 자동으로 우리에게서 얻어냅니다. 신경쓰실 필요가 없습니다.
 
-## `listen()`---누가 연락 좀 해주실래요? {#listen}
+## `listen()`---누가 연락 좀 해줄래요? {#listen}
 
 [i[`listen()` function]] 이제 흐름이 변할 때입니다. 우리가 원격지 호스트에
-접속하고 싶지 않은 경우라면 어떻게 하시겠습니까? 재미로 하는 말이지만, 들어오는
-연결을 기다리고 그것을 어떤 방식으로 다루고자 한다면 어떻게 하시겠습니까?
+접속하고 싶지 않은 경우라면 어떻게 하시겠습니까? 간단히 말해서 들어오는
+연결을 기다리고 그것을 어떤 방식으로 처리해야 한다면 어떻게 하시겠습니까?
 그 과정은 두 단계입니다. 먼저 `listen()`를 호출하고, [i[`accept()`
 function]] `accept()`를 씁니다.(아래를 참고하세요.)
 
@@ -487,26 +488,26 @@ getaddrinfo();
 socket();
 bind();
 listen();
-/* accept()는 아래에 온다 */
+/* accept()는 아래에 옵니다 */
 ```
 
-I'll just leave that in the place of sample code, since it's fairly
-self-explanatory. (The code in the `accept()` section, below, is more
-complete.) The really tricky part of this whole sha-bang is the call to
-`accept()`.
+저 코드는 충분히 자기설명적이므로 저것을 예제 코드의 어딘가에 넣어두기만 하겠습니다.
+(`accept()` 절의 코드는 좀 더 완전합니다.) 정말로 복잡한 부분은 `accept()`
+을 호출하는 부분입니다.
 
-## `accept()`---"3490포트에 접속해주셔서 감사합니다.."
+## `accept()`---"3490포트에 접속해주셔서 감사합니다."
 
 [i[`accept()` function]] 각오하세요! `accept()`함수는 조금 이상합니다.
-이렇게 돌아갑니다: 아주 먼 곳에 있는 누군가가 여러분의 장치에 `connect()`
+지금부터 생길 일은 다음과 같습니다. 아주 먼 곳에 있는 누군가가 여러분의 장치에 `connect()`
 함수로 연결하려고 합니다. 여러분은 특정 포트에서 `listen()`을 실행하고
 있습니다. 그들의 연결은 `accept()`로 받아들여질 때까지 대기열에 쌓일 것입니다.
 여러분은 `accept()`을 해서 대기중인 연결을 받아들이겠다고 알려줍니다.
 `accept()`는 이 연결만을 위해서 쓸 _완전히 새로운 소켓 파일 설명자_ 를 돌려줄 것입니다.
-그렇습니다! 갑자기 `send()`와 `recv()`를 쓸 수 있는 _두 개_ 의 소켓 파일을
-가지게 된 것입니다.
+그렇습니다! 갑자기 소켓 하나 가격에 두 개의소켓을 가지게 되었습니다.
+원래의 소켓은 여전히 새 연결들을 듣고 있고, 새롭게 만들어진 것은 `send()`와 `recv()`작업을
+위해 준비되었습니다. 이제 다 됐군요!
 
-호출은 아래와 같이 합니다:
+호출은 아래와 같이 합니다.
 
 ```{.c}
 #include <sys/types.h>
@@ -522,10 +523,11 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 sockaddr_storage을 `accept()`에 넘기기 전에 `sizeof(struct
 sockaddr_storage)`으로 설정되어야 하는 로컬 정수 변수입니다.
 `accept()`는 `addr`에 `addrlen`의 크기 이상의 바이트를 적지 않을 것입니다.
-예상하셨습니까? `accept()`도 오류가 발생하면 `-1`을 돌려주고 `errno`에
+알고계십니까? `accept()`도 오류가 발생하면 `-1`을 돌려주고 `errno`에
 값을 설정합니다. 전혀 예상하지 못하셨으리라 생각합니다.
 
-전과 마찬가지로 한 번에 많은 내용입니다. 여러분의 독서를 위한 예제 코드 조각입니다:
+전과 마찬가지로 한 번에 이해하기에는 많은 내용입니다.
+그래서 여러분의 독서를 위한 예제 코드 조각이 있습니다.
 
 ```{.c .numberLines}
 #include <string.h>
@@ -534,7 +536,7 @@ sockaddr_storage)`으로 설정되어야 하는 로컬 정수 변수입니다.
 #include <netdb.h>
 
 #define MYPORT "3490"  // 사용자들이 접속할 포트
-#define BACKLOG 10     // 대기열에 몇 개의 연결이 대기할 수 있는가
+#define BACKLOG 10     // 대기열에 대기할 수 있는 연결의 갯수
 
 int main(void)
 {
@@ -545,22 +547,22 @@ int main(void)
 
     // !! 이 호출들에 대한 오류 확인을 잊지 마세요 !!
 
-    // getaddrinfo()으로 정보를 채워넣습니다:
+    // getaddrinfo()으로 정보를 채워넣습니다
 
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;  // IPv4또는 IPv6, 아무것이나 씁니다.
+    hints.ai_family = AF_UNSPEC;  // IPv4또는 IPv6, 아무것이나 씁니다
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;     // 나를 위해 자동으로 내 IP를 채워넣을 것.
+    hints.ai_flags = AI_PASSIVE;     // 나를 위해 자동으로 내 IP를 채워넣습니다
 
     getaddrinfo(NULL, MYPORT, &hints, &res);
 
-    // 소켓을 만들고, 바인드하고, 듣기 시작:
+    // 소켓을 만들고, 바인드하고, 듣기 시작
 
     sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     bind(sockfd, res->ai_addr, res->ai_addrlen);
     listen(sockfd, BACKLOG);
 
-    // 들어오는 연결을 받습니다:
+    // 들어오는 연결을 받습니다
 
     addr_size = sizeof their_addr;
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
@@ -571,15 +573,15 @@ int main(void)
     .
 ```
 
-다시 말하지만 모든 `send()`와 `recv()` 호출에 대해서 `new_fd`를 사용할
-것입니다. 만약 단 한 개의 연결만을 받아들이길 원한다면 추가적인 연결이 같은
+다시 말씀드리지만 모든 `send()`와 `recv()` 호출에 대해서 `new_fd`를 사용할
+것입니다. 만약 단 한 개의 연결만을 받아들이길 원하신다면 추가적인 연결이 같은
 포트를 통해 들어오는 것을 막기 위해서 `sockfd`을 `close()`처리할 수 있습니다.
 
 ## `send()`와 `recv()`---Talk to me, baby! {#sendrecv}
 
-(역자 주 : Talk to me, baby!는 Elmore James의 노래입니다. 그러나 원저자의 의도가 이것인지 확실하지는 않습니다.)
+(역자 주 : Talk to me, baby!는 Elmore James의 노래입니다.)
 이 두 함수들은 스트림 소켓이나 연결된 데이터그램 소켓을 통해 통신하기 위해서 쓰입니다.
-일반적인 연결되지 않은 데이터그램 소켓을 쓰고싶다면 [`sendto()`과
+일반적인 연결되지 않은 데이터그램 소켓을 쓰고싶다면 [`sendto()`와
 `recvfrom()`](#sendtorecv) 절을 보시면 됩니다.
 
 [i[`send()` function]] `send()` 함수:
@@ -589,9 +591,10 @@ int send(int sockfd, const void *msg, int len, int flags);
 ```
 
 `sockfd` 은 데이터를 보내고 싶은 소켓 설명자(`socket()`으로 만들었든 `accept()`로 만들었든)입니다.
-`msg`는 여러분이 보낼 데이터에 대한 포인터이며, `len`은 그 길이입니다.
+`msg`는 여러분이 보낼 데이터에 대한 포인터이며, `len`은 그 길이입니다. `flags`는 그냥 `0`으로
+설정하세요. (flags에 대해 더 자세히 알고싶다면 `send()`의 맨페이지를 보세요.)
 
-예제 코드는 이렇게 될 수 있겠습니다:
+예제 코드는 이렇게 될 수 있겠습니다.
 
 ```{.c .numberLines}
 char *msg = "Beej was here!";
@@ -606,7 +609,13 @@ bytes_sent = send(sockfd, msg, len, 0);
 .
 ```
 
-한 방에 모든 것을 보냈습니다. 다시 강조하지만 오류가 발생하면 `-1`이 반환되고
+`send()`는 실제로 전송한 바이트의 수를 돌려줍니다. _이 값은 여러분이 보내라고 말한
+수보다 적을 수 있습니다!_ 때때로 엄청난 크기의 데이터를 전송하라고 요청하면
+그것이 다 처리되지 못할 수 있는 것입니다. 장치는 전송 가능한 최대한을 보내고,
+나머지는 여러분이 나중에 다시 보낼 것이라고 믿습니다. `send()`가 돌려준 값이
+`len`과 일치하지 않는다면 문자열의 나머지를 전송하는 일은 여러분에게 달렸음을
+기억하세요. 이것에 관한 좋은 소식은 패킷이 작다면(1kb 미만 정도) 그것은 _아마도_
+한 번에 모든 것을 보낼 수 있으리라는 점입니다. 다시 강조하지만 오류가 발생하면 `-1`이 반환되고
 `errno`가 오류 번호로 설정됩니다.
 
 [i[`recv()` function]] `recv()`함수는 많은 면에서 유사합니다:
@@ -622,22 +631,22 @@ int recv(int sockfd, void *buf, int len, int flags);
 `recv()`는 실제로 버퍼에 읽어들인 바이트의 수를 돌려주거나 오류가 발생할 경우 (`errno`
 를 적절한 값으로 설정하고) `-1`을 돌려줍니다.
 
-잠깐! `recv()`는 `0`을 돌려줄 수 있습니다. 이것은 한 가지 의미입니다: 원격지 측에서
-당신에 대한 연결을 닫은 것입니다! 복귀값 `0`은 `recv()`가 연결이 끊어졌음을
+잠깐! `recv()`는 `0`을 돌려줄 수 있습니다. 이것은 한 가지 의미입니다. 원격지 측에서
+여러분에 대한 연결을 닫은 것입니다! 복귀값 `0`은 `recv()`가 연결이 끊어졌음을
 알려주는 방식입니다.
 
-자, 정말 쉽지않습니까? 이제 여러분은 스트림 소켓에서 자료를 주고받을 수 있습니다.
-와! 이제 여러분은 유닉스 네트워크 프로그래머입니다!
+자, 정말 쉽지요? 이제 여러분은 스트림 소켓에서 자료를 주고받을 수 있습니다.
+와! 이제 여러분은 어엿한 유닉스 네트워크 프로그래머입니다!
 
 ## `sendto()`와 `recvfrom()`---Talk to me, DGRAM-방식 {#sendtorecv}
 
 [i[`SOCK_DGRAM` macro]] "이제 다 깔끔하고 좋네요"라고 말씀하시는 소리가
 들립니다. "그렇지만 연결이 없는 데이터그램 소켓은 어떻게 처리하지요?"라고도
-하시는군요. 문제 없습니다, 토모다치여(역자 주 : 원문은 amigo). 딱 맞는 것이
-있습니다.
+하시는군요. 문제 아리마셍, 토모다치요(역자 주 : 원문은 "No problemo, amigo.",
+포르투갈어로 "문제 없습니다, 친구."). 딱 맞는 것이 있습니다.
 
 데이터그램 소켓은 원격지 호스트에 연결되어 있지 않으므로, 패킷을 보낼 때에
-필요한 정보는 조금 다릅니다. 그렇습니다. 목적지 주소가 필요합니다. 이런 식입니다:
+필요한 정보는 조금 다릅니다. 바로 목적지 주소가 필요합니다. 이런 식입니다.
 
 ```{.c}
 int sendto(int sockfd, const void *msg, int len, unsigned int flags,
@@ -646,7 +655,7 @@ int sendto(int sockfd, const void *msg, int len, unsigned int flags,
 
 보시다시피 `send()`와 같지만 두 개의 정보가 더 있습니다. `to`는 목적지의
 [i[IP address]] IP주소와 [i[Port]] 포트를 담은 `struct sockaddr`
-이며(아마도 여러분이 형변환해서 사용하실 `struct sockaddr_in`이나
+에 대한 포인터이며(아마도 여러분이 형변환해서 사용하실 `struct sockaddr_in`이나
 `struct sockaddr_in6` 또는 `struct sockaddr_storage`일 것입니다.)
 `tolen`은 내부적으로는 `int`이며 간단하게 `sizeof *to`나 `sizeof(struct sockaddr_storage)`로
 설정하면 됩니다.
@@ -654,19 +663,19 @@ int sendto(int sockfd, const void *msg, int len, unsigned int flags,
 목적지 주소 구조체를 얻으려면 `getaddrinfo()`이나 아래의 `recvfrom()`을 사용하시거나
 수작업으로 값을 채워넣을 수도 있습니다.
 
-`send()`와 마찬가지로 `sendto()`도 실제로 보낸 바이트 수를 돌려줍니다. (
-그 말은 보내려고 한 바이트의 수보다 적은 수가 돌아올 수도 있다는 의미입니다.)
+`send()`와 마찬가지로 `sendto()`도 실제로 보낸 바이트 수를 돌려줍니다.
+(그 말은 보내려고 한 바이트의 수보다 적은 수가 돌아올 수도 있다는 의미입니다.)
 오류가 발생하면 `-1`을 돌려줍니다.
 
 이와 유사한 관계가 `recv()`과 [i[`recvfrom()` function]] `recvfrom()`입니다.
-`recvfrom()`의 개요는 이렇습니다:
+`recvfrom()`의 개요는 이렇습니다.
 
 ```{.c}
 int recvfrom(int sockfd, void *buf, int len, unsigned int flags,
              struct sockaddr *from, int *fromlen);
 ```
 
-또 다시 이것은 몇 개의 추가적인 필드가 있는 `recv()`과 같습니다.
+또 다시 이것은 몇 개의 추가적인 필드가 있는 `recv()`같은 것입니다.
 `from`은 근원지 장치의 아이피 주소와 포트로 채워진 로컬 [i[`struct sockaddr` type]]
 `struct sockaddr_storage`에 대한 포인터입니다. `fromlen`은 로컬 `int`에 대한 포인터이며
 `sizeof *from`이나 `sizeof(struct sockaddr_storage)`으로 초기화되어야
@@ -676,13 +685,13 @@ int recvfrom(int sockfd, void *buf, int len, unsigned int flags,
 `recvfrom()`은 받은 바이트의 갯수를 반환하며 오류가 나면 (`errno`를 적절히 설정하고)
 `-1`을 돌려줍니다.
 
-여기 질문이 하나 있을 것입니다: 왜 우리는 `struct sockaddr_storage`을 소켓의 타입으로
-사용하는가? 왜 그냥 `struct sockaddr_in`을 쓸 수 없는가? 이유는 보시다시피
+여기 질문이 하나 있습니다. 왜 우리는 `struct sockaddr_storage`을 소켓의 타입으로
+사용할까요? 왜 그냥 `struct sockaddr_in`을 쓸 수 없을까요? 이유는 보시다시피
 우리가 IPv4나 IPv6중 하나에 얽메이고 싶지 않기 때문입니다. 그래서 우리는 양쪽 모두에
 충분히 크고 일반적인 `struct sockaddr_storage`을 사용합니다.
 
-(그럼... 여기에서 다른 질문 하나: 왜 `struct sockaddr`을 모든 주소를 담을
-수 있을 정도로 크게 만들지 않았는가? 우리는 일반 목적의 `struct sockaddr_storage`
+(그럼... 여기에서 다른 질문 하나. 왜 `struct sockaddr`을 모든 주소를 담을
+수 있을 정도로 크게 만들지 않았을까요? 우리는 일반 목적의 `struct sockaddr_storage`
 을 다시 일반 목적의 `struct sockaddr`으로 형변환하고 있습니다! 이런 동작은
 과하고 불필요해 보입니다. 여기에 대한 대답은 그냥 이 `struct sockaddr`은
 만들어질 때부터 그렇게 크지 않았다는 것이고, 이제와서 그것을 바꾸는 것은
@@ -701,7 +710,7 @@ UDP를 사용할 것이지만 소켓 인터페이스가 자동으로 여러분�
 휴! 여러분은 하루 종일 `send()`와 `recv()`을 사용했고, 이제 충분합니다.
 이제 여러분의 소켓 설명자를 닫을 준비가 되었습니다. 이건 쉽습니다. 그냥
 평범한 유닉스 파일 설명자 닫기 함수인 [i[`close()` function]] `close()`
-를 쓸 수 있습니다:
+를 쓸 수 있습니다.
 
 ```{.c}
 close(sockfd);
@@ -713,7 +722,7 @@ close(sockfd);
 소켓이 어떻게 닫히는지 좀 더 조절하고 싶은 경우에 [i[`shutdown()` function]] `shutdown()`
 함수를 사용할 수 있습니다. 이것은 특정 방향으로의 통신만 끊는 일을 할
 수 있으며 양쪽 모두 막을 수도 있습니다(마치 `close()`가 하듯이).
-개요는 이렇습니다:
+개요는 이렇습니다.
 
 ```{.c}
 int shutdown(int sockfd, int how);
@@ -751,7 +760,7 @@ int shutdown(int sockfd, int how);
 너무 쉬워서 이 함수에 별도의 장을 주지도 않았습니다. 아무튼 알려드리겠습니다.
 
 `getpeername()`함수는 연결된 스트림 소켓의 반대편 끝에 누가 있는지를 알려줄
-것입니다. 개요입니다:
+것입니다. 개요입니다.
 
 ```{.c}
 #include <sys/socket.h>
@@ -785,7 +794,7 @@ int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
 쓰일 수 있습니다.
 
 이보다 더 재미있는 일이 있을 수 있겠습니까? 사실 몇 가지 생각나긴 합니다만
-소켓 프로그래밍에 대한 것이 아니군요. 아무튼 정리하자면 이렇습니다:
+소켓 프로그래밍에 대한 것이 아니군요. 아무튼 정리하자면 이렇습니다.
 
 ```{.c}
 #include <unistd.h>
@@ -793,7 +802,7 @@ int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
 int gethostname(char *hostname, size_t size);
 ```
 
-인수들은 단순합니다: `hostname`은 함수가 반환하는 호스트 이름을 담을
+인수들은 단순합니다. `hostname`은 함수가 반환하는 호스트 이름을 담을
 char의 배열에 대한 포인터입니다. `size`는 `hostname`배열의 길이입니다.
 
 함수는 성공적인 완료 후에 `0`을 반환하고, 오류에 대해서는 흔히 그렇듯

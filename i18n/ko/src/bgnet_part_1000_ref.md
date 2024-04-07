@@ -84,7 +84,7 @@ Sockets|https://en.wikipedia.org/wiki/Berkeley_sockets]]**
 [fl[RFCs|https://www.rfc-editor.org/]]---진짜 진탕이다! 이것들은
 인터넷에 사용된 할당된 번호와 프로그래밍 API, 프로토콜 등을 설명하는 문서다.
 여러분의 즐거움을 위해 그 중 일부에 대한 링크를 포함했다. 팝콘을 한 바가지
-가져와서 생각모자를 써 보자.(역자 주 : 어떤 것을 진지하게 생각한다는 의미)
+가져와서 생각모자를 써 봅시다.(역자 주 : 어떤 것을 진지하게 생각한다는 의미)
 
 **[flrfc[RFC 1|1]]**
 ---The First RFC; this gives you an idea of what the "Internet" was like
