@@ -100,7 +100,7 @@ freeaddrinfo(servinfo); // 연결리스트를 해제
 보다시피 그 오류를 `gai_strerror()`함수를 통해서 출력할 수 있습니다. 만약 모든
 것이 제대로 동작한다면 `servinfo`는 각각이 우리가 나중에 쓸 수 있는
 `struct sockaddr`나 비슷한 것을 가진 `struct addrinfo`의 연결리스트를 가리킬
-것이다. 멋지다!
+것입니다. 멋지다!
 
 마지막으로 `getaddrinfo()`가 은혜롭게 우리에게 할당해 준 연결리스트를
 다 썼다면 우리는 `freeaddrinfo()`을 호출해서 그것을 할당 해제할 수 있습니다.
@@ -230,7 +230,7 @@ IP addresses for ipv6.example.com:
 int socket(int domain, int type, int protocol);
 ```
 
-그러나 이 인수들이 무엇인지 모를 것이다. 이것들은 어떤 종류의 소켓을 원하는지
+그러나 이 인수들이 무엇인지 모를 것입니다. 이것들은 어떤 종류의 소켓을 원하는지
 정할 수 있게 해 줍니다.(IPv4 또는 IPv6, 스트림 혹은 데이터그램, TCP 혹은 UDP)
 
 사용자들이 그 값을 직접 적어야 했고, 지금도 그렇게 할 수 있습니다.
@@ -239,15 +239,15 @@ int socket(int domain, int type, int protocol);
 넘겨주거나 "tcp"나 "udp" 중 원하는 프로토콜의 값을 얻기 위해서 `getprotobyname()`
 을 쓸 수도 있습니다.)
 
-(이 `PF_INET`은 `sin_family`필드에 넣어주는 [i[`AF_INET` macro]]`AF_INET`와 유사한 것이다.
+(이 `PF_INET`은 `sin_family`필드에 넣어주는 [i[`AF_INET` macro]]`AF_INET`와 유사한 것입니다.
 이것을 이해하려면 짧은 이야기가 필요하다. 아주 먼 옛날에는 어쩌면 하나의 주소 계통(Address Family)
 ("`AF_INET`"안에 들어있는 "AF")가 여러 종류의 프로토콜 계통(Protocol Family)("`PF_INET`"의
 "PF"))을 지원할 것이라고 생각하던 시절이 있었다. 그런 일은 일어나지 않았다. 그리고 모두 행복하게
 오래오래 잘 살았다. 이런 이야기다. 그래서 할 수 있는 가장 정확한 일은
-`struct sockaddr_in`에서 `AF_INET`을 쓰고 `socket()`에서 `PF_INET`을 사용하는 것이다.
+`struct sockaddr_in`에서 `AF_INET`을 쓰고 `socket()`에서 `PF_INET`을 사용하는 것입니다.
 
 아무튼 이제 충분하다. 여러분이 정말로 하고싶은 일은 `getaddrinfo()`을
-호출한 결과로 돌아오는 값을 아래와 같이 `socket()`에 직접 넘겨주는 것이다.
+호출한 결과로 돌아오는 값을 아래와 같이 `socket()`에 직접 넘겨주는 것입니다.
 
 ```{.c .numberLines}
 int s;
@@ -269,14 +269,14 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 오류가 있으면 -1을 돌려줍니다. 전역 변수인 `errno`가 오류의 값으로 설정된다.
 (자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하세요.)
 
-좋습니다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것이다.
+좋습니다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것입니다.
 실제로 쓰기 위해서는 안내서를 더 읽고 이것이 동작하게 하기 위한 시스템 호출을
 더 해야 합니다.
 
 ## `bind()`---나는 어떤 포트에 있는가? {#bind}
 
 [i[`bind()` function]] 소켓을 가지면 여러분의 기계의 [i[Port]] 포트에 연동하고
-싶을 것이다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
+싶을 것입니다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
 으로 특정 포트에서 들어오는 연결을 듣고자(listen) 할 때 이루어진다. ---다중 사용자
 네트워크 게임들은 "192.168.5.10의 3490포트에 연결합니다"라고 말할 때 이런
 작업을 합니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
@@ -292,9 +292,9 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 ```
 
-`sockfd`은 `socket()`이 돌려준 소켓 파일 설명자이다. `my_addr`은
+`sockfd`은 `socket()`이 돌려준 소켓 파일 설명자입니다. `my_addr`은
 여러분의 주소, 말하자면 포트와 [i[IP address]] IP주소를 가진 `struct sockaddr`
-에 대한 포인터이다. `addrlen`은 그 주소의 바이트 단위 길이이다.
+에 대한 포인터입니다. `addrlen`은 그 주소의 바이트 단위 길이입니다.
 
 으엑. 한 번에 많이 배웠다. 프로그램이 실행되는 호스트의 3490번 포트에
 소켓을 바인드하는 예제를 보자.
@@ -330,7 +330,7 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 많은 오래된 코드들이 `bind()`을 호출하기 전에 `struct sockaddr_in`을 직접
 채워넣는다. 이것은 분명히 IPv4 전용이지만 같은 일을 IPv6에 대해서도 못 할
 이유는 없다. 단지 `getaddrinfo()`을 쓰는 편이 일반적으로 더 쉽다. 어쨌든
-예전 코드는 이런 방식이다.
+예전 코드는 이런 방식입니다.
 
 ```{.c .numberLines}
 // !!! 이것은 예전 방식이다 !!!
@@ -351,7 +351,7 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 위의 코드에서 당신의 로컬 IP 주소에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
 `s_addr`필드에 `INADDR_ANY`을 대입할 수 있습니다. IPv6버전의 `INADDR_ANY`은
 당신의 `struct sockaddr_in6`의 `sin6_addr`필드에 대입해야 하는 전역변수인
-`in6addr_any`이다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
+`in6addr_any`입니다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
 있습니다.)
 
 `bind()`을 쓸 때 주의해야 할 것 : 포트 번호는 낮은 것을 쓰지 말 것.
