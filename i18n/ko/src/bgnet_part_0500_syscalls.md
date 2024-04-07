@@ -220,10 +220,10 @@ IP addresses for ipv6.example.com:
 이제 저것을 다룰 수 있으니, `getaddrinfo()`에서 얻은 결과를 다른 소켓 함수에
 넘기고 결과적으로는 네트워크 연결을 성립할 수 있도록 해 봅시다! 계속 읽어보세요!
 
-## `socket()`---파일 설명자를 받아오라! {#socket}
+## `socket()`---파일 설명자를 받아오자! {#socket}
 
 더 이상 미룰 수가 없을 듯 합니다. 이제 [i[`socket()` function]] `socket()`
-시스템 콜에 대해서 이야기해야 합니다. 개요는 이렇다.
+시스템 콜에 대해서 이야기해야 합니다. 개요는 이렇습니다.
 
 ```{.c}
 #include <sys/types.h>
