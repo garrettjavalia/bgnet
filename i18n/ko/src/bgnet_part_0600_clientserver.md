@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
 
 클라이언트를 실행하기 전에 서버를 실행하지 않으면 `connect()`는
 [i[Connection refused]] "Connection refused"를 반환한다는 점을
-기억하라. 아주 유용하다.
+기억하세요. 아주 유용하다.
 
 [i[Client-->stream]>]
 
@@ -421,8 +421,8 @@ int main(void)
 ```
 
 `getaddrinfo()`에서 우리가 마침내 `SOCK_DGRAM`을 사용한다는 것에
-주목하라. 또한, `listen()`와 `accept()`이 필요하지 않다는 점도
-기억하라. 이것이 연결 없는 데이터그램 소켓을 사용할 때의 장점
+주목하세요. 또한, `listen()`와 `accept()`이 필요하지 않다는 점도
+기억하세요. 이것이 연결 없는 데이터그램 소켓을 사용할 때의 장점
 중 하나이다.
 Notice that in our call to `getaddrinfo()` we're finally using
 `SOCK_DGRAM`. Also, note that there's no need to `listen()` or
@@ -506,7 +506,7 @@ int main(int argc, char *argv[])
 ```
 
 이것이 전부다! 하나의 장치에서 `listener`를 실행하고 `talker`를 다른 장치에서
-실행하라.(역자 주 : 하나의 장치에서도 순서만 맞게 실행하면 문제는 없다. 여러
+실행하세요.(역자 주 : 하나의 장치에서도 순서만 맞게 실행하면 문제는 없다. 여러
 터미널을 동시에 열 수 있는 다양한 방법이 있습니다.) 그것들이 통신하는 것을 지켜보라.
 핵가족 전체를 위한 전연령 엔터테인먼트다.
 

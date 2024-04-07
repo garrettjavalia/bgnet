@@ -89,7 +89,7 @@ freeaddrinfo(servinfo); // 연결리스트를 해제
 ```
 
 `ai_family`을 `AF_UNSPEC`으로 설정해서 IPv4든 IPv6이든 신경쓰지 않음을 나타낸
-것에 주목하라. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있습니다.
+것에 주목하세요. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있습니다.
 
 `AI_PASSIVE`도 볼 수 있습니다. 이것은 `getaddrinfo()`에게 소켓 구조체에
 내 로컬 호스트의 주소를 할당해달라고 말해준다. 이것은 여러분이 하드코딩할 필요를
@@ -260,14 +260,14 @@ getaddrinfo("www.example.com", "http", &hints, &res);
 // 다시 말하지면 원래는 (이 안내서의 예제들이 하듯이) 첫 번째 것이 좋다고
 // 가정하는 대신 getaddrinfo()에 대해서 오류 확인을 하고
 // "res"링크드 리스트를 순회해야 한다.
-// client/server절의 진짜 예제들을 참고하라.
+// client/server절의 진짜 예제들을 참고하세요.
 
 s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 ```
 
 `socket()`은 단순하게 이후의 시스템 호출에서 쓸 수 있는 _소켓 설명자_ 를 돌려준다.
 오류가 있으면 -1을 돌려준다. 전역 변수인 `errno`가 오류의 값으로 설정된다.
-(자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하라.)
+(자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하세요.)
 
 좋다. 그러면 이제 이 소켓을 어디에 쓰는가? 정답은 아직 못 쓴다는 것이다.
 실제로 쓰기 위해서는 안내서를 더 읽고 이것이 동작하게 하기 위한 시스템 호출을
