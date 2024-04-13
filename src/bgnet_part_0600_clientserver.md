@@ -26,7 +26,6 @@ routine is: server will wait for a connection, `accept()` it, and
 `fork()` a child process to handle it. This is what our sample server
 does in the next section.
 
-
 ## A Simple Stream Server
 
 [i[Server-->stream]<]
@@ -199,8 +198,7 @@ next section.
 [i[Client-->stream]<]
 
 This guy's even easier than the server. All this client does is connect
-to the host you specify on the command line, port
-3490. It gets the string that the server sends.
+to the host you specify on the command line, port 3490. It gets the string that the server sends.
 
 [flx[The client source|client.c]]:
 
@@ -221,9 +219,9 @@ to the host you specify on the command line, port
 
 #include <arpa/inet.h>
 
-#define PORT "3490" // the port client will be connecting to 
+#define PORT "3490" // the port client will be connecting to
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 100 // max number of bytes we can get at once
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -237,7 +235,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, numbytes;  
+    int sockfd, numbytes;
     char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -314,8 +312,7 @@ We've already covered the basics of UDP datagram sockets with our
 discussion of `sendto()` and `recvfrom()`, above, so I'll just present a
 couple of sample programs: `talker.c` and `listener.c`.
 
-`listener` sits on a machine waiting for an incoming packet on port
-4950. `talker` sends a packet to that port, on the specified machine,
+`listener` sits on a machine waiting for an incoming packet on port 4950. `talker` sends a packet to that port, on the specified machine,
 that contains whatever the user enters on the command line.
 
 Because datagram sockets are connectionless and just fire packets off
@@ -428,7 +425,7 @@ int main(void)
 ```
 
 Notice that in our call to `getaddrinfo()` we're finally using
-`SOCK_DGRAM`.  Also, note that there's no need to `listen()` or
+`SOCK_DGRAM`. Also, note that there's no need to `listen()` or
 `accept()`. This is one of the perks of using unconnected datagram
 sockets!
 
