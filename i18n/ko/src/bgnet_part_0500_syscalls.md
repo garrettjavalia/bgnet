@@ -69,7 +69,7 @@ int getaddrinfo(const char *node,     // e.g. "www.example.com" 또ㅡㄴ IP
 ```{.c .numberLines}
 int status;
 struct addrinfo hints;
-struct addrinfo *servinfo;  // 결과를 가리킬 것이다
+struct addrinfo *servinfo;  // 결과를 가리킬 것입니다
 
 memset(&hints, 0, sizeof hints); // 구조체를 확실히 비워두세요
 hints.ai_family = AF_UNSPEC;     // IPv4 이든 IPv6 이든 상관없다
