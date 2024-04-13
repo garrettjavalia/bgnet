@@ -23,7 +23,7 @@ _(아래의 예제 코드들은 대개 필수적인 에러코드를 간략함을
 
 ## `getaddrinfo()`---발사 준비!
 
-[i[`getaddrinfo()` function]], 이것은 여러 옵션을 가진 진짜 일꾼입니다.
+[i[`getaddrinfo()` function]] 이것은 여러 옵션을 가진 진짜 일꾼입니다.
 그러나 사용법은 사실 꽤 간단합니다. 이것은 여러분이 나중에 필요로 하는
 `struct`들을 초기화합니다.
 
@@ -74,7 +74,7 @@ struct addrinfo *servinfo;  // 결과를 가리킬 것이다
 memset(&hints, 0, sizeof hints); // 구조체를 확실히 비워두세요
 hints.ai_family = AF_UNSPEC;     // IPv4 이든 IPv6 이든 상관없다
 hints.ai_socktype = SOCK_STREAM; // TCP 스트림 소켓
-hints.ai_flags = AI_PASSIVE;     // 내 주소를 넣어라
+hints.ai_flags = AI_PASSIVE;     // 내 주소를 넣습니다
 
 if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
@@ -267,7 +267,7 @@ getaddrinfo("www.example.com", "http", &hints, &res);
 s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 ```
 
-`socket()`은 단순하게 이후의 시스템 호출에서 쓸 수 있는 _소켓 설명자_ 를 돌려줍니다.
+`socket()`은 단순하게 이후의 시스템 호출에서 쓸 수 있는 *소켓 설명자*를 돌려줍니다.
 오류가 있으면 -1을 돌려줍니다. 전역 변수인 `errno`가 오류의 값으로 설정됩니다.
 (자세한 정보는 [`errno`](#errnoman) 의 맨페이지를 참고하세요.)
 
@@ -502,7 +502,7 @@ listen();
 함수로 연결하려고 합니다. 여러분은 특정 포트에서 `listen()`을 실행하고
 있습니다. 그들의 연결은 `accept()`로 받아들여질 때까지 대기열에 쌓일 것입니다.
 여러분은 `accept()`을 해서 대기중인 연결을 받아들이겠다고 알려줍니다.
-`accept()`는 이 연결만을 위해서 쓸 _완전히 새로운 소켓 파일 설명자_ 를 돌려줄 것입니다.
+`accept()`는 이 연결만을 위해서 쓸 *완전히 새로운 소켓 파일 설명자*를 돌려줄 것입니다.
 그렇습니다! 갑자기 소켓 하나 가격에 두 개의소켓을 가지게 되었습니다.
 원래의 소켓은 여전히 새 연결들을 듣고 있고, 새롭게 만들어진 것은 `send()`와 `recv()`작업을
 위해 준비되었습니다. 이제 다 됐군요!
