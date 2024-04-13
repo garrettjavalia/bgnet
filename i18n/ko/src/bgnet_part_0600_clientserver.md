@@ -40,7 +40,7 @@ $ telnet remotehostname 3490
 
 `remotehostname`은 여러분이 실행하는 장치의 아이피입니다.
 
-[flx[The server code|server.c]]:
+[flx[서버 코드|server.c]]:
 
 ```{.c .numberLines}
 /*
