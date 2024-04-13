@@ -80,7 +80,7 @@ Sockets|https://en.wikipedia.org/wiki/Berkeley_sockets]]**
 
 [i[RFCs]<] [i[References-->FRFCs]<]
 
-[fl[RFCs|https://www.rfc-editor.org/]]---진짜 진탕입니다! 이것들은
+[fl[RFC들|https://www.rfc-editor.org/]]---진짜 진탕입니다! 이것들은
 인터넷에 사용된 할당된 번호와 프로그래밍 API, 프로토콜 등을 설명하는 문서입니다.
 여러분의 즐거움을 위해 그 중 일부에 대한 링크를 포함했습니다. 팝콘을 한 바가지
 가져와서 생각모자를 써 봅시다.(역자 주 : 어떤 것을 진지하게 생각한다는 의미)
