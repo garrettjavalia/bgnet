@@ -196,13 +196,13 @@ int main(void)
 
 이 녀석은 서버보다도 더 쉽습니다. 이 클라이언트가 하는 일은 여러분이 명령줄에
 지정한 호스트의 3490번 포트로 접속하는 것입니다. 이것은 서버가 보낸 문자열을
-받는다.
+받습니다.
 
-[flx[The client source|client.c]]:
+[flx[클라이언트 소스|client.c]]:
 
 ```{.c .numberLines}
 /*
-** client.c -- a stream socket client demo
+** client.c -- 스트림 소켓 클라이언트의 예시
 */
 
 #include <stdio.h>
@@ -221,7 +221,7 @@ int main(void)
 
 #define MAXDATASIZE 100 // 한 번에 받을 수 있는 최대 바이트 갯수
 
-// get sockaddr, IPv4 or IPv6:
+// IPv4 또는 IPv6 sockaddr를 받아온다
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // 모든 결과를 순회하면서 쓸 수 있는 가장 첫 번째 것을 씀
+    // 모든 결과를 순회하면서 쓸 수 있는 가장 첫 번째 것을 사용한다
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없음
+    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없다
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
@@ -307,11 +307,11 @@ int main(int argc, char *argv[])
 [i[Server-->datagram]<]
 
 위에서 `sendto()`과 `recvfrom()`에 대해 논의할 때 UDP 데이터그램 소켓의
-기본에 대해서 이미 알아보았다. 그러므로 바로 2개의 예제 프로그램을 제시하겠다.
-`talker.c`와 `listener.c`입니다.
+기본에 대해서 이미 알아보았습니다. 그러므로 바로 2개의 예제 프로그램을
+제시하겠습니다. `talker.c`와 `listener.c`입니다.
 
 `listener`는 장치에서 포트 4950으로 들어오는 패킷을 대기합니다. `talker`는
-지정한 장치의 해당 포트로 사용자가 명령줄에 입력한 내용을 담은 패킷을 보낸다.
+지정한 장치의 해당 포트로 사용자가 명령줄에 입력한 내용을 담은 패킷을 보냅니다.
 
 데이터그램 소켓은 연결이 없고 소켓을 이더넷에 발송한 후 성공 여부는 신경쓰지
 않기 때문에 클라이언트와 서버에 IPv6을 사용하도록 명시할 것입니다. 이렇게 하면
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 
 ```{.c .numberLines}
 /*
-** listener.c -- a datagram sockets "server" demo
+** listener.c -- 데이터그램 소켓 "서버"의 예시
 */
 
 #include <stdio.h>
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define MYPORT "4950"	// the port users will be connecting to
+#define MYPORT "4950"	// 연결할 포트
 
 #define MAXBUFLEN 100
 
@@ -364,16 +364,16 @@ int main(void)
 	char s[INET6_ADDRSTRLEN];
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
+	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_PASSIVE; // use my IP
+	hints.ai_flags = AI_PASSIVE; // 내 주소를 씁니다
 
 	if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
 
-	// loop through all the results and bind to the first we can
+	// 모든 결과를 순회하면서 가능한 첫 번째 것에 바인드합니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
@@ -422,22 +422,18 @@ int main(void)
 
 `getaddrinfo()`에서 우리가 마침내 `SOCK_DGRAM`을 사용한다는 것에
 주목하세요. 또한, `listen()`와 `accept()`이 필요하지 않다는 점도
-기억하세요. 이것이 연결 없는 데이터그램 소켓을 사용할 때의 장점
+기억하세요. 이것이 연결없는 데이터그램 소켓을 사용할 때의 장점
 중 하나입니다.
-Notice that in our call to `getaddrinfo()` we're finally using
-`SOCK_DGRAM`. Also, note that there's no need to `listen()` or
-`accept()`. This is one of the perks of using unconnected datagram
-sockets!
 
 [i[Server-->datagram]>]
 
 [i[Client-->datagram]<]
 
-Next comes the [flx[source for `talker.c`|talker.c]]:
+다음으로 [flx[`talker.c`의 소스코드|talker.c]]입니다.
 
 ```{.c .numberLines}
 /*
-** talker.c -- a datagram "client" demo
+** talker.c -- 데이터그램 "클라이언트"의 예시
 */
 
 #include <stdio.h>
@@ -451,7 +447,7 @@ Next comes the [flx[source for `talker.c`|talker.c]]:
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SERVERPORT "4950"	// the port users will be connecting to
+#define SERVERPORT "4950"	// 사용자들이 접속할 포트
 
 int main(int argc, char *argv[])
 {
@@ -466,7 +462,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
+	hints.ai_family = AF_INET6; // IPv4을 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
 
 	if ((rv = getaddrinfo(argv[1], SERVERPORT, &hints, &servinfo)) != 0) {
@@ -474,7 +470,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// loop through all the results and make a socket
+	// 모든 결과를 순회하면서 소켓을 만듭니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
@@ -505,21 +501,21 @@ int main(int argc, char *argv[])
 }
 ```
 
-이것이 전부다! 하나의 장치에서 `listener`를 실행하고 `talker`를 다른 장치에서
+이것이 전부입니다! 하나의 장치에서 `listener`를 실행하고 `talker`를 다른 장치에서
 실행하세요.(역자 주 : 하나의 장치에서도 순서만 맞게 실행하면 문제는 없습니다. 여러
-터미널을 동시에 열 수 있는 다양한 방법이 있습니다.) 그것들이 통신하는 것을 지켜보라.
-핵가족 전체를 위한 전연령 엔터테인먼트다.
+터미널을 동시에 열 수 있는 다양한 방법이 있습니다.) 그것들이 통신하는 것을 지켜보세요.
+온 가족을 위한 즐거운 쑈가 될 것이라 확신합니다.
 
-이번에는 서버르 실행할 필요도 없다! `talker`를 혼자 실행시키면 패킷을 행복하게
+이번에는 서버를 실행할 필요도 없습니다! `talker`를 혼자 실행시키면 패킷을 행복하게
 발송하고, 아무도 반대쪽에서 `recvfrom()`을 호출하지 않는다면 그저 패킷은 사라질
-뿐입니다. 기억하라 : UDP 데이터그램 소켓으로 보낸 데이터는 도착을 보장하지 않는다.!
+뿐입니다. UDP 데이터그램 소켓으로 보낸 데이터는 도착을 보장하지 않는다는 점을 기억하세요!
 
 [i[Client-->datagram]>]
 
-전에 몇 번 말한 사소한 것 한 가지를 빼면 전부다: [i[`connect()` function-->on datagram sockets]]
+전에 몇 번 말한 사소한 것 한 가지를 빼면 전부입니다: [i[`connect()` function-->on datagram sockets]]
 연결된 데이터그램 소켓이 그것입니다. 그것에 대해서 여기에서 말해야하는데,
 이 문서의 데이터그램에 대한 부분이 바로 여기이기 때문입니다. 위의 `talker`
-가 `listener`의 주소를 지정하고 `connect()`를 호출한다고 하자. 그 순간부터
+가 `listener`의 주소를 지정하고 `connect()`를 호출한다고 합시다. 그 순간부터
 `talker`는 `connect()`로 지정한 주소로만 데이터를 보내고 받을 수 있습니다.
 이런 이유로 `sendto()`와 `recvfrom()`을 쓸 필요가 없습니다. 단순히 `send()`
 와 `recv()`를 쓰면 됩니다.
