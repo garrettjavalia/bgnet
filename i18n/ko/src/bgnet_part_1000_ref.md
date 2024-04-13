@@ -1,7 +1,7 @@
 # 더 많은 참고문헌
 
-여기까지 왔고, 더 많은 것을 원하는가? 네트워크에 대해서 더 배우려면 어디로
-가야할까?
+여기까지 왔고, 더 많은 것을 원하시나요? 네트워크에 대해서 더 배우려면 어디로
+가야할까요?
 (역자 주 : 이 장은 일부만 번역했습니다.)
 
 ## 책들 {#books}
@@ -11,7 +11,7 @@
 옛날식의, 정말로 손에 쥘 수 있는, 종이로 만든 책들입니다. 아래에 있는 훌륭한 책
 중 몇몇을 읽어보라. 이것들은 필자에게 좋은 보상을 주는 유명한 도서 유통업자들의
 제휴된 링크로 여러분을 안내할 것입니다. 좀 더 관대한 독자라면 페이팔로
-[`beej@beej.us`](mailto:beej@beej.us)에 기부를 해주길 바란다. `:-)`
+[`beej@beej.us`](mailto:beej@beej.us)에 기부를 해주길 바랍니다. `:-)`
 
 **Unix Network Programming, volumes 1-2**
 by W. Richard Stevens. Published by Addison-Wesley Professional and

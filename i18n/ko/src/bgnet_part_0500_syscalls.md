@@ -275,7 +275,7 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 실제로 쓰기 위해서는 안내서를 더 읽고 이것이 동작하게 하기 위한 시스템 호출을
 더 해야 합니다.
 
-## `bind()`---나는 어떤 포트에 있을까? {#bind}
+## `bind()`---나는 어떤 포트에 있나요? {#bind}
 
 [i[`bind()` function]] 소켓을 가지면 여러분의 장치의 [i[Port]] 포트에 연동하고
 싶을 것입니다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
@@ -351,9 +351,9 @@ memset(my_addr.sin_zero, '\0', sizeof my_addr.sin_zero);
 bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 ```
 
-위의 코드에서 당신의 로컬 IP 주소에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
+위의 코드에서 여러분의 로컬 IP 주소에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
 `s_addr`필드에 `INADDR_ANY`을 대입할 수 있습니다. IPv6버전의 `INADDR_ANY`은
-당신의 `struct sockaddr_in6`의 `sin6_addr`필드에 대입해야 하는 전역변수인
+여러분의 `struct sockaddr_in6`의 `sin6_addr`필드에 대입해야 하는 전역변수인
 `in6addr_any`입니다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
 있습니다.)
 
@@ -366,7 +366,7 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 [i[Address already in use]] "주소가 이미 사용중입니다.."라고 할 때가 있습니다.
 그것은 연결되었던 소켓 중 일부가 여전히 커널에서 대기중이고 포트를 사용하고
 있다는 것을 의미합니다. 여러분은 그것이 정리될 때까지 1분 정도를 기다리거나
-당신의 프로그램이 포트를 재사용할 수 있도록 하는 코드를 넣을 수도 있습니다.
+여러분의 프로그램이 포트를 재사용할 수 있도록 하는 코드를 넣을 수도 있습니다.
 
 [i[`setsockopt()` function]]
 [i[`SO_REUSEADDR` macro]]
@@ -457,8 +457,8 @@ connect(sockfd, res->ai_addr, res->ai_addrlen);
 ## `listen()`---누가 연락 좀 해줄래요? {#listen}
 
 [i[`listen()` function]] 이제 흐름이 변할 때입니다. 우리가 원격지 호스트에
-접속하고 싶지 않은 경우라면 어떻게 하시겠습니까? 간단히 말해서 들어오는
-연결을 기다리고 그것을 어떤 방식으로 처리해야 한다면 어떻게 하시겠습니까?
+접속하고 싶지 않은 경우라면 어떻게 할까요? 간단히 말해서 들어오는
+연결을 기다리고 그것을 어떤 방식으로 처리해야 한다면 어떻게 할까요?
 그 과정은 두 단계입니다. 먼저 `listen()`를 호출하고, [i[`accept()`
 function]] `accept()`를 씁니다.(아래를 참고하세요.)
 
@@ -470,7 +470,7 @@ int listen(int sockfd, int backlog);
 
 `sockfd`은 `socket()`시스템 함수 호출로 얻어온 평범한 소켓 파일 설명자입니다.
 [i[`listen()` function-->backlog]] `backlog`는 들어오는 큐에 허용되는
-연결의 숫자입니다. 이것이 무슨 뜻인지 궁금하십니까? 들어오는 연결들은
+연결의 숫자입니다. 이것이 무슨 뜻인지 궁금한가요? 들어오는 연결들은
 여러분이 `accept()`를 해주기 전까지(아래를 참고하세요) 이 큐 안에서
 기다릴 것이고 이것은 몇 개의 연결이 대기할 수 있는가를 정합니다. 대개의 시스템은
 이 값을 조용히 20 정도로 제한합니다. 그러나 `5`나 `10`정도의 값으로
@@ -523,8 +523,8 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 sockaddr_storage을 `accept()`에 넘기기 전에 `sizeof(struct
 sockaddr_storage)`으로 설정되어야 하는 로컬 정수 변수입니다.
 `accept()`는 `addr`에 `addrlen`의 크기 이상의 바이트를 적지 않을 것입니다.
-알고계십니까? `accept()`도 오류가 발생하면 `-1`을 돌려주고 `errno`에
-값을 설정합니다. 전혀 예상하지 못하셨으리라 생각합니다.
+`accept()`도 오류가 발생하면 `-1`을 돌려주고 `errno`에
+값을 설정합니다. 어느 정도는 예상하셨으리라 생각합니다.
 
 전과 마찬가지로 한 번에 이해하기에는 많은 내용입니다.
 그래서 여러분의 독서를 위한 예제 코드 조각이 있습니다.
@@ -753,7 +753,7 @@ int shutdown(int sockfd, int how);
 사용하실 경우 `close()`대신 [i[`closesocket()` function]]
 `closesocket()`을 호출해야 합니다.)
 
-## `getpeername()`---누구십니까?
+## `getpeername()`---누구세요?
 
 [i[`getpeername()` function]] 이 함수는 너무 쉽습니다.
 
@@ -793,7 +793,7 @@ int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
 을 써서 여러분의 로컬 장치의 [i[IP address]] IP주소를 알아내는 일에
 쓰일 수 있습니다.
 
-이보다 더 재미있는 일이 있을 수 있겠습니까? 사실 몇 가지 생각나긴 합니다만
+이보다 더 재미있는 일은 세상에 없습니다. 사실 몇 가지 생각나긴 합니다만
 소켓 프로그래밍에 대한 것이 아니군요. 아무튼 정리하자면 이렇습니다.
 
 ```{.c}

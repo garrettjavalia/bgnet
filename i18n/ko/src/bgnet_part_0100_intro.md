@@ -229,8 +229,8 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 ## Note for Translators 번역가들을 위한 노트
 
 [i[Translating the Guide]] 이 안내서를 다른 언어로 번역하고 싶다면
-[`beej@beej.us`](beej@beej.us)에 메일을 보내주세요. 당신의 번역본의
-링크를 제 메인 페이지에 걸어두겠습니다. 당신의 이름과 연락처 정보를 번역본에
+[`beej@beej.us`](beej@beej.us)에 메일을 보내주세요. 여러분의 번역본의
+링크를 제 메인 페이지에 걸어두겠습니다. 여러분의 이름과 연락처 정보를 번역본에
 추가하시는 것도 환영합니다.
 
 이 원본 마크다운 문서는 UTF-8로 인코드 되었습니다.
