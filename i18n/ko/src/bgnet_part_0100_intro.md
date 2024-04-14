@@ -168,7 +168,7 @@ Winsock라이브러리를 다 쓴 후에 저것을 호출해야 합니다.
 VC++에서는 `프로젝트` 메뉴에서 `설정`으로 가서 `링크`탭을 클릭하고 "오브젝트/라이브러리 모듈"
 이라는 제목이 붙은 상자를 찾으세요. 그리고 거기에 "ws2_32.lib"나 여러분이 원하는
 다른 라이브러리를 추가하세요.
-(역자 주: 최신 Visual Studio에서는 [이 링크|https://learn.microsoft.com/en-us/cpp/build/reference/dot-lib-files-as-linker-input?view=msvc-170]를 참고하세요.)
+(역자 주: 최신 Visual Studio에서는 [이 링크](https://learn.microsoft.com/en-us/cpp/build/reference/dot-lib-files-as-linker-input?view=msvc-170)를 참고하세요.)
 
 직접 해 본 것은 아닙니다.
 
