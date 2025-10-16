@@ -4,10 +4,10 @@
 
 클라이언트-서버에 대해 이야기할 차례입니다. 통신망에 있는 거의 모든 것들은
 서버 프로세스에게 이야기하는 클라이언트 프로세스를 상대하거나 그 반대입니다.
-`telnet`을 예로 들어봅시다. 여러분이 텔넷(클라이언트)로 원격지 호스트의 23번
+`telnet`을 예로 들어볼까요? 여러분이 텔넷(클라이언트)으로 원격지 호스트의 23번
 포트에 접속할 때 그 호스트의 프로그램(`telnetd`라고 불리는 서버)이 생명을
-얻는다. 그것이 들어오는 텔넷 요청을 처리하고 여러분에게 로그인 프롬프트를
-띄워주는 등의 일을 처리합니다.
+얻습니다. 그 프로그램이 들어오는 텔넷 요청을 처리하고 여러분에게 로그인 프롬프트를
+띄워주는 등의 일을 맡습니다.
 
 ![클라이언트 - 서버 상호작용](cs.pdf "[클라이언트- 서버 상호작용 도표]")
 
@@ -66,7 +66,7 @@ $ telnet remotehostname 3490
 
 void sigchld_handler(int s)
 {
-    // waitpid()이 errno를 덮어쓸 수 있으므로 저장했다가 되살린다.
+    // waitpid()이 errno를 덮어쓸 수 있으므로 저장했다가 되살립니다.
     int saved_errno = errno;
 
     while(waitpid(-1, NULL, WNOHANG) > 0);
@@ -75,7 +75,7 @@ void sigchld_handler(int s)
 }
 
 
-// IPv4 또는 IPv6 sockaddr을 받아온다.
+// IPv4 또는 IPv6 sockaddr을 받아옵니다.
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -182,7 +182,7 @@ int main(void)
 안에 모든 코드를 다 적었습니다. 원한다면 더 작은 함수들로 나누어도 좋습니다.
 
 (아마도 이 [i[`sigaction()` function]] `sigaction()`을 처음 볼 수도 있는데
-괜찮다. 이 코드는 `fork()`된 자식 프로세스가 종료되면서 생기는 좀비 프로세스를
+괜찮습니다. 이 코드는 `fork()`된 자식 프로세스가 종료되면서 생기는 좀비 프로세스를
 거둬들이는 데 사용됩니다. 좀비 프로세스를 많이 만들고 거둬들이지 않으면 시스템
 관리자가 흥분할 것입니다.)
 
@@ -221,7 +221,7 @@ int main(void)
 
 #define MAXDATASIZE 100 // 한 번에 받을 수 있는 최대 바이트 갯수
 
-// IPv4 또는 IPv6 sockaddr를 받아온다
+// IPv4 또는 IPv6 sockaddr를 받아옵니다
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
 전에 몇 번 말한 사소한 것 한 가지를 빼면 전부입니다: [i[`connect()` function-->on datagram sockets]]
 연결된 데이터그램 소켓이 그것입니다. 그것에 대해서 여기에서 말해야하는데,
 이 문서의 데이터그램에 대한 부분이 바로 여기이기 때문입니다. 위의 `talker`
-가 `listener`의 주소를 지정하고 `connect()`를 호출한다고 합시다. 그 순간부터
+가 `listener`의 주소를 지정하고 `connect()`를 호출한다고 가정해볼까요? 그 순간부터
 `talker`는 `connect()`로 지정한 주소로만 데이터를 보내고 받을 수 있습니다.
 이런 이유로 `sendto()`와 `recvfrom()`을 쓸 필요가 없습니다. 단순히 `send()`
 와 `recv()`를 쓰면 됩니다.

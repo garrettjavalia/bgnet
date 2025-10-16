@@ -36,7 +36,7 @@ _(아래의 예제 코드들은 대개 필수적인 에러코드를 간략함을
 것이 있어서 DNS 와 서비스 이름 검색, `struct`내용 채워넣기 등을 포함해서
 여러분이 필요로 하는 모든 일을 해 줍니다.
 
-이제 살펴봅시다!
+이제 살펴보겠습니다!
 
 ```{.c}
 #include <sys/types.h>
@@ -44,7 +44,7 @@ _(아래의 예제 코드들은 대개 필수적인 에러코드를 간략함을
 #include <netdb.h>
 
 int getaddrinfo(const char *node,     // e.g. "www.example.com" 또ㅡㄴ IP
-                const char *service,  // e.g. "http" 또는 포트 숫자를 ""안에 감싸서 넣는다.
+                const char *service,  // e.g. "http" 또는 포트 숫자를 ""안에 감싸서 넣습니다.
                 const struct addrinfo *hints,
                 struct addrinfo **res);
 ```
@@ -129,7 +129,7 @@ status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 ```
 
 `servinfo`는 모든 종류의 주소 정보를 가진 연결리스트라고 거듭 말했습니다.
-이 정보를 보기 위한 짧은 시연 프로그램을 작성해봅시다. [flx[이 짧은 프로그램|showip.c]]
+이 정보를 보기 위한 짧은 시연 프로그램을 작성해볼까요? [flx[이 짧은 프로그램|showip.c]]
 은 여러분이 명령줄에 적는 호스트의 IP주소들을 출력합니다.
 
 ```{.c .numberLines}
@@ -218,7 +218,7 @@ IP addresses for ipv6.example.com:
 ```
 
 이제 저것을 다룰 수 있으니, `getaddrinfo()`에서 얻은 결과를 다른 소켓 함수에
-넘기고 결과적으로는 네트워크 연결을 성립할 수 있도록 해 봅시다! 계속 읽어보세요!
+넘기고 결과적으로는 네트워크 연결을 성립할 수 있도록 해 볼까요? 계속 읽어보세요!
 
 ## `socket()`---파일 설명자를 받아오자! {#socket}
 
@@ -284,7 +284,7 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 작업을 합니다.)(역자 주 : 90년대~2000년대 초의 멀티플레이어 게임들이 접속시에
 이런 문구를 흔히 보여줬습니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
 연관짓기 위해서 사용합니다. 만약 여러분이 [i[`connect()`] function] `connect()`만
-할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어봅시다.
+할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어볼까요?
 
 이것이 `bind()` 시스템 콜의 개요입니다.
 
@@ -300,7 +300,7 @@ int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 에 대한 포인터입니다. `addrlen`은 그 주소의 바이트 단위 길이입니다.
 
 으엑. 한 번에 많이 배웠습니다. 프로그램이 실행되는 호스트의 3490번 포트에
-소켓을 바인드하는 예제를 봅시다.
+소켓을 바인드하는 예제를 살펴보겠습니다.
 
 ```{.c .numberLines}
 struct addrinfo hints, *res;
@@ -315,7 +315,7 @@ hints.ai_flags = AI_PASSIVE;     // IP는 나의 아이피로 채웁니다
 
 getaddrinfo(NULL, "3490", &hints, &res);
 
-// 소켓을 만든다.
+// 소켓을 만듭니다.
 
 sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
@@ -390,14 +390,14 @@ if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
 
 ## `connect()`---거기 안녕! {#connect}
 
-[i[`connect()` function]] 몇 분만 여러분이 텔넷 응용프로그램이 되었다고 생각해봅시다.
+[i[`connect()` function]] 몇 분만 여러분이 텔넷 응용프로그램이 되었다고 생각해볼까요?
 여러분의 사용자들이 소켓 파일 설명자를 얻기 위해서 여러분에게 명령을 내립니다
 (영화 [i[TRON]] *트론*에서처럼요). 여러분은 그에 따라 `socket()`을 호출합니다.
 다음으로 사용자가 여러분에게 "`10.12.110.57`"의 "`23`"번 포트(텔넷 표준 포트)에
 연결하라고 합니다. 어떻게 해야할까요?
 
 응용프로그램 여러분, `connect()`에 대한 절을 읽는 중이라니 운이 좋습니다!
-이 절은 원격 호스트에 어떻게 연결하는지에 대해 알려줍니다. 거침없이 읽어봅시다!
+이 절은 원격 호스트에 어떻게 연결하는지에 대해 알려줍니다. 거침없이 읽어볼까요!
 낭비할 시간이 없습니다!
 
 `connect()`에 대한 호출은 아래와 같습니다:
@@ -417,7 +417,7 @@ int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 모든 정보는 멋진 `getaddrinfo()`호출의 결과에서 추출할 수 있습니다.
 
 이해가 되기 시작하나요? 저는 대답을 들을 수 없으니 그럴 것이라 생각하겠습니다.
-"`www.example.com`"의 `3490`포트로 소켓 연결을 만드는 예제를 살펴봅시다:
+"`www.example.com`"의 `3490`포트로 소켓 연결을 만드는 예제를 살펴보겠습니다:
 
 ```{.c .numberLines}
 struct addrinfo hints, *res;
@@ -785,7 +785,7 @@ int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
 가능합니다. 그러나 그것은 이 문서의 범위를 넘어섭니다. 더 자세한 정보를
 원한다면 [flrfc[RFC 1413|1413]]을 참고하세요.)
 
-## `gethostname()`---나는 누구인가?
+## `gethostname()`---나는 누구인가요?
 
 [i[`gethostname()` function]] `getpeername()`보다 더 쉬운 것이 바로 `gethostname()`
 함수입니다. 이것은 여러분의 프로그램이 실행되고 있는 컴퓨터의 이름을 돌려줍니다.
