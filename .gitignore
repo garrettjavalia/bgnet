@@ -19,6 +19,7 @@ __pycache__
 
 # Misc
 
+.DS_Store
 foo
 foo.[ch]
 bar
