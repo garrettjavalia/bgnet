@@ -1,55 +1,25 @@
 PACKAGE=bgnet
-UPLOADDIR=beej71@alfalfa.dreamhost.com:~/beej.us/guide/$(PACKAGE)
-BUILDDIR=./stage
-BUILDTMP=./build_tmp
-SRCDIR=./src
+WEB_IMAGES=$(wildcard src/*.svg)
 
-.PHONY: all
-all:
-	$(MAKE) -C ${SRCDIR}
-	$(MAKE) -C source clean
+BGBSPD_BUILD_DIR?=../bgbspd
 
-.PHONY: stage
-stage:
-	mkdir -p $(BUILDDIR)/{pdf,html,translations,source}
-	mkdir -p $(BUILDDIR)/html/$(PACKAGE)
-	cp -v website/* website/.htaccess $(BUILDDIR)
-	cp -v ${SRCDIR}/$(PACKAGE)*.pdf $(BUILDDIR)/pdf
-	cp -v ${SRCDIR}/$(PACKAGE).html $(BUILDDIR)/html/index.html
-	cp -v ${SRCDIR}/$(PACKAGE)-wide.html $(BUILDDIR)/html/index-wide.html
-	cp -v ${SRCDIR}/split/* $(BUILDDIR)/html/$(PACKAGE)
-	( cd $(BUILDDIR)/html; zip -r $(PACKAGE).zip $(PACKAGE); mv $(PACKAGE) split )
-	mkdir -p $(BUILDDIR)/html/$(PACKAGE)
-	cp -v ${SRCDIR}/split-wide/* $(BUILDDIR)/html/$(PACKAGE)
-	( cd $(BUILDDIR)/html; zip -r $(PACKAGE)-wide.zip $(PACKAGE); mv $(PACKAGE) split-wide )
-	cp -v ${SRCDIR}/{cs,dataencap}.svg $(BUILDDIR)/html/
-	cp -v ${SRCDIR}/{cs,dataencap}.svg $(BUILDDIR)/html/split
-	cp -v ${SRCDIR}/{cs,dataencap}.svg $(BUILDDIR)/html/split-wide
-	cp -v translations/*.{pdf,html} $(BUILDDIR)/translations 2>/dev/null || : 
-	cp -rv source/* $(BUILDDIR)/source
-	mkdir -p $(BUILDTMP)/$(PACKAGE)_source
-	cp -rv source/* $(BUILDTMP)/$(PACKAGE)_source
-	( cd $(BUILDTMP); zip -r $(PACKAGE)_source.zip $(PACKAGE)_source )
-	cp -v $(BUILDTMP)/$(PACKAGE)_source.zip $(BUILDDIR)/source
-	rm -rf $(BUILDTMP)
+include $(BGBSPD_BUILD_DIR)/main.make
 
-.PHONY: upload
-upload: pristine all stage
-	rsync -rv -e ssh --delete $(BUILDDIR)/* $(BUILDDIR)/.htaccess $(UPLOADDIR)
+I18N_KO_SRCDIR?=i18n/ko/src
 
-.PHONY: fastupload
-fastupload: all stage
-	rsync -rv -e ssh --delete $(BUILDDIR)/* $(BUILDDIR)/.htaccess $(UPLOADDIR)
+.PHONY: ko ko-clean ko-pristine ko-stage
 
-.PHONY: pristine
-pristine: clean
-	$(MAKE) -C ${SRCDIR} $@
-	$(MAKE) -C source $@
-	rm -rf $(BUILDDIR)
+ko:
+	$(MAKE) -C $(I18N_KO_SRCDIR) all
 
-.PHONY: clean
-clean:
-	rm -rf 
-	$(MAKE) -C ${SRCDIR} $@
-	$(MAKE) -C source $@
+ko-clean:
+	$(MAKE) -C $(I18N_KO_SRCDIR) clean
 
+ko-pristine:
+	$(MAKE) -C $(I18N_KO_SRCDIR) pristine
+
+ko-stage: ko
+	mkdir -p $(STAGEDIR)/translations
+	cp -v $(I18N_KO_SRCDIR)/$(PACKAGE).html $(STAGEDIR)/translations/$(PACKAGE)_ko.html
+	cp -v $(I18N_KO_SRCDIR)/$(PACKAGE)-wide.html $(STAGEDIR)/translations/$(PACKAGE)_ko_wide.html
+	cp -v $(I18N_KO_SRCDIR)/$(PACKAGE)*.pdf $(STAGEDIR)/translations 2>/dev/null || :

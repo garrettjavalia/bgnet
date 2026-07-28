@@ -78,7 +78,7 @@ be used for further `accept()` calls as they come in.
 
 | Parameter | Description                                                   |
 |-----------|---------------------------------------------------------------|
-| `s`       | The `listen()`ing socket descriptor.                          | 
+| `s`       | The `listen()`ing socket descriptor.                          |
 | `addr`    | This is filled in with the address of the site that's connecting to you.|
 | `addrlen` | This is filled in with the `sizeof()` the structure returned in the `addr` parameter. You can safely ignore it if you assume you're getting a `struct sockaddr_in` back, which you know you are, because that's the type you passed in for `addr`.|
 
@@ -396,7 +396,8 @@ sockaddr` with the result.
 #include <netdb.h>
 
 int getaddrinfo(const char *nodename, const char *servname,
-                const struct addrinfo *hints, struct addrinfo **res);
+                const struct addrinfo *hints,
+                struct addrinfo **res);
 
 void freeaddrinfo(struct addrinfo *ai);
 
@@ -406,7 +407,7 @@ struct addrinfo {
   int     ai_flags;          // AI_PASSIVE, AI_CANONNAME, ...
   int     ai_family;         // AF_xxx
   int     ai_socktype;       // SOCK_xxx
-  int     ai_protocol;       // 0 (auto) or IPPROTO_TCP, IPPROTO_UDP 
+  int     ai_protocol;       // 0 (auto) or IPPROTO_TCP, IPPROTO_UDP
 
   socklen_t  ai_addrlen;     // length of ai_addr
   char   *ai_canonname;      // canonical name for nodename
@@ -419,7 +420,7 @@ struct addrinfo {
 
 `getaddrinfo()` is an excellent function that will return information on
 a particular host name (such as its IP address) and load up a `struct
-sockaddr` for you, taking care of the gritty details (like if it's IPv4
+sockaddr` for you, taking care of the gritty details (like if its IPv4
 or IPv6). It replaces the old functions `gethostbyname()` and
 `getservbyname()`.The description, below, contains a lot of information
 that might be a little daunting, but actual usage is pretty simple. It
@@ -499,7 +500,7 @@ error code in the return value.
 // namely a stream socket to www.example.com on port 80 (http)
 // either IPv4 or IPv6
 
-int sockfd;  
+int sockfd;
 struct addrinfo hints, *servinfo, *p;
 int rv;
 
@@ -507,7 +508,8 @@ memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 hints.ai_socktype = SOCK_STREAM;
 
-if ((rv = getaddrinfo("www.example.com", "http", &hints, &servinfo)) != 0) {
+rv = getaddrinfo("www.example.com", "http", &hints, &servinfo);
+if (rv != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     exit(1);
 }
@@ -543,7 +545,7 @@ freeaddrinfo(servinfo); // all done with this structure
 // namely a stream socket on port 3490, on this host's IP
 // either IPv4 or IPv6.
 
-int sockfd;  
+int sockfd;
 struct addrinfo hints, *servinfo, *p;
 int rv;
 
@@ -740,7 +742,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if ((he = gethostbyname(argv[1])) == NULL) {  // get the host info
+    if ((he = gethostbyname(argv[1])) == NULL) {  // get host info
         herror("gethostbyname");
         return 2;
     }
@@ -844,7 +846,8 @@ char service[20];
 
 // pretend sa is full of good information about the host and port...
 
-getnameinfo(&sa, sizeof sa, host, sizeof host, service, sizeof service, 0);
+getnameinfo(&sa, sizeof sa, host, sizeof host, service,
+            sizeof service, 0);
 
 printf("   host: %s\n", host);    // e.g. "www.example.com"
 printf("service: %s\n", service); // e.g. "http"
@@ -1094,9 +1097,15 @@ might want to build it on an Intel machine and still have things work
 properly.)
 
 Note that the types involved are 32-bit (4 byte, probably `int`) and
-16-bit (2 byte, very likely `short`) numbers. 64-bit machines might have
-a `htonll()` for 64-bit `int`s, but I've not seen it. You'll just have
-to write your own.
+16-bit (2 byte, very likely `short`) numbers.
+
+There are 64-bit variants on various systems. Check out the
+[flm[`htobe64()`|htobe64]] function and its relatives in `<endian.h>` if
+you have it (which apparently MacOS doesn't). And GCC has [fl[byte
+swapping
+built-ins|https://gcc.gnu.org/onlinedocs/gcc/Byte-Swapping-Builtins.html]]
+that even go up to 128 bits. [flx[Or you can roll your own|htonll.c]],
+but only actually do the swap if you're on a little-endian machine!
 
 Anyway, the way these functions work is that you first decide if you're
 converting _from_ host (your machine's) byte order or from network byte
@@ -1151,7 +1160,8 @@ back
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-// ALL THESE ARE DEPRECATED! Use inet_pton()  or inet_ntop() instead!!
+// ALL THESE ARE DEPRECATED!
+// Use inet_pton() or inet_ntop() instead!
 
 char *inet_ntoa(struct in_addr in);
 int inet_aton(const char *cp, struct in_addr *inp);
@@ -1161,7 +1171,7 @@ in_addr_t inet_addr(const char *cp);
 ### Description {.unnumbered .unlisted}
 
 _These functions are deprecated because they don't handle IPv6! Use
-(`inet_ntop()`)[#inet_ntopman] or (`inet_pton()`)[#inet_ntopman]
+[`inet_ntop()`](#inet_ntopman) or [`inet_pton()`](#inet_ntopman)
 instead! They are included here because they can still be found in the
 wild._
 
@@ -1330,13 +1340,15 @@ char *get_ip_str(const struct sockaddr *sa, char *s, size_t maxlen)
 {
     switch(sa->sa_family) {
         case AF_INET:
-            inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
-                    s, maxlen);
+            inet_ntop(AF_INET,
+                    &(((struct sockaddr_in *)sa)->sin_addr), s,
+                    maxlen);
             break;
 
         case AF_INET6:
-            inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
-                    s, maxlen);
+            inet_ntop(AF_INET6,
+                    &(((struct sockaddr_in6 *)sa)->sin6_addr), s,
+                    maxlen);
             break;
 
         default:
@@ -1408,13 +1420,14 @@ getaddrinfo(NULL, "3490", &hints, &res);
 
 // make a socket:
 
-sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+sockfd = socket(res->ai_family, res->ai_socktype,
+    res->ai_protocol);
 
 // bind it to the port we passed in to getaddrinfo():
 
 bind(sockfd, res->ai_addr, res->ai_addrlen);
 
-listen(sockfd, 10); // set s up to be a server (listening) socket
+listen(sockfd, 10); // set sockfd up to be a server socket
 
 // then have an accept() loop down here somewhere
 ```
@@ -1524,7 +1537,7 @@ descriptor, and contains the following fields:
 struct pollfd {
     int fd;         // the socket descriptor
     short events;   // bitmap of events we're interested in
-    short revents;  // when poll() returns, bitmap of events that occurred
+    short revents;  // after return, bitmap of events that occurred
 };
 ```
 
@@ -1573,11 +1586,11 @@ s2 = socket(PF_INET, SOCK_STREAM, 0);
 
 // set up the array of file descriptors.
 //
-// in this example, we want to know when there's normal or out-of-band
-// data ready to be recv()'d...
+// in this example, we want to know when there's normal or
+// out-of-band (OOB) data ready to be recv()'d...
 
 ufds[0].fd = s1;
-ufds[0].events = POLLIN | POLLPRI; // check for normal or out-of-band
+ufds[0].events = POLLIN | POLLPRI; // check for normal or OOB
 
 ufds[1].fd = s2;
 ufds[1].events = POLLIN; // check for just normal data
@@ -1655,8 +1668,8 @@ vanilla `recv()`.
 | Macro         | Description                                              |
 |---------------|----------------------------------------------------------|
 | [i[Out-of-band data]][i[`MSG_OOB` macro]i]`MSG_OOB` | Receive Out of Band data. This is how to get data that has been sent to you with the `MSG_OOB` flag in `send()`. As the receiving side, you will have had signal [i[`SIGURG` macro]i] `SIGURG` raised telling you there is urgent data. In your handler for that signal, you could call `recv()` with this `MSG_OOB` flag.|
-| [i[`MSG_PEEK` macro]i]`MSG_PEEK`                    | If you want to call `recv()` "just for pretend", you can call it with this flag. This will tell you what's waiting in the buffer for when you call `recv()` "for real" (i.e. _without_ the `MSG_PEEK` flag. It's like a sneak preview into the next `recv()` call.| 
-| [i[`MSG_WAITALL` macro]i]`MSG_WAITALL`              | Tell `recv()` to not return until all the data you specified in the `len` parameter. It will ignore your wishes in extreme circumstances, however, like if a signal interrupts the call or if some error occurs or if the remote side closes the connection, etc. Don't be mad with it.| 
+| [i[`MSG_PEEK` macro]i]`MSG_PEEK`                    | If you want to call `recv()` "just for pretend", you can call it with this flag. This will tell you what's waiting in the buffer for when you call `recv()` "for real" (i.e. _without_ the `MSG_PEEK` flag.) It's like a sneak preview into the next `recv()` call.|
+| [i[`MSG_WAITALL` macro]i]`MSG_WAITALL`              | Tell `recv()` to not return until all the data you specified in the `len` parameter has been received. It will ignore your wishes in extreme circumstances, however, like if a signal interrupts the call or if some error occurs or if the remote side closes the connection, etc. Don't be mad with it.|
 
 When you call `recv()`, it will block until there is some data to read.
 If you want to not block, set the socket to non-blocking or check with
@@ -1725,8 +1738,8 @@ printf("recv()'d %d bytes of data in buf\n", byte_count);
 printf("from IP address %s\n",
     inet_ntop(addr.ss_family,
         addr.ss_family == AF_INET?
-            ((struct sockadd_in *)&addr)->sin_addr:
-            ((struct sockadd_in6 *)&addr)->sin6_addr,
+            ((struct sockaddr_in *)&addr)->sin_addr:
+            ((struct sockaddr_in6 *)&addr)->sin6_addr,
         ipstr, sizeof ipstr);
 ```
 
@@ -1748,8 +1761,8 @@ Check if sockets descriptors are ready to read/write
 ```{.c}
 #include <sys/select.h>
 
-int select(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
-           struct timeval *timeout);
+int select(int n, fd_set *readfds, fd_set *writefds,
+           fd_set *exceptfds, struct timeval *timeout);
 
 FD_SET(int fd, fd_set *set);
 FD_CLR(int fd, fd_set *set);
@@ -1833,7 +1846,8 @@ FD_SET(s2, &readfds);
 // the n param in select()
 n = s2 + 1;
 
-// wait until either socket has data ready to be recv()d (timeout 10.5 secs)
+// wait until either socket has data ready to be recv()d
+// (timeout 10.5 secs)
 tv.tv_sec = 10;
 tv.tv_usec = 500000;
 rv = select(n, &readfds, NULL, NULL, &tv);
@@ -1897,7 +1911,7 @@ all the options, but here are some of the most fun ones:
 |-------------------|------------------------------------------------------|
 | [i[`SO_BINDTODEVICE` macro]i]`SO_BINDTODEVICE` | Bind this socket to a symbolic device name like `eth0` instead of using `bind()` to bind it to an IP address. Type the command `ifconfig` under Unix to see the device names.|
 | [i[`SO_REUSEADDR` macro]i]`SO_REUSEADDR      ` | Allows other sockets to `bind()` to this port, unless there is an active listening socket bound to the port already. This enables you to get around those "Address already in use" error messages when you try to restart your server after a crash.|
-| [i[`SO_BROADCAST` macro]i]`SOCK_DGRAM`         | Allows UDP datagram (`SOCK_DGRAM`) sockets to send and receive packets sent to and from the broadcast address. Does nothing---_NOTHING!!_---to TCP stream sockets! Hahaha!|
+| [i[`SO_BROADCAST` macro]i]`SO_BROADCAST`       | Allows UDP datagram (`SOCK_DGRAM`) sockets to send and receive packets sent to and from the broadcast address. Does nothing---_NOTHING!!_---to TCP stream sockets! Hahaha!|
 
 As for the parameter `optval`, it's usually a pointer to an `int`
 indicating the value in question. For booleans, zero is false, and
@@ -2027,7 +2041,8 @@ temp = htonl(spatula_count);
 send(stream_socket, &temp, sizeof temp, 0);
 
 // send secret message out of band:
-send(stream_socket, secret_message, strlen(secret_message)+1, MSG_OOB);
+send(stream_socket, secret_message, strlen(secret_message)+1,
+        MSG_OOB);
 
 // now with UDP datagram sockets:
 //getaddrinfo(...
@@ -2035,7 +2050,7 @@ send(stream_socket, secret_message, strlen(secret_message)+1, MSG_OOB);
 //dgram_socket = socket(...
 
 // send secret message normally:
-sendto(dgram_socket, secret_message, strlen(secret_message)+1, 0, 
+sendto(dgram_socket, secret_message, strlen(secret_message)+1, 0,
        (struct sockaddr*)&dest, sizeof dest);
 ```
 
@@ -2134,7 +2149,7 @@ by hand if you really want to.
 | Parameter  | Description                                                 |
 |------------|-------------------------------------------------------------|
 | `domain`   | `domain` describes what kind of socket you're interested in. This can, believe me, be a wide variety of things, but since this is a socket guide, it's going to be [i[`PF_INET` macro]i] `PF_INET` for IPv4, and `PF_INET6` for IPv6.|
-| `type`     | Also, the `type` parameter can be a number of things, but you'll probably be setting it to either [i[`SOCK_STREAM` macro]i] `SOCK_STREAM` for reliable TCP sockets (`send()`, `recv()`) or [i[`SOCK_DGRAM` macro]i] `SOCK_DGRAM` for unreliable fast UDP sockets (`sendto()`, `recvfrom()`). (Another interesting socket type is [i[`SOCK_RAW` macro]i] `SOCK_RAW` which can be used to construct packets by hand. It's pretty cool.)| 
+| `type`     | Also, the `type` parameter can be a number of things, but you'll probably be setting it to either [i[`SOCK_STREAM` macro]i] `SOCK_STREAM` for reliable TCP sockets (`send()`, `recv()`) or [i[`SOCK_DGRAM` macro]i] `SOCK_DGRAM` for unreliable fast UDP sockets (`sendto()`, `recvfrom()`). (Another interesting socket type is [i[`SOCK_RAW` macro]i] `SOCK_RAW` which can be used to construct packets by hand. It's pretty cool.)|
 | `protocol` | Finally, the `protocol` parameter tells which protocol to use with a certain socket type. Like I've already said, for instance, `SOCK_STREAM` uses TCP. Fortunately for you, when using `SOCK_STREAM` or `SOCK_DGRAM`, you can just set the protocol to 0, and it'll use the proper protocol automatically. Otherwise, you can use [i[`getprotobyname()` function]] `getprotobyname()` to look up the proper protocol number.|
 
 ### Return Value {.unnumbered .unlisted}
@@ -2183,8 +2198,9 @@ Structures for handling internet addresses
 ```{.c}
 #include <netinet/in.h>
 
-// All pointers to socket address structures are often cast to pointers
-// to this type before use in various functions and system calls:
+// All pointers to socket address structures are often cast to
+// pointers to this type before use in various functions and system
+// calls:
 
 struct sockaddr {
     unsigned short    sa_family;    // address family, AF_xxx
@@ -2210,7 +2226,7 @@ struct in_addr {
 
 struct sockaddr_in6 {
     u_int16_t       sin6_family;   // address family, AF_INET6
-    u_int16_t       sin6_port;     // port number, Network Byte Order
+    u_int16_t       sin6_port;     // port number, network order
     u_int32_t       sin6_flowinfo; // IPv6 flow information
     struct in6_addr sin6_addr;     // IPv6 address
     u_int32_t       sin6_scope_id; // Scope ID
@@ -2221,8 +2237,8 @@ struct in6_addr {
 };
 
 
-// General socket address holding structure, big enough to hold either
-// struct sockaddr_in or struct sockaddr_in6 data:
+// General socket address holding structure, big enough to hold
+// either struct sockaddr_in or struct sockaddr_in6 data:
 
 struct sockaddr_storage {
     sa_family_t  ss_family;     // address family
@@ -2251,7 +2267,7 @@ promise you it's pure coincidence and you shouldn't even worry about it.
 
 So, with that in mind, remember that whenever a function says it takes a
 `struct sockaddr*` you can cast your `struct sockaddr_in*`, `struct
-sockaddr_in6*`, or `struct sockadd_storage*` to that type with ease and
+sockaddr_in6*`, or `struct sockaddr_storage*` to that type with ease and
 safety.
 
 `struct sockaddr_in` is the structure used with IPv4 addresses (e.g.
@@ -2269,7 +2285,7 @@ Sometimes it's a crazy `union` with all kinds of `#define`s and other
 nonsense. But what you should do is only use the `s_addr` field in this
 structure, because many systems only implement that one.
 
-`struct sockadd_in6` and `struct in6_addr` are very similar, except
+`struct sockaddr_in6` and `struct in6_addr` are very similar, except
 they're used for IPv6.
 
 `struct sockaddr_storage` is a struct you can pass to `accept()` or

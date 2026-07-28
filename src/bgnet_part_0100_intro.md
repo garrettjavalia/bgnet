@@ -1,4 +1,131 @@
 # Intro
+<!--
+Beej's Guide to Network Programming book source
+
+# vim: ts=4:sw=4:nosi:et:tw=72
+-->
+
+<!--
+	History:
+
+	2.3.2:		socket man page
+	2.3.3:		sockaddr_in man page
+	2.3.4:		bind, listen man page
+	2.3.5:		connect man page
+	2.3.6:		listen, perror man page
+	2.3.7:		errno man page
+	2.3.8:		htonl etc man page
+	2.3.9:		close man page, expanded man page leader
+	2.3.10:		inet_ntoa, setsockopt man pages
+	2.3.11:		getpeername man page
+	2.3.12:		send/sendto man pages
+	2.3.13:		shutdown man pages
+	2.3.14:		gethostname man pages, fix inet_aton links
+	2.3.15:		fcntl man page
+	2.3.16:		recv/recvfrom man page
+	2.3.17:		gethostbyname/gethostbyaddr man page
+	2.3.18:		changed GET / to GET / HTTP/1.0
+	2.3.19:		added select() man page
+	2.3.20:		added poll() man page
+	2.3.21:		section on NAT and reserved networks
+	2.3.22:		typo fixes in sects "man" and "privnet"
+	2.3.23:		added broadcast packets section
+	2.3.24:		manpage prototype changed to code, subtitle moved out of title
+	2.4.0:		big overhaul, serialization stuff
+	2.4.1:		minor text changes in intro
+	2.4.2:		changed all sizeofs to use variable names instead of types
+	2.4.3:		fix myaddr->my_addr in listener.c, sockaddr_inman example
+	2.4.4:		fix myaddr->my_addr in server.c
+	2.4.5:		fix 14->18 in son of data encap
+	3.0.0:		IPv6 overhaul
+	3.0.1:		sa-to-sa6 typo fix
+	3.0.2:		typo fixes
+	3.0.3:		typo fixes
+	3.0.4:		cut-n-paste errors, selectserver hints fix
+	3.0.5:		typo fixes
+	3.0.6:		typo fixes
+	3.0.7:		typo fixes, added front matter
+	3.0.8:		getpeername() code fixes
+	3.0.9:		getpeername() code fixes, this time fer sure
+	3.0.10:		bind() man page code fix, comment changes
+	3.0.11:		socket syscall section code fix, comment changes
+	3.0.12:		typos in "IP Addresses, structs, and Data Munging"
+	3.0.13:		amp removals, note about errno and multithreading
+	3.0.14:		type changes to listener.c, pack2.c
+	3.0.15:		fix inet_pton example
+	3.0.16:		fix simple server output, optlen in getsockopt man page
+	3.0.17:		fix small typo
+	3.0.18:		reverse perror and close calls in getaddrinfo
+	3.0.19:		add notes about O_NONBLOCK with select() under Linux
+	3.0.20:		fix missing .fd in poll() example
+	3.0.21:		change sizeof(int) to sizeof yes
+    3.0.22:     C99 updates, bug fixes, markdown
+    3.0.23:     Book reference and URL updates
+    3.1.0:      Section on poll()
+    3.1.1:      Add WSL note, telnot
+    3.1.2:      pollserver.c bugfix
+    3.1.3:      Fix freeaddrinfo memleak
+    3.1.4:      Fix accept example header files
+    3.1.5:      Fix dgram AF_UNSPEC
+-->
+
+<!-- prevent hyphenation of the following words: -->
+[nh[strtol]]
+[nh[sprintf]]
+[nh[accept]]
+[nh[bind]]
+[nh[connect]]
+[nh[close]]
+[nh[getaddrinfo]]
+[nh[freeaddrinfo]]
+<!--
+Don't know how to make this work with underscores. I love
+you, Knuth, but... daaahm.
+
+[nh[gai_strerr]]
+-->
+[nh[gethostname]]
+[nh[gethostbyname]]
+[nh[gethostbyaddr]]
+[nh[getnameinfo]]
+[nh[getpeername]]
+[nh[errno]]
+[nh[fcntl]]
+[nh[htons]]
+[nh[htonl]]
+[nh[ntohs]]
+[nh[ntohl]]
+<!--
+[nh[inet_ntoa]]
+[nh[inet_aton]]
+[nh[inet_addr]]
+[nh[inet_ntop]]
+[nh[inet_pton]]
+-->
+[nh[listen]]
+[nh[perror]]
+[nh[strerror]]
+[nh[poll]]
+[nh[recv]]
+[nh[recvfrom]]
+[nh[select]]
+[nh[setsockopt]]
+[nh[getsockopt]]
+[nh[send]]
+[nh[sendto]]
+[nh[shutdown]]
+[nh[socket]]
+[nh[struct]]
+[nh[sockaddr]]
+<!--
+[nh[sockaddr_in]]
+[nh[in_addr]]
+[nh[sockaddr_in6]]
+[nh[in6_addr]]
+-->
+[nh[hostent]]
+[nh[addrinfo]]
+[nh[closesocket]]
 
 Hey! Socket programming got you down? Is this stuff just a little too
 difficult to figure out from the `man` pages? You want to do cool
@@ -53,12 +180,12 @@ I'll appreciate the purchase because it helps sustain my
 document-writing lifestyle!
 
 
-## Note for Solaris/SunOS Programmers {#solaris}
+## Note for Solaris/SunOS/illumos Programmers {#solaris}
 
-When compiling for [i[Solaris]] Solaris or [i[SunOS]] SunOS, you need to
-specify some extra command-line switches for linking in the proper
-libraries. In order to do this, simply add "`-lnsl -lsocket -lresolv`"
-to the end of the compile command, like so:
+When compiling for a [i[Solaris]] Solaris variant or [i[SunOS]] SunOS,
+you need to specify some extra command-line switches for linking in the
+proper libraries. In order to do this, simply add "`-lnsl -lsocket
+-lresolv`" to the end of the compile command, like so:
 
 ```
 $ cc -o server server.c -lnsl -lsocket -lresolv
@@ -90,40 +217,50 @@ information---it's just what people have told me through email.
 
 At this point in the guide, historically, I've done a bit of bagging on
 [i[Windows]] Windows, simply due to the fact that I don't like it very
-much. But I should really be fair and tell you that Windows has a huge
-install base and is obviously a perfectly fine operating system.
+much. But then Windows and Microsoft (as a company) got a lot better.
+Windows 10 coupled with WSL (below) actually makes for a decent
+operating system. Not really a lot to complain about.
 
-They say absence makes the heart grow fonder, and in this case, I
-believe it to be true. (Or maybe it's age.) But what I can say is that
-after a decade-plus of not using Microsoft OSes for my personal work,
-I'm much happier! As such, I can sit back and safely say, "Sure, feel
-free to use Windows!"  ...OK yes, it does make me grit my teeth to say
-that.
+Well, a little—for example, I'm writing this (in 2025) on a 2015 laptop
+that used to run Windows 10. Eventually it got too slow and I installed
+Linux on it. And have been using it ever since.
 
-So I still encourage you to try [i[Linux]]
+But now we have Windows 11 that apparently requires beefier hardware
+than Windows 10. I'm not a fan of that. The OS should be as unobtrusive
+as possible and not require you to spend more money. The extra CPU power
+should be for apps, not the OS! Additionally, Microsoft knows what you
+want, and what you want is more advertising! Right? In your operating
+system! Weren't you missing that? Now you can have it with Windows 11.
+
+So... I still encourage you to try [i[Linux]]
 [fl[Linux|https://www.linux.com/]], [i[BSD]] [fl[BSD|https://bsd.org/]],
-or some flavor of Unix, instead.
+[i[illumos]] [fl[illumos|https://www.illumos.org/]] or any other flavor
+of Unix instead of Windows.
+
+How'd that soapbox get there?
 
 But people like what they like, and you Windows folk will be pleased to
-know that this information is generally applicable to you guys, with a
-few minor changes, if any.
+know that this information is generally applicable to Windows, with a
+few minor changes.
 
-Another thing that you should strongly consider is [i[WSL]] [i[Windows
+One thing that you should strongly consider is [i[WSL]] [i[Windows
 Subsystem For Linux]] the [fl[Windows Subsystem for
 Linux|https://learn.microsoft.com/en-us/windows/wsl/]]. This basically
 allows you to install a Linux VM-ish thing on Windows 10. That will also
 definitely get you situated, and you'll be able to build and run these
 programs as is.
 
-One cool thing you can do is install [i[Cygwin]]
+Another thing you can do is install [i[Cygwin]]
 [fl[Cygwin|https://cygwin.com/]], which is a collection of Unix tools
 for Windows. I've heard on the grapevine that doing so allows all these
 programs to compile unmodified, but I've never tried it.
 
-But some of you might want to do things the Pure Windows Way. That's
-very gutsy of you, and this is what you have to do: run out and get Unix
+Some of you might want to do things the Pure Windows Way. That's very
+gutsy of you, and this is what you have to do: run out and get Unix
 immediately! No, no---I'm kidding. I'm supposed to be
 Windows-friendly(er) these days...
+
+Okay, okay. I'll get on with it.
 
 [i[Winsock]]
 
@@ -160,8 +297,6 @@ available.
 
 The code to do that looks something like this:
 
-[[book-pagebreak]]
-
 ```{.c .numberLines}
 #include <winsock2.h>
 
@@ -176,7 +311,7 @@ The code to do that looks something like this:
     if (LOBYTE(wsaData.wVersion) != 2 ||
         HIBYTE(wsaData.wVersion) != 2)
     {
-        fprintf(stderr,"Versiion 2.2 of Winsock is not available.\n");
+        fprintf(stderr,"Version 2.2 of Winsock not available.\n");
         WSACleanup();
         exit(2);
     }
@@ -255,15 +390,15 @@ me to hear that it is being used for good! `:-)` Thank you!
 [i[Mirroring the Guide]] You are more than welcome to mirror this site,
 whether publicly or privately. If you publicly mirror the site and want
 me to link to it from the main page, drop me a line at
-[`beej@beej.us`](beej@beej.us).
+[`beej@beej.us`](mailto:beej@beej.us).
 
 
 ## Note for Translators
 
 [i[Translating the Guide]] If you want to translate the guide into
-another language, write me at [`beej@beej.us`](beej@beej.us) and I'll
-link to your translation from the main page. Feel free to add your name
-and contact info to the translation.
+another language, write me at [`beej@beej.us`](mailto:beej@beej.us) and
+I'll link to your translation from the main page. Feel free to add your
+name and contact info to the translation.
 
 This source markdown document uses UTF-8 encoding.
 

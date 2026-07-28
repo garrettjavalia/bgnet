@@ -58,6 +58,11 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
+        inet_ntop(p->ai_family,
+            get_in_addr((struct sockaddr *)p->ai_addr),
+            s, sizeof s);
+        printf("client: attempting connection to %s\n", s);
+
 		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			perror("client: connect");
 			close(sockfd);
@@ -72,9 +77,10 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+	inet_ntop(p->ai_family,
+			get_in_addr((struct sockaddr *)p->ai_addr),
 			s, sizeof s);
-	printf("client: connecting to %s\n", s);
+	printf("client: connected to %s\n", s);
 
 	freeaddrinfo(servinfo); // all done with this structure
 

@@ -1,2 +1,9 @@
-bgnet_lulu.*
-bgnet_amazon.*
+bgnet*.pdf
+bgnet*.html
+bgnet*.epub
+bgnet_temp_*
+bg-css*.html
+split/
+split-wide/
+cs.png
+dataencap.png

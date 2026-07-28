@@ -110,7 +110,7 @@ Let's have a look at that `struct`:
 struct pollfd {
     int fd;         // the socket descriptor
     short events;   // bitmap of events we're interested in
-    short revents;  // when poll() returns, bitmap of events that occurred
+    short revents;  // on return, bitmap of events that occurred
 };
 ```
 
@@ -125,6 +125,7 @@ The `events` field is the bitwise-OR of the following:
 |-----------|--------------------------------------------------------------|
 | `POLLIN`  | Alert me when data is ready to `recv()` on this socket.      |
 | `POLLOUT` | Alert me when I can `send()` data to this socket without blocking.|
+| `POLLHUP` | Alert me when the remote closed the connection.|
 
 Once you have your array of `struct pollfd`s in order, then you can pass
 it to `poll()`, also passing the size of the array, as well as a timeout
@@ -165,9 +166,11 @@ int main(void)
         int pollin_happened = pfds[0].revents & POLLIN;
 
         if (pollin_happened) {
-            printf("File descriptor %d is ready to read\n", pfds[0].fd);
+            printf("File descriptor %d is ready to read\n",
+                    pfds[0].fd);
         } else {
-            printf("Unexpected event occurred: %d\n", pfds[0].revents);
+            printf("Unexpected event occurred: %d\n",
+                    pfds[0].revents);
         }
     }
 
@@ -234,17 +237,36 @@ of file descriptors.
 
 #define PORT "9034"   // Port we're listening on
 
-// Get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+/*
+ * Convert socket to IP address string.
+ * addr: struct sockaddr_in or struct sockaddr_in6
+ */
+const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
+    struct sockaddr_storage *sas = addr;
+    struct sockaddr_in *sa4;
+    struct sockaddr_in6 *sa6;
+    void *src;
+
+    switch (sas->ss_family) {
+        case AF_INET:
+            sa4 = addr;
+            src = &(sa4->sin_addr);
+            break;
+        case AF_INET6:
+            sa6 = addr;
+            src = &(sa6->sin6_addr);
+            break;
+        default:
+            return NULL;
     }
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+    return inet_ntop(sas->ss_family, src, buf, size);
 }
 
-// Return a listening socket
+/*
+ * Return a listening socket.
+ */
 int get_listener_socket(void)
 {
     int listener;     // Listening socket descriptor
@@ -255,22 +277,24 @@ int get_listener_socket(void)
 
     // Get us a socket and bind it
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
     if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
-        fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
+        fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
         exit(1);
     }
-    
+
     for(p = ai; p != NULL; p = p->ai_next) {
-        listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) { 
+        listener = socket(p->ai_family, p->ai_socktype,
+                p->ai_protocol);
+        if (listener < 0) {
             continue;
         }
-        
+
         // Lose the pesky "address already in use" error message
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
+                sizeof(int));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
             close(listener);
@@ -280,12 +304,12 @@ int get_listener_socket(void)
         break;
     }
 
-    freeaddrinfo(ai); // All done with this
-
     // If we got here, it means we didn't get bound
     if (p == NULL) {
         return -1;
     }
+
+    freeaddrinfo(ai); // All done with this
 
     // Listen
     if (listen(listener, 10) == -1) {
@@ -295,23 +319,28 @@ int get_listener_socket(void)
     return listener;
 }
 
-// Add a new file descriptor to the set
-void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
+/*
+ * Add a new file descriptor to the set.
+ */
+void add_to_pfds(struct pollfd **pfds, int newfd, int *fd_count,
+        int *fd_size)
 {
     // If we don't have room, add more space in the pfds array
     if (*fd_count == *fd_size) {
         *fd_size *= 2; // Double it
-
         *pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
     }
 
     (*pfds)[*fd_count].fd = newfd;
     (*pfds)[*fd_count].events = POLLIN; // Check ready-to-read
+    (*pfds)[*fd_count].revents = 0;
 
     (*fd_count)++;
 }
 
-// Remove an index from the set
+/*
+ * Remove a file descriptor at a given index from the set.
+ */
 void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
 {
     // Copy the one from the end over this one
@@ -320,23 +349,112 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
     (*fd_count)--;
 }
 
-// Main
+/*
+ * Handle incoming connections.
+ */
+void handle_new_connection(int listener, int *fd_count,
+        int *fd_size, struct pollfd **pfds)
+{
+    struct sockaddr_storage remoteaddr; // Client address
+    socklen_t addrlen;
+    int newfd;  // Newly accept()ed socket descriptor
+    char remoteIP[INET6_ADDRSTRLEN];
+
+    addrlen = sizeof remoteaddr;
+    newfd = accept(listener, (struct sockaddr *)&remoteaddr,
+            &addrlen);
+
+    if (newfd == -1) {
+        perror("accept");
+    } else {
+        add_to_pfds(pfds, newfd, fd_count, fd_size);
+
+        printf("pollserver: new connection from %s on socket %d\n",
+                inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP),
+                newfd);
+    }
+}
+
+/*
+ * Handle regular client data or client hangups.
+ */
+void handle_client_data(int listener, int *fd_count,
+        struct pollfd *pfds, int *pfd_i)
+{
+    char buf[256];    // Buffer for client data
+
+    int nbytes = recv(pfds[*pfd_i].fd, buf, sizeof buf, 0);
+
+    int sender_fd = pfds[*pfd_i].fd;
+
+    if (nbytes <= 0) { // Got error or connection closed by client
+        if (nbytes == 0) {
+            // Connection closed
+            printf("pollserver: socket %d hung up\n", sender_fd);
+        } else {
+            perror("recv");
+        }
+
+        close(pfds[*pfd_i].fd); // Bye!
+
+        del_from_pfds(pfds, *pfd_i, fd_count);
+
+        // reexamine the slot we just deleted
+        (*pfd_i)--;
+
+    } else { // We got some good data from a client
+        printf("pollserver: recv from fd %d: %.*s", sender_fd,
+                nbytes, buf);
+        // Send to everyone!
+        for(int j = 0; j < *fd_count; j++) {
+            int dest_fd = pfds[j].fd;
+
+            // Except the listener and ourselves
+            if (dest_fd != listener && dest_fd != sender_fd) {
+                if (send(dest_fd, buf, nbytes, 0) == -1) {
+                    perror("send");
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Process all existing connections.
+ */
+void process_connections(int listener, int *fd_count, int *fd_size,
+        struct pollfd **pfds)
+{
+    for(int i = 0; i < *fd_count; i++) {
+
+        // Check if someone's ready to read
+        if ((*pfds)[i].revents & (POLLIN | POLLHUP)) {
+            // We got one!!
+
+            if ((*pfds)[i].fd == listener) {
+                // If we're the listener, it's a new connection
+                handle_new_connection(listener, fd_count, fd_size,
+                        pfds);
+            } else {
+                // Otherwise we're just a regular client
+                handle_client_data(listener, fd_count, *pfds, &i);
+            }
+        }
+    }
+}
+
+/*
+ * Main: create a listener and connection set, loop forever
+ * processing connections.
+ */
 int main(void)
 {
     int listener;     // Listening socket descriptor
 
-    int newfd;        // Newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // Client address
-    socklen_t addrlen;
-
-    char buf[256];    // Buffer for client data
-
-    char remoteIP[INET6_ADDRSTRLEN];
-
     // Start off with room for 5 connections
     // (We'll realloc as necessary)
-    int fd_count = 0;
     int fd_size = 5;
+    int fd_count = 0;
     struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
 
     // Set up and get a listening socket
@@ -347,11 +465,14 @@ int main(void)
         exit(1);
     }
 
-    // Add the listener to set
+    // Add the listener to set;
+    // Report ready to read on incoming connection
     pfds[0].fd = listener;
-    pfds[0].events = POLLIN; // Report ready to read on incoming connection
+    pfds[0].events = POLLIN;
 
     fd_count = 1; // For the listener
+
+    puts("pollserver: waiting for connections...");
 
     // Main loop
     for(;;) {
@@ -362,72 +483,11 @@ int main(void)
             exit(1);
         }
 
-        // Run through the existing connections looking for data to read
-        for(int i = 0; i < fd_count; i++) {
+        // Run through connections looking for data to read
+        process_connections(listener, &fd_count, &fd_size, &pfds);
+    }
 
-            // Check if someone's ready to read
-            if (pfds[i].revents & POLLIN) { // We got one!!
-
-                if (pfds[i].fd == listener) {
-                    // If listener is ready to read, handle new connection
-
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
-
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        add_to_pfds(&pfds, newfd, &fd_count, &fd_size);
-
-                        printf("pollserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // If not the listener, we're just a regular client
-                    int nbytes = recv(pfds[i].fd, buf, sizeof buf, 0);
-
-                    int sender_fd = pfds[i].fd;
-
-                    if (nbytes <= 0) {
-                        // Got error or connection closed by client
-                        if (nbytes == 0) {
-                            // Connection closed
-                            printf("pollserver: socket %d hung up\n", sender_fd);
-                        } else {
-                            perror("recv");
-                        }
-
-                        close(pfds[i].fd); // Bye!
-
-                        del_from_pfds(pfds, i, &fd_count);
-
-                    } else {
-                        // We got some good data from a client
-
-                        for(int j = 0; j < fd_count; j++) {
-                            // Send to everyone!
-                            int dest_fd = pfds[j].fd;
-
-                            // Except the listener and ourselves
-                            if (dest_fd != listener && dest_fd != sender_fd) {
-                                if (send(dest_fd, buf, nbytes, 0) == -1) {
-                                    perror("send");
-                                }
-                            }
-                        }
-                    }
-                } // END handle data from client
-            } // END got ready-to-read from poll()
-        } // END looping through file descriptors
-    } // END for(;;)--and you thought it would never end!
-    
-    return 0;
+    free(pfds);
 }
 ```
 
@@ -633,39 +693,42 @@ one `telnet` session, it should appear in all the others.
 
 #define PORT "9034"   // port we're listening on
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+/*
+ * Convert socket to IP address string.
+ * addr: struct sockaddr_in or struct sockaddr_in6
+ */
+const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
+    struct sockaddr_storage *sas = addr;
+    struct sockaddr_in *sa4;
+    struct sockaddr_in6 *sa6;
+    void *src;
+
+    switch (sas->ss_family) {
+        case AF_INET:
+            sa4 = addr;
+            src = &(sa4->sin_addr);
+            break;
+        case AF_INET6:
+            sa6 = addr;
+            src = &(sa6->sin6_addr);
+            break;
+        default:
+            return NULL;
     }
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+    return inet_ntop(sas->ss_family, src, buf, size);
 }
 
-int main(void)
+/*
+ * Return a listening socket
+ */
+int get_listener_socket(void)
 {
-    fd_set master;    // master file descriptor list
-    fd_set read_fds;  // temp file descriptor list for select()
-    int fdmax;        // maximum file descriptor number
-
-    int listener;     // listening socket descriptor
-    int newfd;        // newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // client address
-    socklen_t addrlen;
-
-    char buf[256];    // buffer for client data
-    int nbytes;
-
-    char remoteIP[INET6_ADDRSTRLEN];
-
-    int yes=1;        // for setsockopt() SO_REUSEADDR, below
-    int i, j, rv;
-
     struct addrinfo hints, *ai, *p;
-
-    FD_ZERO(&master);    // clear the master and temp sets
-    FD_ZERO(&read_fds);
+    int yes=1;    // for setsockopt() SO_REUSEADDR, below
+    int rv;
+    int listener;
 
     // get us a socket and bind it
     memset(&hints, 0, sizeof hints);
@@ -676,15 +739,17 @@ int main(void)
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
-    
+
     for(p = ai; p != NULL; p = p->ai_next) {
-        listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) { 
+        listener = socket(p->ai_family, p->ai_socktype,
+                p->ai_protocol);
+        if (listener < 0) {
             continue;
         }
-        
+
         // lose the pesky "address already in use" error message
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
+                sizeof(int));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
             close(listener);
@@ -708,6 +773,99 @@ int main(void)
         exit(3);
     }
 
+    return listener;
+}
+
+/*
+ * Add new incoming connections to the proper sets
+ */
+void handle_new_connection(int listener, fd_set *master, int *fdmax)
+{
+    socklen_t addrlen;
+    int newfd;        // newly accept()ed socket descriptor
+    struct sockaddr_storage remoteaddr; // client address
+    char remoteIP[INET6_ADDRSTRLEN];
+
+    addrlen = sizeof remoteaddr;
+    newfd = accept(listener,
+        (struct sockaddr *)&remoteaddr,
+        &addrlen);
+
+    if (newfd == -1) {
+        perror("accept");
+    } else {
+        FD_SET(newfd, master); // add to master set
+        if (newfd > *fdmax) {  // keep track of the max
+            *fdmax = newfd;
+        }
+        printf("selectserver: new connection from %s on "
+            "socket %d\n",
+            inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP),
+            newfd);
+    }
+}
+
+/*
+ * Broadcast a message to all clients
+ */
+void broadcast(char *buf, int nbytes, int listener, int s,
+               fd_set *master, int fdmax)
+{
+    for(int j = 0; j <= fdmax; j++) {
+        // send to everyone!
+        if (FD_ISSET(j, master)) {
+            // except the listener and ourselves
+            if (j != listener && j != s) {
+                if (send(j, buf, nbytes, 0) == -1) {
+                    perror("send");
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Handle client data and hangups
+ */
+void handle_client_data(int s, int listener, fd_set *master,
+                        int fdmax)
+{
+    char buf[256];    // buffer for client data
+    int nbytes;
+
+    // handle data from a client
+    if ((nbytes = recv(s, buf, sizeof buf, 0)) <= 0) {
+        // got error or connection closed by client
+        if (nbytes == 0) {
+            // connection closed
+            printf("selectserver: socket %d hung up\n", s);
+        } else {
+            perror("recv");
+        }
+        close(s); // bye!
+        FD_CLR(s, master); // remove from master set
+    } else {
+        // we got some data from a client
+        broadcast(buf, nbytes, listener, s, master, fdmax);
+    }
+}
+
+/*
+ * Main
+ */
+int main(void)
+{
+    fd_set master;    // master file descriptor list
+    fd_set read_fds;  // temp file descriptor list for select()
+    int fdmax;        // maximum file descriptor number
+
+    int listener;     // listening socket descriptor
+
+    FD_ZERO(&master);    // clear the master and temp sets
+    FD_ZERO(&read_fds);
+
+    listener = get_listener_socket();
+
     // add the listener to the master set
     FD_SET(listener, &master);
 
@@ -722,61 +880,18 @@ int main(void)
             exit(4);
         }
 
-        // run through the existing connections looking for data to read
-        for(i = 0; i <= fdmax; i++) {
+        // run through the existing connections looking for data
+        // to read
+        for(int i = 0; i <= fdmax; i++) {
             if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (i == listener) {
-                    // handle new connections
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
+                if (i == listener)
+                    handle_new_connection(i, &master, &fdmax);
+                else
+                    handle_client_data(i, listener, &master, fdmax);
+            }
+        }
+    }
 
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        FD_SET(newfd, &master); // add to master set
-                        if (newfd > fdmax) {    // keep track of the max
-                            fdmax = newfd;
-                        }
-                        printf("selectserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // handle data from a client
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
-                        // got error or connection closed by client
-                        if (nbytes == 0) {
-                            // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
-                        } else {
-                            perror("recv");
-                        }
-                        close(i); // bye!
-                        FD_CLR(i, &master); // remove from master set
-                    } else {
-                        // we got some data from a client
-                        for(j = 0; j <= fdmax; j++) {
-                            // send to everyone!
-                            if (FD_ISSET(j, &master)) {
-                                // except the listener and ourselves
-                                if (j != listener && j != i) {
-                                    if (send(j, buf, nbytes, 0) == -1) {
-                                        perror("send");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } // END handle data from client
-            } // END got new incoming connection
-        } // END looping through file descriptors
-    } // END for(;;)--and you thought it would never end!
-    
     return 0;
 }
 ```
@@ -871,7 +986,7 @@ containing the number of bytes in the buffer.
 The function returns `-1` on error (and `errno` is still set from the
 call to `send()`). Also, the number of bytes actually sent is returned
 in `len`. This will be the same number of bytes you asked it to send,
-unless there was an error. `sendall()` will do it's best, huffing and
+unless there was an error. `sendall()` will do its best, huffing and
 puffing, to send the data out, but if there's an error, it gets back to
 you right away.
 
@@ -1005,8 +1120,11 @@ uint32_t htonf(float f)
     if (f < 0) { sign = 1; f = -f; }
     else { sign = 0; }
         
-    p = ((((uint32_t)f)&0x7fff)<<16) | (sign<<31); // whole part and sign
-    p |= (uint32_t)(((f - (int)f) * 65536.0f))&0xffff; // fraction
+    // whole part and sign
+    p = ((((uint32_t)f)&0x7fff)<<16) | (sign<<31);
+
+    // fraction
+    p |= (uint32_t)(((f - (int)f) * 65536.0f))&0xffff;
 
     return p;
 }
@@ -1061,11 +1179,17 @@ numbers is known as [i[IEEE-754]]
 use this format internally for doing floating point math, so in those
 cases, strictly speaking, conversion wouldn't need to be done. But if
 you want your source code to be portable, that's an assumption you can't
-necessarily make. (On the other hand, if you want things to be fast, you
-should optimize this out on platforms that don't need to do it! That's
-what `htons()` and its ilk do.)
+necessarily make.
 
-[flx[Here's some code that encodes floats and doubles into IEEE-754
+Or can you? Very probably your systems are IEEE-754, just like they're
+probably 2's complement for integers. So if you know that's what you
+have, you can just pass the data over the wire (though you need to fix the
+endianness with `htonl()` or the appropriate function—`float`s have
+endianness, too). And this is what `htons()` and its ilk do on
+big-endian systems where no conversion is necessary.
+
+But just in case you are on a system that isn't IEEE-754, [flx[here's
+some code that encodes `float`s and `double`s into IEEE-754
 format|ieee754.c]].  (Mostly---it doesn't encode NaN or Infinity, but it
 could be modified to do that.)
 
@@ -1080,7 +1204,9 @@ uint64_t pack754(long double f, unsigned bits, unsigned expbits)
     long double fnorm;
     int shift;
     long long sign, exp, significand;
-    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+
+    // -1 for sign bit
+    unsigned significandbits = bits - expbits - 1;
 
     if (f == 0.0) return 0; // get this special case out of the way
 
@@ -1109,7 +1235,9 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
     long double result;
     long long shift;
     unsigned bias;
-    unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+
+    // -1 for sign bit
+    unsigned significandbits = bits - expbits - 1;
 
     if (i == 0) return 0.0;
 
@@ -1205,7 +1333,7 @@ Pike, they implement `printf()`-like functions called `pack()` and
 `unpack()` that do exactly this. I'd link to them, but apparently those
 functions aren't online with the rest of the source from the book.
 
-(The Practice of Programming is an excellent read. Zeus saves a kitten
+(_The Practice of Programming_ is an excellent read. Zeus saves a kitten
 every time I recommend it.)
 
 At this point, I'm going to drop a pointer to a [fl[Protocol Buffers
@@ -1233,7 +1361,7 @@ into a `char` array instead of another integer.)
 
 /*
 ** packi16() -- store a 16-bit int into a char buffer (like htons())
-*/ 
+*/
 void packi16(unsigned char *buf, unsigned int i)
 {
     *buf++ = i>>8; *buf++ = i;
@@ -1241,7 +1369,7 @@ void packi16(unsigned char *buf, unsigned int i)
 
 /*
 ** packi32() -- store a 32-bit int into a char buffer (like htonl())
-*/ 
+*/
 void packi32(unsigned char *buf, unsigned long int i)
 {
     *buf++ = i>>24; *buf++ = i>>16;
@@ -1250,7 +1378,7 @@ void packi32(unsigned char *buf, unsigned long int i)
 
 /*
 ** packi64() -- store a 64-bit int into a char buffer (like htonl())
-*/ 
+*/
 void packi64(unsigned char *buf, unsigned long long int i)
 {
     *buf++ = i>>56; *buf++ = i>>48;
@@ -1260,8 +1388,9 @@ void packi64(unsigned char *buf, unsigned long long int i)
 }
 
 /*
-** unpacki16() -- unpack a 16-bit int from a char buffer (like ntohs())
-*/ 
+** unpacki16() -- unpack a 16-bit int from a char buffer (like
+**                ntohs())
+*/
 int unpacki16(unsigned char *buf)
 {
     unsigned int i2 = ((unsigned int)buf[0]<<8) | buf[1];
@@ -1275,16 +1404,18 @@ int unpacki16(unsigned char *buf)
 }
 
 /*
-** unpacku16() -- unpack a 16-bit unsigned from a char buffer (like ntohs())
-*/ 
+** unpacku16() -- unpack a 16-bit unsigned from a char buffer (like
+**                ntohs())
+*/
 unsigned int unpacku16(unsigned char *buf)
 {
     return ((unsigned int)buf[0]<<8) | buf[1];
 }
 
 /*
-** unpacki32() -- unpack a 32-bit int from a char buffer (like ntohl())
-*/ 
+** unpacki32() -- unpack a 32-bit int from a char buffer (like
+**                ntohl())
+*/
 long int unpacki32(unsigned char *buf)
 {
     unsigned long int i2 = ((unsigned long int)buf[0]<<24) |
@@ -1301,8 +1432,9 @@ long int unpacki32(unsigned char *buf)
 }
 
 /*
-** unpacku32() -- unpack a 32-bit unsigned from a char buffer (like ntohl())
-*/ 
+** unpacku32() -- unpack a 32-bit unsigned from a char buffer (like
+**                ntohl())
+*/
 unsigned long int unpacku32(unsigned char *buf)
 {
     return ((unsigned long int)buf[0]<<24) |
@@ -1312,18 +1444,20 @@ unsigned long int unpacku32(unsigned char *buf)
 }
 
 /*
-** unpacki64() -- unpack a 64-bit int from a char buffer (like ntohl())
-*/ 
+** unpacki64() -- unpack a 64-bit int from a char buffer (like
+**                ntohl())
+*/
 long long int unpacki64(unsigned char *buf)
 {
-    unsigned long long int i2 = ((unsigned long long int)buf[0]<<56) |
-                                ((unsigned long long int)buf[1]<<48) |
-                                ((unsigned long long int)buf[2]<<40) |
-                                ((unsigned long long int)buf[3]<<32) |
-                                ((unsigned long long int)buf[4]<<24) |
-                                ((unsigned long long int)buf[5]<<16) |
-                                ((unsigned long long int)buf[6]<<8)  |
-                                buf[7];
+    unsigned long long int i2 =
+        ((unsigned long long int)buf[0]<<56) |
+        ((unsigned long long int)buf[1]<<48) |
+        ((unsigned long long int)buf[2]<<40) |
+        ((unsigned long long int)buf[3]<<32) |
+        ((unsigned long long int)buf[4]<<24) |
+        ((unsigned long long int)buf[5]<<16) |
+        ((unsigned long long int)buf[6]<<8)  |
+        buf[7];
     long long int i;
 
     // change unsigned numbers to signed
@@ -1334,8 +1468,9 @@ long long int unpacki64(unsigned char *buf)
 }
 
 /*
-** unpacku64() -- unpack a 64-bit unsigned from a char buffer (like ntohl())
-*/ 
+** unpacku64() -- unpack a 64-bit unsigned from a char buffer (like
+**                ntohl())
+*/
 unsigned long long int unpacku64(unsigned char *buf)
 {
     return ((unsigned long long int)buf[0]<<56) |
@@ -1353,14 +1488,14 @@ unsigned long long int unpacku64(unsigned char *buf)
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
-**      8 |   c        C         
+**      8 |   c        C
 **     16 |   h        H         f
 **     32 |   l        L         d
 **     64 |   q        Q         g
 **      - |                               s
 **
 **  (16-bit unsigned length is automatically prepended to strings)
-*/ 
+*/
 
 unsigned int pack(unsigned char *buf, char *format, ...)
 {
@@ -1488,11 +1623,12 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 }
 
 /*
-** unpack() -- unpack data dictated by the format string into the buffer
+** unpack() -- unpack data dictated by the format string into the
+**             buffer
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
-**      8 |   c        C         
+**      8 |   c        C
 **     16 |   h        H         f
 **     32 |   l        L         d
 **     64 |   q        Q         g
@@ -1602,8 +1738,10 @@ void unpack(unsigned char *buf, char *format, ...)
             s = va_arg(ap, char*);
             len = unpacku16(buf);
             buf += 2;
-            if (maxstrlen > 0 && len >= maxstrlen) count = maxstrlen - 1;
-            else count = len;
+            if (maxstrlen > 0 && len > maxstrlen)
+                count = maxstrlen - 1;
+            else
+                count = len;
             memcpy(s, buf, count);
             s[count] = '\0';
             buf += len;
@@ -1632,37 +1770,42 @@ packets in an effort to attack your system!
 
 ```{.c .numberLines}
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
-// various bits for floating point types--
-// varies for different architectures
+// If you have a C23 compiler
+#if __STDC_VERSION__ >= 202311L
+#include <stdfloat.h>
+#else
+// Otherwise let's define our own.
+// Varies for different architectures! But you're probably:
 typedef float float32_t;
 typedef double float64_t;
+#endif
 
 int main(void)
 {
-    unsigned char buf[1024];
+    uint8_t buf[1024];
     int8_t magic;
     int16_t monkeycount;
     int32_t altitude;
     float32_t absurdityfactor;
-    char *s = "Great unmitigated Zot! You've found the Runestaff!";
+    char *s = "Great unmitigated Zot!  You've found the Runestaff!";
     char s2[96];
     int16_t packetsize, ps2;
 
-    packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0, (int16_t)37, 
-            (int32_t)-5, s, (float32_t)-3490.6677);
-    packi16(buf+1, packetsize); // store packet size in packet for kicks
+    packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0,
+            (int16_t)37, (int32_t)-5, s, (float32_t)-3490.6677);
+    packi16(buf+1, packetsize); // store packet size for kicks
 
     printf("packet is %" PRId32 " bytes\n", packetsize);
 
-    unpack(buf, "chhl96sf", &magic, &ps2, &monkeycount, &altitude, s2,
-        &absurdityfactor);
+    unpack(buf, "chhl96sf", &magic, &ps2, &monkeycount, &altitude,
+            s2, &absurdityfactor);
 
     printf("'%c' %" PRId32" %" PRId16 " %" PRId32
             " \"%s\" %f\n", magic, ps2, monkeycount,
             altitude, s2, absurdityfactor);
-
-    return 0;
 }
 ```
 
@@ -1864,12 +2007,18 @@ broadcast packet, and since it is all of them on the local network, that
 could be a lot of machines doing a lot of unnecessary work. When the
 game Doom first came out, this was a complaint about its network code.
 
-Now, there is more than one way to skin a cat... wait a minute. Is there
-really more than one way to skin a cat? What kind of expression is that?
-Uh, and likewise, there is more than one way to send a broadcast packet.
-So, to get to the meat and potatoes of the whole thing: how do you
-specify the destination address for a broadcast message? There are two
-common ways:
+Now, there is more than one way to skin a cat[^6178]... wait a minute.
+Is there really more than one way to skin a cat? What kind of expression
+is that? Uh, and likewise, there is more than one way to send a
+broadcast packet. So, to get to the meat and potatoes of the whole
+thing: how do you specify the destination address for a broadcast
+message? There are two common ways:
+
+[^6178]: For the record, I love cats. They're the best. I've had many
+    beloved feline companions over the years. Though I acknowledge the
+    some object to this morbid, figurative expression whose etymology
+    has been lost to time, I think this portion of the guide is best
+    served by its use.
 
 1. Send the data to a specific subnet's broadcast address. This is the
    subnet's network number with all one-bits set for the host portion of
@@ -1931,12 +2080,12 @@ call this program [flx[`broadcaster.c`|broadcaster.c]]:
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SERVERPORT 4950 // the port users will be connecting to
+#define SERVERPORT 4950    // the port users will be connecting to
 
 int main(int argc, char *argv[])
 {
     int sockfd;
-    struct sockaddr_in their_addr; // connector's address information
+    struct sockaddr_in their_addr; // connector's address info
     struct hostent *he;
     int numbytes;
     int broadcast = 1;
@@ -1952,7 +2101,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+    if ((sockfd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
         perror("socket");
         exit(1);
     }
@@ -1965,12 +2114,14 @@ int main(int argc, char *argv[])
     }
 
     their_addr.sin_family = AF_INET;     // host byte order
-    their_addr.sin_port = htons(SERVERPORT); // short, network byte order
+    their_addr.sin_port = htons(SERVERPORT); // network byte order
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
 
-    if ((numbytes=sendto(sockfd, argv[2], strlen(argv[2]), 0,
-             (struct sockaddr *)&their_addr, sizeof their_addr)) == -1) {
+    numbytes = sendto(sockfd, argv[2], strlen(argv[2]), 0,
+             (struct sockaddr *)&their_addr, sizeof their_addr);
+
+    if (numbytes == -1) {
         perror("sendto");
         exit(1);
     }
