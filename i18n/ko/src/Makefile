@@ -9,15 +9,19 @@ BGBSPD_BUILD_DIR?=../../../../bgbspd
 WEB_IMAGES=$(wildcard *.svg)
 EPUB_SVGS=$(wildcard *.svg)
 
-all: install-fonts
-
 include $(BGBSPD_BUILD_DIR)/source.make
 
-PDF_MAINFONT="Pretendard"
-PDF_SANSFONT="Pretendard"
-PDF_MONOFONT="Pretendard"
+PREPROC=./preproc_ko.py
 
-install-fonts:
-	bash ./install_fonts.sh
+bg-css.html: ko-css-src.html
+bg-css-wide.html: ko-css-src.html
 
-.PHONY: install-fonts
+PDF_OPTS= \
+	-H $(BGBSPD_BUILD_DIR)/latex/header_general.latex \
+	-A $(BGBSPD_BUILD_DIR)/latex/after_index.latex \
+	--pdf-engine=xelatex \
+	--variable geometry:"top=1in,bottom=1in" \
+	-V documentclass=book \
+	--lua-filter $(BGBSPD_BUILD_DIR)/lua/latex_filters.lua \
+	-H latex/ko-fonts.latex \
+	$(COMMON_OPTS)

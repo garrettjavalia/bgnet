@@ -1,0 +1,32 @@
+\ifPDFTeX\else
+\setmainfont{Pretendard}[
+    Path=../fonts/pretendard/public/static/alternative/,
+    Extension=.ttf,
+    UprightFont=*-Regular,
+    BoldFont=*-Bold,
+    ItalicFont=*-Regular,
+    BoldItalicFont=*-Bold,
+    ItalicFeatures={FakeSlant=0.16},
+    BoldItalicFeatures={FakeSlant=0.16}
+]
+\setsansfont{Pretendard}[
+    Path=../fonts/pretendard/public/static/alternative/,
+    Extension=.ttf,
+    UprightFont=*-Regular,
+    BoldFont=*-Bold,
+    ItalicFont=*-Regular,
+    BoldItalicFont=*-Bold,
+    ItalicFeatures={FakeSlant=0.16},
+    BoldItalicFeatures={FakeSlant=0.16}
+]
+\setmonofont{YeomilMono}[
+    Path=../fonts/yeomil-mono/ttf/,
+    Extension=.ttf,
+    UprightFont=*-Regular,
+    BoldFont=*-Bold,
+    ItalicFont=*-Regular,
+    BoldItalicFont=*-Bold,
+    ItalicFeatures={FakeSlant=0.16},
+    BoldItalicFeatures={FakeSlant=0.16}
+]
+\fi

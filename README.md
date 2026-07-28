@@ -90,8 +90,6 @@ If you don't want to mess with a local setup, you can build via Docker.
    This will mount the project where the image expects it, and run `make
    pristine all stage`, leaving your `./stage` directory ready to be published.
 
-3. Run `docker run --rm -v "$PWD":/guide -ti beej-bgnet-builder make -e SHELL=/bin/bash ko-stage` to build the Korean translation and copy it into `./stage/translations`.
-
 ## Pull Requests
 
 Please keep these on the scale of typo and bug fixes. That way I don't
@@ -104,3 +102,4 @@ have to consider any copyright issues when merging changes.
 * File transfer example maybe in son of data encapsulation
 * Multicast?
 * Event IO?
+
