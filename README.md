@@ -24,14 +24,40 @@ Mac dependencies install (reopen terminal after doing this):
 xcode-select --install                  # installs make
 brew install python                     # installs Python3
 brew install pandoc
-brew install mactex --cask              # installs XeLaTeX
+brew install mactex                     # installs XeLaTeX
 brew tap homebrew/cask-fonts
-brew install font-liberation            # installs sans, serif, and mono
+brew install font-liberation            # installs Liberation fonts
+```
+
+You might have to add something like this to your path to find `xelatex`:
+
+```
+PATH=$PATH:/usr/local/texlive/2021/bin/universal-darwin
+```
+
+### Dependency: Build System
+
+This depends on an external repo to build: [Beej's Guide Build System
+for Pandoc](https://github.com/beejjorgensen/bgbspd).
+
+You'll want to clone that repo as a sibling to this one:
+
+```
+mystuff-->bggit
+      \-->bgbspd
+```
+
+The Makefiles here will look for the build system there.
+
+You can override the `bgbspd` directory before running `make` like this:
+
+```
+export BGBSPD_BUILD_DIR=/some/path/to/bgbspd
 ```
 
 ### Build
 
-1. Type `make` from the top-level directory.
+1. Type `make all` from the top-level directory.
 
    If you have Gnu Make, it should work fine.  Other makes might work as
    well.  Windows users might want to check out Cygwin.
@@ -64,8 +90,6 @@ If you don't want to mess with a local setup, you can build via Docker.
    This will mount the project where the image expects it, and run `make
    pristine all stage`, leaving your `./stage` directory ready to be published.
 
-3. Run `docker run --rm -v "$PWD":/guide -ti beej-bgnet-builder make -e SHELL=/bin/bash pristine all stage SRCDIR={PATH_OF_SRC_FOLDER}` to build i18n versions.
-
 ## Pull Requests
 
 Please keep these on the scale of typo and bug fixes. That way I don't
@@ -78,9 +102,4 @@ have to consider any copyright issues when merging changes.
 * File transfer example maybe in son of data encapsulation
 * Multicast?
 * Event IO?
-
-### Bug fixes
-
-* When pandoc 2.8 comes up, switch all man page subheaders to h3 and supress
-  them from the table of contents.
 

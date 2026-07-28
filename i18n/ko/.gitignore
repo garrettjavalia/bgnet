@@ -7,3 +7,5 @@ src/bgnet_*.pdf
 src/split
 src/split-wide
 src/bgnet_temp*
+dist/
+build_tmp/

@@ -75,7 +75,7 @@ Forget this dots-and-numbers look of IPv4, too; now we've got a
 hexadecimal representation, with each two-byte chunk separated by a
 colon, like this:
 
-```
+``` {.default}
 2001:0db8:c9d2:aee5:73e3:934a:a5ae:9551
 ```
 
@@ -84,7 +84,7 @@ zeros in it, and you can compress them between two colons. And you can
 leave off leading zeros for each byte pair. For instance, each of these
 pairs of addresses are equivalent:
 
-```
+``` {.default}
 2001:0db8:c9d2:0012:0000:0000:0000:0051
 2001:db8:c9d2:12::51
 
@@ -190,7 +190,7 @@ numbers.  You can see them all in [fl[the Big IANA Port
 List|https://www.iana.org/assignments/port-numbers]] or, if you're on a
 Unix box, in your `/etc/services` file. HTTP (the web) is port 80,
 telnet is port 23, SMTP is port 25, the game
-[fl[DOOM|https://en.wikipedia.org/wiki/Doom_(1993_video_game)]] used
+[fl[DOOM|https://en.wikipedia.org/wiki/Doom_%281993_video_game%29]] used
 port 666, etc. and so on. Ports under 1024 are often considered special,
 and usually require special OS privileges to use.
 
@@ -268,9 +268,10 @@ Basically, you'll want to convert the numbers to Network Byte Order
 before they go out on the wire, and convert them to Host Byte Order as
 they come in off the wire.
 
-I don't know of a 64-bit variant, sorry. And if you want to do floating
-point, check out the section on [Serialization](#serialization), far
-below.
+There are no standard 64-bit variants in the sockets API, but I talk
+about other options in the [`htons()` reference page](#htonsman). And if
+you want to do floating point, check out the section on
+[Serialization](#serialization), far below.
 
 Assume the numbers in this document are in Host Byte Order unless I say
 otherwise.
@@ -417,7 +418,7 @@ What about [i[IPv6]] IPv6? Similar `struct`s exist for it, as well:
 
 struct sockaddr_in6 {
     u_int16_t       sin6_family;   // address family, AF_INET6
-    u_int16_t       sin6_port;     // port number, Network Byte Order
+    u_int16_t       sin6_port;     // port, Network Byte Order
     u_int32_t       sin6_flowinfo; // IPv6 flow information
     struct in6_addr sin6_addr;     // IPv6 address
     u_int32_t       sin6_scope_id; // Scope ID
@@ -471,14 +472,15 @@ function]] `inet_pton()`, converts an IP address in numbers-and-dots
 notation into either a `struct in_addr` or a `struct in6_addr` depending
 on whether you specify `AF_INET` or `AF_INET6`. ("`pton`" stands for
 "presentation to network"---you can call it "printable to network" if
-that's easier to remember.) The conversion can be made as follows:
+that's easier to remember.) The conversion can be made as follows for
+IPv4 and IPv6:
 
 ```{.c}
-struct sockaddr_in sa; // IPv4
+struct sockaddr_in sa;   // IPv4
 struct sockaddr_in6 sa6; // IPv6
 
-inet_pton(AF_INET, "10.12.110.57", &(sa.sin_addr)); // IPv4
-inet_pton(AF_INET6, "2001:db8:63b3:1::3490", &(sa6.sin6_addr)); // IPv6
+inet_pton(AF_INET, "10.12.110.57", &(sa.sin_addr));
+inet_pton(AF_INET6, "2001:db8:63b3:1::3490", &(sa6.sin6_addr));
 ```
 
 (Quick note: the old way of doing things used a function called

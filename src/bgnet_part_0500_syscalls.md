@@ -49,7 +49,7 @@ Let's take a look!
 #include <sys/socket.h>
 #include <netdb.h>
 
-int getaddrinfo(const char *node,     // e.g. "www.example.com" or IP
+int getaddrinfo(const char *node,   // e.g. "www.example.com" or IP
                 const char *service,  // e.g. "http" or port number
                 const struct addrinfo *hints,
                 struct addrinfo **res);
@@ -85,11 +85,12 @@ hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
 hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
 
 if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
-    fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+    fprintf(stderr, "gai error: %s\n", gai_strerror(status));
     exit(1);
 }
 
-// servinfo now points to a linked list of 1 or more struct addrinfos
+// servinfo now points to a linked list of 1 or more
+// struct addrinfos
 
 // ... do everything until you don't need servinfo anymore ....
 
@@ -132,7 +133,8 @@ hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
 // get ready to connect
 status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 
-// servinfo now points to a linked list of 1 or more struct addrinfos
+// servinfo now points to a linked list of 1 or more
+// struct addrinfos
 
 // etc.
 ```
@@ -144,7 +146,9 @@ addresses for whatever host you specify on the command line:
 
 ```{.c .numberLines}
 /*
-** showip.c -- show IP addresses for a host given on the command line
+** showip.c
+**
+** show IP addresses for a host given on the command line
 */
 
 #include <stdio.h>
@@ -167,7 +171,7 @@ int main(int argc, char *argv[])
     }
 
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+    hints.ai_family = AF_UNSPEC;  // Either IPv4 or IPv6
     hints.ai_socktype = SOCK_STREAM;
 
     if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
@@ -180,15 +184,17 @@ int main(int argc, char *argv[])
     for(p = res;p != NULL; p = p->ai_next) {
         void *addr;
         char *ipver;
+        struct sockaddr_in *ipv4;
+        struct sockaddr_in6 *ipv6;
 
         // get the pointer to the address itself,
         // different fields in IPv4 and IPv6:
         if (p->ai_family == AF_INET) { // IPv4
-            struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+            ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
             ipver = "IPv4";
         } else { // IPv6
-            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+            ipv6 = (struct sockaddr_in6 *)p->ai_addr;
             addr = &(ipv6->sin6_addr);
             ipver = "IPv6";
         }
@@ -404,10 +410,7 @@ int yes=1;
 //char yes='1'; // Solaris people use this
 
 // lose the pesky "Address already in use" error message
-if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
-    perror("setsockopt");
-    exit(1);
-}
+setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 ```
 
 [i[`bind()` function]] One small extra final note about `bind()`: there
@@ -573,7 +576,7 @@ code fragment for your perusal:
 #include <netdb.h>
 
 #define MYPORT "3490"  // the port users will be connecting to
-#define BACKLOG 10     // how many pending connections queue will hold
+#define BACKLOG 10     // how many pending connections queue holds
 
 int main(void)
 {
@@ -595,14 +598,16 @@ int main(void)
 
     // make a socket, bind it, and listen on it:
 
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    sockfd = socket(res->ai_family, res->ai_socktype,
+                                                 res->ai_protocol);
     bind(sockfd, res->ai_addr, res->ai_addrlen);
     listen(sockfd, BACKLOG);
 
     // now accept an incoming connection:
 
     addr_size = sizeof their_addr;
-    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
+    new_fd = accept(sockfd, (struct sockaddr *)&their_addr,
+                                                       &addr_size);
 
     // ready to communicate on socket descriptor new_fd!
     .
@@ -622,7 +627,18 @@ connected datagram sockets. If you want to use regular unconnected
 datagram sockets, you'll need to see the section on [`sendto()` and
 `recvfrom()`](#sendtorecv), below.
 
-[i[`send()` function]] The `send()` call:
+> [i[Blocking]] Here's something that might (or might not) be new to
+> you: these are _blocking_ calls. That is, `recv()` will _block_ until
+> there is some data ready to receive. "But what does 'block' mean,
+> already?!" It means your program is going to stop there, on that
+> system call, until someone sends you something. (The OS techie jargon
+> for "stop" in that sentence is actually _sleep_, so I might use those
+> terms interchangeably.) `send()` can also block if the stuff you're
+> sending is all jammed up somehow, but that's rarer. We'll [revisit
+> this concept later](#blocking), and talk about how to avoid it when
+> you need to.
+
+[i[`send()` function]] Here's the `send()` call:
 
 ```{.c}
 int send(int sockfd, const void *msg, int len, int flags);
@@ -738,7 +754,7 @@ sockaddr_storage` which we know will be big enough for either.
 (So... here's another question: why isn't `struct sockaddr` itself big
 enough for any address? We even cast the general-purpose `struct
 sockaddr_storage` to the general-purpose `struct sockaddr`! Seems
-extraneous and redundant, huh. The answer is, it just isn't big enough,
+extraneous and redundant, huh? The answer is, it just isn't big enough,
 and I'd guess that changing it at this point would be Problematic. So
 they made a new one.)
 
