@@ -1,8 +1,8 @@
 /*
-** ghbn.c -- a hostname lookup demo
+** ghbn.c -- 호스트 이름 조회 데모
 **
-** THIS IS A DEPRECATED METHOD OF GETTING HOST NAMES
-** use getaddrinfo() instead.
+** 이것은 호스트 이름을 얻는 구식 방법입니다
+** 대신 getaddrinfo()를 쓰세요.
 */
 
 #include <stdio.h>
@@ -19,17 +19,17 @@ int main(int argc, char *argv[])
 	struct hostent *he;
 	struct in_addr **addr_list;
 
-	if (argc != 2) {  // error check the command line
+	if (argc != 2) {  // 명령줄 오류 확인
 		fprintf(stderr,"usage: ghbn hostname\n");
 		return 1;
 	}
 
-	if ((he = gethostbyname(argv[1])) == NULL) {  // get the host info
+	if ((he = gethostbyname(argv[1])) == NULL) {  // 호스트 정보 얻기
 		herror("gethostbyname");
 		return 2;
 	}
 
-	// print information about this host:
+	// 이 호스트에 대한 정보를 출력합니다:
 	printf("Official name is: %s\n", he->h_name);
 	printf("    IP addresses: ");
 	addr_list = (struct in_addr **)he->h_addr_list;

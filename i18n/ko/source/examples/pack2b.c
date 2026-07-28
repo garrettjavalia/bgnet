@@ -5,86 +5,86 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-// If you have a compiler that supports them, we can use these exact types:
+// 지원하는 컴파일러가 있다면 이 정확한 타입들을 사용할 수 있습니다:
 #ifdef __STDC_IEC_60559_TYPES__
 typedef _Float32_t float32_t;
 typedef _Float64_t float64_t;
 #else
-// Otherwise let's define our own.
-// Varies for different architectures! But you're probably:
+// 아니면 직접 정의합니다.
+// 아키텍처에 따라 다릅니다! 하지만 아마 다음과 같을 것입니다.
 typedef float float32_t;
 typedef double float64_t;
 #endif
 
-// macros for packing floats and doubles:
+// float와 double을 포장하기 위한 매크로:
 #define pack754_32(f) (pack754((f), 32, 8))
 #define pack754_64(f) (pack754((f), 64, 11))
 #define unpack754_32(i) (unpack754((i), 32, 8))
 #define unpack754_64(i) (unpack754((i), 64, 11))
 
 /*
-** pack754() -- pack a floating point number into IEEE-754 format
+** pack754() -- 부동소수점 수를 IEEE-754 형식으로 포장합니다
 */ 
 uint64_t pack754(long double f, unsigned bits, unsigned expbits)
 {
 	long double fnorm;
 	int shift;
 	long long sign, exp, significand;
-	unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+	unsigned significandbits = bits - expbits - 1; // 부호 비트 때문에 -1
 
-	if (f == 0.0) return 0; // get this special case out of the way
+	if (f == 0.0) return 0; // 이 특수한 경우를 먼저 처리합니다
 
-	// check sign and begin normalization
+	// 부호를 확인하고 정규화를 시작합니다
 	if (f < 0) { sign = 1; fnorm = -f; }
 	else { sign = 0; fnorm = f; }
 
-	// get the normalized form of f and track the exponent
+	// f의 정규화된 형태를 얻고 지수를 추적합니다
 	shift = 0;
 	while(fnorm >= 2.0) { fnorm /= 2.0; shift++; }
 	while(fnorm < 1.0) { fnorm *= 2.0; shift--; }
 	fnorm = fnorm - 1.0;
 
-	// calculate the binary form (non-float) of the significand data
+	// 유효숫자 데이터의 이진 형태(부동소수점 아님)를 계산합니다
 	significand = fnorm * ((1LL<<significandbits) + 0.5f);
 
-	// get the biased exponent
-	exp = shift + ((1<<(expbits-1)) - 1); // shift + bias
+	// 바이어스가 적용된 지수를 얻습니다
+	exp = shift + ((1<<(expbits-1)) - 1); // 이동값 + 바이어스
 
-	// return the final answer
+	// 최종 답을 반환합니다
 	return (sign<<(bits-1)) | (exp<<(bits-expbits-1)) | significand;
 }
 
 /*
-** unpack754() -- unpack a floating point number from IEEE-754 format
+** unpack754() -- IEEE-754 형식에서 부동소수점 수를 풀어냅니다
 */ 
 long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 {
 	long double result;
 	long long shift;
 	unsigned bias;
-	unsigned significandbits = bits - expbits - 1; // -1 for sign bit
+	unsigned significandbits = bits - expbits - 1; // 부호 비트 때문에 -1
 
 	if (i == 0) return 0.0;
 
-	// pull the significand
-	result = (i&((1LL<<significandbits)-1)); // mask
-	result /= (1LL<<significandbits); // convert back to float
-	result += 1.0f; // add the one back on
+	// 유효숫자를 꺼냅니다
+	result = (i&((1LL<<significandbits)-1)); // 마스크
+	result /= (1LL<<significandbits); // 다시 부동소수점으로 변환합니다
+	result += 1.0f; // 1을 다시 더합니다
 
-	// deal with the exponent
+	// 지수를 처리합니다
 	bias = (1<<(expbits-1)) - 1;
 	shift = ((i>>significandbits)&((1LL<<expbits)-1)) - bias;
 	while(shift > 0) { result *= 2.0; shift--; }
 	while(shift < 0) { result /= 2.0; shift++; }
 
-	// sign it
+	// 부호를 적용합니다
 	result *= (i>>(bits-1))&1? -1.0: 1.0;
 
 	return result;
 }
 
 /*
-** packi16() -- store a 16-bit int into a char buffer (like htons())
+** packi16() -- 16비트 int를 char 버퍼에 저장합니다(htons()처럼)
 */ 
 void packi16(uint8_t *buf, int16_t i)
 {
@@ -94,7 +94,7 @@ void packi16(uint8_t *buf, int16_t i)
 }
 
 /*
-** packi32() -- store a 32-bit int into a char buffer (like htonl())
+** packi32() -- 32비트 int를 char 버퍼에 저장합니다(htonl()처럼)
 */ 
 void packi32(uint8_t *buf, int32_t i)
 {
@@ -105,7 +105,7 @@ void packi32(uint8_t *buf, int32_t i)
 }
 
 /*
-** packi64() -- store a 64-bit int into a char buffer (like htonl())
+** packi64() -- 64비트 int를 char 버퍼에 저장합니다(htonl()처럼)
 */ 
 void packi64(uint8_t *buf, int64_t i)
 {
@@ -118,14 +118,14 @@ void packi64(uint8_t *buf, int64_t i)
 }
 
 /*
-** unpacki16() -- unpack a 16-bit int from a char buffer (like ntohs())
+** unpacki16() -- char 버퍼에서 16비트 int를 풀어냅니다(ntohs()처럼)
 */ 
 int16_t unpacki16(uint8_t *buf)
 {
 	uint16_t i2 = ((uint16_t)buf[0]<<8) | buf[1];
 	int16_t i;
 
-	// change unsigned numbers to signed
+	// 부호 없는 수를 부호 있는 수로 바꿉니다
 	if (i2 <= 0x7fffu) { i = i2; }
 	//else { i = -(int16_t)((uint16_t)0xffff - i2 + (uint16_t)1u); }
 	else { i = -1 - (uint16_t)(0xffffu - i2); }
@@ -134,7 +134,7 @@ int16_t unpacki16(uint8_t *buf)
 }
 
 /*
-** unpacki32() -- unpack a 32-bit int from a char buffer (like ntohl())
+** unpacki32() -- char 버퍼에서 32비트 int를 풀어냅니다(ntohl()처럼)
 */ 
 int32_t unpacki32(uint8_t *buf)
 {
@@ -142,7 +142,7 @@ int32_t unpacki32(uint8_t *buf)
 	              ((uint32_t)buf[2]<<8)  | buf[3];
 	int32_t i;
 
-	// change unsigned numbers to signed
+	// 부호 없는 수를 부호 있는 수로 바꿉니다
 	if (i2 <= 0x7fffffffu) { i = i2; }
 	else { i = -1 - (int32_t)(0xffffffffu - i2); }
 
@@ -150,7 +150,7 @@ int32_t unpacki32(uint8_t *buf)
 }
 
 /*
-** unpacki64() -- unpack a 64-bit int from a char buffer (like ntohl())
+** unpacki64() -- char 버퍼에서 64비트 int를 풀어냅니다(ntohl()처럼)
 */ 
 int64_t unpacki64(uint8_t *buf)
 {
@@ -160,7 +160,7 @@ int64_t unpacki64(uint8_t *buf)
 	              ((uint64_t)buf[6]<<8)  | buf[7];
 	int64_t i;
 
-	// change unsigned numbers to signed
+	// 부호 없는 수를 부호 있는 수로 바꿉니다
 	if (i2 <= 0x7fffffffffffffffu) { i = i2; }
 	else { i = -1 -(int64_t)(0xffffffffffffffffu - i2); }
 
@@ -168,12 +168,12 @@ int64_t unpacki64(uint8_t *buf)
 }
 
 /*
-** pack() -- store data dictated by the format string in the buffer
+** pack() -- 형식 문자열이 지시한 방식으로 버퍼에 데이터를 저장합니다
 **
-**  c - 8-bit signed int     h - 16-bit signed int
-**  l - 32-bit signed int    f - 32-bit float
-**  L - 64-bit signed int    F - 64-bit float
-**  s - string (16-bit length is automatically prepended)
+**  c - 8비트 부호 있는 int     h - 16비트 부호 있는 int
+**  l - 32비트 부호 있는 int    f - 32비트 float
+**  L - 64비트 부호 있는 int    F - 64비트 float
+**  s - 문자열(16비트 길이가 자동으로 앞에 붙습니다)
 */ 
 int32_t pack(uint8_t *buf, char *format, ...)
 {
@@ -191,37 +191,37 @@ int32_t pack(uint8_t *buf, char *format, ...)
 
 	for(; *format != '\0'; format++) {
 		switch(*format) {
-		case 'h': // 16-bit
+		case 'h': // 16비트
 			size += 2;
-			h = (int16_t)va_arg(ap, int); // promoted
+			h = (int16_t)va_arg(ap, int); // 승격됨
 			packi16(buf, h);
 			buf += 2;
 			break;
 
-		case 'l': // 32-bit
+		case 'l': // 32비트
 			size += 4;
 			l = va_arg(ap, int32_t);
 			packi32(buf, l);
 			buf += 4;
 			break;
 
-		case 'L': // 64-bit
+		case 'L': // 64비트
 			size += 8;
 			L = va_arg(ap, int64_t);
 			packi64(buf, L);
 			buf += 8;
 			break;
 
-		case 'c': // 8-bit
+		case 'c': // 8비트
 			size += 1;
-			c = (int8_t)va_arg(ap, int); // promoted
+			c = (int8_t)va_arg(ap, int); // 승격됨
 			*buf++ = (c>>0)&0xff;
 			break;
 
 		case 'f': // float
 			size += 4;
-			f = (float32_t)va_arg(ap, double); // promoted
-			l = pack754_32(f); // convert to IEEE 754
+			f = (float32_t)va_arg(ap, double); // 승격됨
+			l = pack754_32(f); // IEEE 754로 변환
 			packi32(buf, l);
 			buf += 4;
 			break;
@@ -229,12 +229,12 @@ int32_t pack(uint8_t *buf, char *format, ...)
 		case 'F': // float-64
 			size += 8;
 			F = (float64_t)va_arg(ap, float64_t);
-			L = pack754_64(F); // convert to IEEE 754
+			L = pack754_64(F); // IEEE 754로 변환
 			packi64(buf, L);
 			buf += 8;
 			break;
 
-		case 's': // string
+		case 's': // 문자열
 			s = va_arg(ap, char*);
 			len = strlen(s);
 			size += len + 2;
@@ -252,7 +252,7 @@ int32_t pack(uint8_t *buf, char *format, ...)
 }
 
 /*
-** unpack() -- unpack data dictated by the format string into the buffer
+** unpack() -- 형식 문자열이 지시한 방식으로 데이터를 버퍼에 풀어냅니다
 */
 void unpack(uint8_t *buf, char *format, ...)
 {
@@ -272,25 +272,25 @@ void unpack(uint8_t *buf, char *format, ...)
 
 	for(; *format != '\0'; format++) {
 		switch(*format) {
-		case 'h': // 16-bit
+		case 'h': // 16비트
 			h = va_arg(ap, int16_t*);
 			*h = unpacki16(buf);
 			buf += 2;
 			break;
 
-		case 'l': // 32-bit
+		case 'l': // 32비트
 			l = va_arg(ap, int32_t*);
 			*l = unpacki32(buf);
 			buf += 4;
 			break;
 
-		case 'L': // 64-bit
+		case 'L': // 64비트
 			L = va_arg(ap, int64_t*);
 			*L = unpacki64(buf);
 			buf += 8;
 			break;
 
-		case 'c': // 8-bit
+		case 'c': // 8비트
 			c = va_arg(ap, int8_t*);
 			if (*buf <= 0x7f) { *c = *buf;}
 			else { *c = -1 - (uint8_t)(0xffu - *buf); }
@@ -311,7 +311,7 @@ void unpack(uint8_t *buf, char *format, ...)
 			*F = unpack754_64(pF);
 			break;
 
-		case 's': // string
+		case 's': // 문자열
 			s = va_arg(ap, char*);
 			len = unpacki16(buf);
 			buf += 2;
@@ -323,7 +323,7 @@ void unpack(uint8_t *buf, char *format, ...)
 			break;
 
 		default:
-			if (isdigit(*format)) { // track max str len
+			if (isdigit(*format)) { // 최대 문자열 길이를 추적합니다
 				maxstrlen = maxstrlen * 10 + (*format-'0');
 			}
 		}
@@ -355,7 +355,7 @@ int main(void)
 
 	packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0,
             (int16_t)37, (int32_t)-5, s, (float32_t)-3490.6677);
-	packi16(buf+1, packetsize); // store packet size for kicks
+	packi16(buf+1, packetsize); // 재미삼아 패킷 크기를 저장합니다
 
 	printf("packet is %" PRId32 " bytes\n", packetsize);
 
@@ -380,8 +380,7 @@ int main(void)
 	int16_t j, j2;
 	int16_t test16[14] = { 0, -0, 1, 2, -1, -2, SHRT_MAX>>1, SHRT_MAX-1, SHRT_MAX, SHRT_MIN+1, SHRT_MIN, 0, 0, 0 };
 
-	// do a little barebones configuration to make sure floating point
-	// types are right:
+	// 부동소수점 타입이 맞는지 확인하기 위해 아주 기본적인 설정을 합니다:
 	if (sizeof(float32_t) != 4 || sizeof(float64_t) != 8) {
 		char *f32 = NULL, *f64 = NULL;
 
@@ -470,4 +469,3 @@ int main(void)
 
 	return 0;
 }
-

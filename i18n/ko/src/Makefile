@@ -13,8 +13,8 @@ include $(BGBSPD_BUILD_DIR)/source.make
 
 PREPROC=./preproc_ko.py
 
-bg-css.html: ko-css-src.html
-bg-css-wide.html: ko-css-src.html
+bg-css.html: ko-css-src.html ko-head-src.html
+bg-css-wide.html: ko-css-src.html ko-head-src.html
 
 PDF_OPTS= \
 	-H $(BGBSPD_BUILD_DIR)/latex/header_general.latex \

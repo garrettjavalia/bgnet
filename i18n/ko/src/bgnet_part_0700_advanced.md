@@ -4,7 +4,7 @@
 벗어나고 있습니다. 사실 여러분이 여기까지 왔다면 스스로가 기본적인 유닉스 네트워크
 프로그래밍을 꽤 잘 한다고 생각하셔도 됩니다. 축하합니다.
 
-이제 여러분이 소켓에 대해서 배우고 싶어할 좀 더 비밀스러운 것들의 세상으로
+이제 여러분이 소켓에 대해서 배우고 싶어 할 조금 더 난해한 것들의 세상으로
 용감하게 가봅시다. 시작합니다!
 
 ## 블로킹 {#blocking}
@@ -15,14 +15,13 @@
 "블록"은 "잠자기"에 대한 기술적 용어입니다. 위에서 `listener`를 실행하면
 패킷이 도착할 때까지 그대로 기다리고 있다는 것을 눈치채셨을 것입니다. 내부적으로는
 `recvfrom()`이 호출되고, 데이터가 없으므로 `recvfrom()`는 데이터가 도착할
-때까지 "블록"된 상태인 것입니다.(즉 그대로 잠들어 있게 됩니다.)
+때까지 "블록"된 상태인 것입니다. (즉 그대로 잠들어 있게 됩니다.)
 
-많은 함수들이 블록상태가 됩니다. `accept()`는 블로킹 함수입니다. 모든 `recv()`
-함수들도 블록 동작을 하는 함수입니다.(역자 주 : 원문에서는 block자체를 동사로
-씁니다.) 그것들이 블록 동작을 할 수 있는 이유는 그렇게 할 수 있게 허락을 받았기
-때문입니다. `socket()`으로 소켓 설명자를 처음 만들 때 커널이 이 소켓을 블로킹
+많은 함수들이 블록 상태가 됩니다. `accept()`는 블로킹 함수입니다. 모든 `recv()`
+함수들도 블록 동작을 합니다. 그런 동작이 허용되기 때문입니다.
+`socket()`으로 소켓 설명자를 처음 만들 때 커널이 이 소켓을 블로킹
 소켓으로 설정합니다. [i[Non-blocking sockets]] 만약 소켓이 블록 동작을 하지
-않길 원한다면 [i[`fcntl()` funtion]] `fcntl()` 에 대한 호출을 해야합니다. :
+않길 원한다면 [i[`fcntl()` function]] `fcntl()`을 호출해야 합니다:
 
 ```{.c .numberLines}
 #include <unistd.h>
@@ -37,10 +36,10 @@ fcntl(sockfd, F_SETFL, O_NONBLOCK);
 .
 ```
 
-소켓을 논블로킹으로 설정하면 정보를 얻기 위해서 실질적으로 소켓을 "조사"
-할 수 있습니다. 논 블로킹(역자 주 : Non blocking) 소켓을 읽으려고 할 때
-정보가 없다면 그것이 블록 동작을 하는 것은 허락되지 않습니다. 그것은 -1을
-반환할 것이고 `errno`은 [i[`EAGAIN` macro]] `EAGAIN` 이나 [i[`EWOULDBLOCK` macro]]
+소켓을 논블로킹으로 설정하면 정보를 얻기 위해서 실질적으로 소켓을 "폴링"
+할 수 있습니다. 논블로킹 소켓을 읽으려고 할 때
+정보가 없다면 블록할 수 없으므로 `-1`을
+반환할 것이고 `errno`는 [i[`EAGAIN` macro]] `EAGAIN`이나 [i[`EWOULDBLOCK` macro]]
 `EWOULDBLOCK`로 설정될 것입니다.
 
 (잠깐, [i[`EAGAIN` macro]] `EAGAIN` _이나_ [i[`EWOULDBLOCK` macro]] `EWOULDBLOCK`
@@ -49,9 +48,9 @@ fcntl(sockfd, F_SETFL, O_NONBLOCK);
 
 그러나 일반적으로 말하자면 이런 방식의 조사는 좋은 생각이 아닙니다. 여러분의 프로그램이
 소켓의 자료를 기다리면서 바쁜 대기 상태가 되면 여러분의 프로그램은 보통의 프로그램보다 훨씬
-CPU시간을 많이 사용할 것입니다. (역자 주 : 특별한 제한을 걸지 않으면 최대 단일 코어
+CPU 시간을 많이 사용할 것입니다. (역자 주 : 특별한 제한을 걸지 않으면 최대 단일 코어
 하나를 100% 점유할 수 있습니다.) 읽기 작업을 기다리는 정보가 있는지 확인하기 위한
-조금 더 우아한 해결책은 [i[`poll()` funtion]] `poll()`에 대해 다루는 다음 절에 있습니다.
+조금 더 우아한 해결책은 [i[`poll()` function]] `poll()`에 대해 다루는 다음 절에 있습니다.
 
 [i[Blocking]>]
 
@@ -59,7 +58,7 @@ CPU시간을 많이 사용할 것입니다. (역자 주 : 특별한 제한을 �
 
 [i[poll()]<]
 
-여러분이 정말로 해야하는 일은 소켓 *한 무더기*를 한 번에 감시하고 그 중에
+여러분이 정말로 해야 하는 일은 소켓 *한 무더기*를 한 번에 감시하고 그 중에
 데이터가 준비된 것을 처리하는 것입니다. 이런 방식을 통해서 여러분은 모든 소켓을
 지속적으로 조사하지 않아도 여러 개의 소켓 중 어떤 것이 데이터가 준비되었는지 알
 수 있습니다.
@@ -69,8 +68,8 @@ CPU시간을 많이 사용할 것입니다. (역자 주 : 특별한 제한을 �
 > 를 사용하면 더 좋은 성능을 얻을 수 있습니다. 이런 라이브러리는 여러분의 운영체제에서
 > 사용할 수 있는 가장 빠른 방법을 사용하려고 시도할 것입니다.
 
-그래서 어떻게 조사를 피할 수 있을까요? 놀랍게도 `poll()` 시스템 함수를 사용해서 조사를
-피할 수 있습니다. (역자 주 : poll은 투표, 설문, 그러한 부류의 조사라는 뜻입니다.) 간단히
+그래서 어떻게 폴링을 피할 수 있을까요? 약간 아이러니하게도 `poll()` 시스템 함수를 사용해서 폴링을
+피할 수 있습니다. 간단히
 말하자면 운영체제에게 모든 번거로운 작업을 우리 대신 하고 어떤 소켓에 자료가 도착하면
 알려달라고 부탁하는 것입니다. 그 동안 우리의 프로세스는 대기 상태가 될 수 있고 시스템
 자원을 아낄 수 있습니다.
@@ -82,9 +81,9 @@ CPU시간을 많이 사용할 것입니다. (역자 주 : 특별한 제한을 �
 것입니다.
 
 유용하게도 `listen()` 상태인 소켓은 새로운 연결이 `accept()`될 수 있는 상태가
-되었을 때 "ready to read"를 반환할 것입니다.
+되었을 때 "읽을 준비됨"을 반환할 것입니다.
 
-이만하면 충분히 이야기 했습니다. 이것을 쓰는 방법은 어떨지 봅시다.
+이만하면 충분히 이야기했습니다. 이것을 쓰는 방법은 어떨지 봅시다.
 
 ```{.c}
 #include <poll.h>
@@ -93,8 +92,8 @@ int poll(struct pollfd fds[], nfds_t nfds, int timeout);
 ```
 
 `fds`는 우리의 정보(어떤 소켓을 무엇을 위해 감시할지)의 배열입니다.
-`nfds`는 배열에 담긴 요소의 갯수입니다. `timeout`은 밀리초 단위의 제한시간입니다.
-이것은 이벤트가 발생한 요소의 갯수를 돌려줍니다.
+`nfds`는 배열에 담긴 요소의 개수입니다. `timeout`은 밀리초 단위의 제한시간입니다.
+이것은 이벤트가 발생한 요소의 개수를 돌려줍니다.
 
 위에 등장하는 구조체는 무엇인지 살펴봅시다.
 
@@ -103,31 +102,32 @@ int poll(struct pollfd fds[], nfds_t nfds, int timeout);
 ```{.c}
 struct pollfd {
     int fd;         // 소켓 설명자
-    short events;   // 우리가 관심있는 이벤트의 비트맵
+    short events;   // 우리가 관심 있는 이벤트의 비트맵
     short revents;  // poll()이 반환하는 시점에 발생한 이벤트의 비트맵
 };
 ```
 
-이 구조체 타입의 배열을 하나 설정하고 각각의 `fd`필드를 우리가 관찰하고 싶은 소켓 설명자로
-설정합니다. 그리고 각각의 `events`필드는 우리가 관심있는 이벤트로 설정하는 것입니다.
+이 구조체 타입의 배열을 하나 설정하고 각각의 `fd` 필드를 우리가 관찰하고 싶은 소켓 설명자로
+설정합니다. 그리고 각각의 `events` 필드는 우리가 관심 있는 이벤트로 설정하는 것입니다.
 
-`events`필드는 아래 값들을 비트단위 논리합 계산한 결과값입니다.
+`events` 필드는 아래 값들을 비트 단위 OR로 묶은 결과값입니다.
 
 | 매크로    | 설명                                                            |
 | --------- | --------------------------------------------------------------- |
 | `POLLIN`  | 이 소켓이 데이터를 `recv()`할 준비가 되면 알려줍니다.           |
 | `POLLOUT` | 이 소켓에 블로킹 없이 데이터를 `send()`할 수 있으면 알려줍니다. |
+| `POLLHUP` | 원격 쪽이 연결을 닫으면 알려줍니다.                             |
 
 `struct pollfd`의 배열을 준비하면 `poll()`에 그것을 넘길 수 있습니다. 배열의 크기와
-밀리초 단위의 제한시간도 같이 넘겨야 합니다.(영원히 기다리려면 음수를 지정하면 됩니다.)
+밀리초 단위의 제한시간도 같이 넘겨야 합니다. (영원히 기다리려면 음수를 지정하면 됩니다.)
 
 `poll()`이 반환하면 이벤트가 발생했음을 나타내는 `POLLIN`이나 `POLLOUT`이
-설정되었는지 보기위해서 `revents` 필드를 확인할 수 있습니다.
+설정되었는지 보기 위해서 `revents` 필드를 확인할 수 있습니다.
 
-(실제로는 `poll()`호출로 할 수 있는 것들이 더 있습니다. 자세한 내용은
+(실제로는 `poll()` 호출로 할 수 있는 것들이 더 있습니다. 자세한 내용은
 [아래의 `poll()` 맨페이지](#pollman)를 참고하세요.)
 
-여기 표준 입력에서 데이터를 읽어들일 수 있을 때까지(예를 들어 여러분이 줄바꿈을 입력할 때까지)
+여기 표준 입력에서 데이터를 읽어 들일 수 있을 때까지(예를 들어 여러분이 줄바꿈을 입력할 때까지)
 2.5초를 기다리는 [flx[예제|poll.c]]가 있습니다.
 
 ```{.c .numberLines}
@@ -145,7 +145,7 @@ int main(void)
     //pfds[1].fd = some_socket; // 임의의 소켓 설명자
     //pfds[1].events = POLLIN;  // 읽을 준비가 되면 알려줍니다.
 
-    printf("엔터키를 누르거나 제한시간 도달을 위해 2.5초를 기다리세요\n");
+    printf("엔터 키를 누르거나 제한시간 도달을 위해 2.5초를 기다리세요\n");
 
     int num_events = poll(pfds, 1, 2500); // 2.5초 제한 시간
 
@@ -155,7 +155,7 @@ int main(void)
         int pollin_happened = pfds[0].revents & POLLIN;
 
         if (pollin_happened) {
-            printf("파일 설명자 %d을 읽을 준비가 되었습니다\n", pfds[0].fd);
+            printf("파일 설명자 %d를 읽을 준비가 되었습니다\n", pfds[0].fd);
         } else {
             printf("예상하지 못한 이벤트가 발생했습니다: %d\n", pfds[0].revents);
         }
@@ -165,26 +165,26 @@ int main(void)
 }
 ```
 
-`poll()`이 `pfds`배열에서 이벤트가 발생한 요소의 갯수를 돌려준다는 것을 다시
-기억하세요. 배열의 *어떤*요소에서 이벤트가 발생했는지는 알려주지 않지만 몇 개의
+`poll()`이 `pfds` 배열에서 이벤트가 발생한 요소의 개수를 돌려준다는 것을 다시
+기억하세요. 배열의 *어떤* 요소에서 이벤트가 발생했는지는 알려주지 않지만 몇 개의
 `revents` 필드가 0이 아닌 값으로 설정되었는지는 알려줍니다. 이것을 활용해서
 반환된 숫자만큼의 0이 아닌 `revents`를 읽은 후에는 스캔을 중단할 수 있습니다.
 
 몇 가지 질문이 떠오를 것입니다. `poll()`에 넘겨준 집합에 새 파일 설명자를 추가하려면
-어떻게 해야할까요? 이를 위해서 단순히 여러분의 모든 필요에 부합할 만큼 충분한
+어떻게 해야 할까요? 이를 위해서 단순히 여러분의 모든 필요에 부합할 만큼 충분한
 크기의 배열을 만들거나 추가적인 공간이 필요할 때 `realloc()`을 사용하세요.
 
-집합에서 요소를 제거하려면 어떻게 해야할까요? 이것을 위해서 여러분은 배열의 마지막
-요소를 삭제할 요소에 덮어씌우고, `poll()`의 count에 하나 더 적은 값을 전달하세요.
+집합에서 요소를 제거하려면 어떻게 해야 할까요? 이것을 위해서 여러분은 배열의 마지막
+요소를 삭제할 요소에 덮어씌우고, `poll()`의 개수 인수에는 하나 더 적은 값을 전달하세요.
 (역자 주 : 이것은 배열에서 임의의 요소 1개를 빠르게 제거하기 위해서 일반적으로
-사용하는 방법입니다.) 다른 한 가지 방법은 `fd`필드를 음수로 설정하는 것이며
+사용하는 방법입니다.) 다른 한 가지 방법은 `fd` 필드를 음수로 설정하는 것이며
 `poll()`은 해당 요소를 무시할 것입니다.
 
 이 모든 것을 여러분이 `telnet`할 수 있는 하나의 채팅 서버에 합치려면 어떻게
-해야할까요?
+해야 할까요?
 
 우리가 할 일은 리스너 소켓을 시작한 후에 그것을 `poll()`할 파일 설명자
-집합에 추가하는 일입니다. (그 파일설명자는 들어오는 연결이 있을 때 읽기 준비된
+집합에 추가하는 일입니다. (그 파일 설명자는 들어오는 연결이 있을 때 읽기 준비된
 상태가 될 것입니다.)
 
 그 후에 새로운 연결을 우리의 `struct pollfd` 배열에 추가하면 됩니다.
@@ -197,15 +197,15 @@ int main(void)
 
 이제 [flx[이 폴 서버|pollserver.c]]를 한 번 시험해보세요. 이것을 하나의
 창에서 실행한 후 몇 개의 다른 터미널 창에서 `telnet localhost 9034`를
-실행해보세요. 여러분이 하나의 창에서 입력하는 것을 (여러분이 엔터키를 누른 후에)
-다른 창들에서 볼 수 있어야합니다.
+실행해 보세요. 여러분이 하나의 창에서 입력하는 것을 (여러분이 엔터 키를 누른 후에)
+다른 창들에서 볼 수 있어야 합니다.
 
-그것 뿐 아니라 여러분이 `CTRL-]`를 누른 후 `quit`을 입력해서 `telnet`을 종료할
-경우 서버는 연결종료를 감지하고 그 연결을 파일 설명자 배열에서 제거할 것입니다.
+그뿐 아니라 여러분이 `CTRL-]`를 누른 후 `quit`을 입력해서 `telnet`을 종료할
+경우 서버는 연결 종료를 감지하고 그 연결을 파일 설명자 배열에서 제거할 것입니다.
 
 ```{.c .numberLines}
 /*
-** pollserver.c -- 형편없는 다인 대화 서버
+** pollserver.c -- 허술한 다중 사용자 대화 서버
 */
 
 #include <stdio.h>
@@ -219,208 +219,265 @@ int main(void)
 #include <netdb.h>
 #include <poll.h>
 
-#define PORT "9034"   // 우리가 듣는(listening) 포트
+#define PORT "9034"   // 리스닝할 포트
 
-// Get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+/*
+ * 소켓 주소를 IP 주소 문자열로 변환합니다.
+ * addr: struct sockaddr_in 또는 struct sockaddr_in6
+ */
+const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+	struct sockaddr_storage *sas = addr;
+	struct sockaddr_in *sa4;
+	struct sockaddr_in6 *sa6;
+	void *src;
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	switch (sas->ss_family) {
+		case AF_INET:
+			sa4 = addr;
+			src = &(sa4->sin_addr);
+			break;
+		case AF_INET6:
+			sa6 = addr;
+			src = &(sa6->sin6_addr);
+			break;
+		default:
+			return NULL;
+	}
+
+	return inet_ntop(sas->ss_family, src, buf, size);
 }
 
-// Return a listening socket
+/*
+ * 리스닝 소켓을 반환합니다.
+ */
 int get_listener_socket(void)
 {
-    int listener;     // 듣는 소켓 설명자
-    int yes=1;        // setsockopt() SO_REUSEADDR을 위해서는 아래를 보세요
-    int rv;
+	int listener;	 // 리스닝 소켓 설명자
+	int yes=1;		// 아래 setsockopt() SO_REUSEADDR용
+	int rv;
 
-    struct addrinfo hints, *ai, *p;
+	struct addrinfo hints, *ai, *p;
 
-    // 소켓을 받아서 바인드합니다
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
-        fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
-        exit(1);
-    }
+	// 소켓을 얻어서 바인드합니다
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+		fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
+		exit(1);
+	}
 
-    for(p = ai; p != NULL; p = p->ai_next) {
-        listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) {
-            continue;
-        }
+	for(p = ai; p != NULL; p = p->ai_next) {
+		listener = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol);
+		if (listener < 0) {
+			continue;
+		}
 
-        // 귀찮은 "주소가 이미 사용중입니다"에러메시지를 제거합니다
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+		// 성가신 "address already in use" 오류 메시지를 피합니다
+		setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
+				sizeof(int));
 
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
-            close(listener);
-            continue;
-        }
+		if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
+			close(listener);
+			continue;
+		}
 
-        break;
-    }
+		break;
+	}
 
-    freeaddrinfo(ai); // 더 이상 필요없습니다
+	// 여기까지 왔다면 바인드하지 못했다는 뜻입니다
+	if (p == NULL) {
+		return -1;
+	}
 
-    // 여기가 실행되면 우리가 바인드하지 못했다는 의미입니다
-    if (p == NULL) {
-        return -1;
-    }
+	freeaddrinfo(ai); // 이 구조체는 다 썼습니다
 
-    // 리슨
-    if (listen(listener, 10) == -1) {
-        return -1;
-    }
+	// 리스닝합니다
+	if (listen(listener, 10) == -1) {
+		return -1;
+	}
 
-    return listener;
+	return listener;
 }
 
-// 집합에 새 파일 설명자를 추가합니다
-void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
+/*
+ * 집합에 새 파일 설명자를 추가합니다.
+ */
+void add_to_pfds(struct pollfd **pfds, int newfd, int *fd_count,
+		int *fd_size)
 {
-    // 공간이 부족하면 pfds 배열을 늘립니다
-    if (*fd_count == *fd_size) {
-        *fd_size *= 2; // 두배로 합니다
+	// 공간이 부족하면 pfds 배열 공간을 늘립니다
+	if (*fd_count == *fd_size) {
+		*fd_size *= 2; // 두 배로 늘립니다
+		*pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
+	}
 
-        *pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
-    }
+	(*pfds)[*fd_count].fd = newfd;
+	(*pfds)[*fd_count].events = POLLIN; // 읽을 준비 상태를 확인합니다
+	(*pfds)[*fd_count].revents = 0;
 
-    (*pfds)[*fd_count].fd = newfd;
-    (*pfds)[*fd_count].events = POLLIN; // 읽을 준비가 되었는지 확인합니다
-
-    (*fd_count)++;
+	(*fd_count)++;
 }
 
-// 집합에서 하나의 인덱스를 제거합니다
+/*
+ * 집합의 지정한 인덱스에서 파일 설명자를 제거합니다.
+ */
 void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
 {
-    // 마지막에서 하나를 삭제 대상 인덱스로 복사해옵니다
-    pfds[i] = pfds[*fd_count-1];
+	// 마지막 요소를 이 위치로 복사합니다
+	pfds[i] = pfds[*fd_count-1];
 
-    (*fd_count)--;
+	(*fd_count)--;
 }
 
-// 메인
+/*
+ * 들어오는 연결을 처리합니다.
+ */
+void handle_new_connection(int listener, int *fd_count,
+		int *fd_size, struct pollfd **pfds)
+{
+	struct sockaddr_storage remoteaddr; // 클라이언트 주소
+	socklen_t addrlen;
+	int newfd;  // 새로 accept()한 소켓 설명자
+	char remoteIP[INET6_ADDRSTRLEN];
+
+	addrlen = sizeof remoteaddr;
+	newfd = accept(listener, (struct sockaddr *)&remoteaddr,
+			&addrlen);
+
+	if (newfd == -1) {
+		perror("accept");
+	} else {
+		add_to_pfds(pfds, newfd, fd_count, fd_size);
+
+		printf("pollserver: new connection from %s on socket %d\n",
+				inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP),
+				newfd);
+	}
+}
+
+/*
+ * 일반 클라이언트 데이터와 연결 종료를 처리합니다.
+ */
+void handle_client_data(int listener, int *fd_count,
+		struct pollfd *pfds, int *pfd_i)
+{
+	char buf[256];	// 클라이언트 데이터용 버퍼
+
+	int nbytes = recv(pfds[*pfd_i].fd, buf, sizeof buf, 0);
+
+	int sender_fd = pfds[*pfd_i].fd;
+
+	if (nbytes <= 0) { // 오류가 발생했거나 클라이언트가 연결을 닫았습니다
+		if (nbytes == 0) {
+			// 연결이 닫혔습니다
+			printf("pollserver: socket %d hung up\n", sender_fd);
+		} else {
+			perror("recv");
+		}
+
+		close(pfds[*pfd_i].fd); // 안녕!
+
+		del_from_pfds(pfds, *pfd_i, fd_count);
+
+		// 방금 삭제한 슬롯을 다시 검사합니다
+		(*pfd_i)--;
+
+	} else { // 클라이언트에서 정상 데이터를 받았습니다
+		printf("pollserver: recv from fd %d: %.*s", sender_fd,
+				nbytes, buf);
+		// 모두에게 보냅니다!
+		for(int j = 0; j < *fd_count; j++) {
+			int dest_fd = pfds[j].fd;
+
+			// 리스너와 자기 자신은 제외합니다
+			if (dest_fd != listener && dest_fd != sender_fd) {
+				if (send(dest_fd, buf, nbytes, 0) == -1) {
+					perror("send");
+				}
+			}
+		}
+	}
+}
+
+/*
+ * 기존 연결들을 모두 처리합니다.
+ */
+void process_connections(int listener, int *fd_count, int *fd_size,
+		struct pollfd **pfds)
+{
+	for(int i = 0; i < *fd_count; i++) {
+
+		// 읽을 준비가 된 항목이 있는지 확인합니다
+		if ((*pfds)[i].revents & (POLLIN | POLLHUP)) {
+			// 하나 찾았습니다!!
+
+			if ((*pfds)[i].fd == listener) {
+				// 리스너라면 새 연결입니다
+				handle_new_connection(listener, fd_count, fd_size,
+						pfds);
+			} else {
+				// 그렇지 않으면 일반 클라이언트입니다
+				handle_client_data(listener, fd_count, *pfds, &i);
+			}
+		}
+	}
+}
+
+/*
+ * 메인: 리스너와 연결 집합을 만들고 영원히 반복하면서
+ * 연결을 처리합니다.
+ */
 int main(void)
 {
-    int listener;     // 리슨 소켓 설명자
+	int listener;	 // 리스닝 소켓 설명자
 
-    int newfd;        // 새롭게 accept()한 소켓 설명자
-    struct sockaddr_storage remoteaddr; // 클라이언트 주소
-    socklen_t addrlen;
+	// 5개 연결을 담을 공간으로 시작합니다
+	// (필요하면 realloc할 것입니다)
+	int fd_size = 5;
+	int fd_count = 0;
+	struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
 
-    char buf[256];    // 클라이언트 데이터를 위한 버퍼
+	// 리스닝 소켓을 설정하고 얻습니다
+	listener = get_listener_socket();
 
-    char remoteIP[INET6_ADDRSTRLEN];
+	if (listener == -1) {
+		fprintf(stderr, "error getting listening socket\n");
+		exit(1);
+	}
 
-    // 5개의 연결을 위한 공간을 가지고 시작합니다
-    // (필요해지면 realloc할 것입니다.)
-    int fd_count = 0;
-    int fd_size = 5;
-    struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
+	// 리스너를 집합에 추가합니다.
+	// 들어오는 연결을 읽을 준비 이벤트로 보고받습니다
+	pfds[0].fd = listener;
+	pfds[0].events = POLLIN;
 
-    // 초기화 후 리스닝 소켓을 얻습니다
-    listener = get_listener_socket();
+	fd_count = 1; // 리스너용
 
-    if (listener == -1) {
-        fprintf(stderr, "리스닝 소켓 얻기 실패\n");
-        exit(1);
-    }
+	puts("pollserver: waiting for connections...");
 
-    // 리스너를 집합에 추가
-    pfds[0].fd = listener;
-    pfds[0].events = POLLIN; // 들어오는 연결을 읽을 준비가 되면 보고를 받습니다
+	// 메인 루프
+	for(;;) {
+		int poll_count = poll(pfds, fd_count, -1);
 
-    fd_count = 1; // 리스너를 위한 설정
+		if (poll_count == -1) {
+			perror("poll");
+			exit(1);
+		}
 
-    // 주 반복문
-    for(;;) {
-        int poll_count = poll(pfds, fd_count, -1);
+		// 연결들을 순회하며 읽을 데이터를 찾습니다
+		process_connections(listener, &fd_count, &fd_size, &pfds);
+	}
 
-        if (poll_count == -1) {
-            perror("poll");
-            exit(1);
-        }
-
-        // 읽어들일 데이터를 찾기 위해서 존재하는 연결을 순회
-        for(int i = 0; i < fd_count; i++) {
-
-            // 무엇인가 읽을 준비가 되었는지 확인
-            if (pfds[i].revents & POLLIN) { // 하나를 찾았습니다!!
-
-                if (pfds[i].fd == listener) {
-                    // 리스너를 읽을 준비가 되었다면 새 연결을 처리합니다
-
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
-
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        add_to_pfds(&pfds, newfd, &fd_count, &fd_size);
-
-                        printf("폴서버: 새로운 연결 %s"
-                            " 소켓 %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // 리스너가 아닐 경우 일반적인 클라이언트입니다
-                    int nbytes = recv(pfds[i].fd, buf, sizeof buf, 0);
-
-                    int sender_fd = pfds[i].fd;
-
-                    if (nbytes <= 0) {
-                        // 오류가 발생했거나 연결이 클라이언트에 의해 닫혔습니다
-                        if (nbytes == 0) {
-                            // 연결이 닫혔습니다
-                            printf("폴서버: 소켓 %d 이 끊어짐\n", sender_fd);
-                        } else {
-                            perror("recv");
-                        }
-
-                        close(pfds[i].fd); // 안녕히가세요!
-
-                        del_from_pfds(pfds, i, &fd_count);
-
-                    } else {
-                        // 클라이언트로부터 뭔가 좋은 데이터를 받았습니다
-
-                        for(int j = 0; j < fd_count; j++) {
-                            // 모두에게 보냅시다!
-                            int dest_fd = pfds[j].fd;
-
-                            // 리스너와 보낸 사람을 제외합니다
-                            if (dest_fd != listener && dest_fd != sender_fd) {
-                                if (send(dest_fd, buf, nbytes, 0) == -1) {
-                                    perror("send");
-                                }
-                            }
-                        }
-                    }
-                } // 클라이언트로부터 온 데이터를 처리하는 부분의 끝
-            } // poll()에서 읽을 준비가 된 부분의 끝
-        } // 파일 설명자 순회의 끝
-    } // for(;;)의 끝--물론 여기에 도달하는 일은 없을 것이니다!
-
-    return 0;
+	free(pfds);
 }
 ```
 
 다음 절에서는 비슷하지만 오래된 함수인 `select()`를 살펴볼 것입니다.
 `select()`와 `poll()` 모두 비슷한 기능과 성능을 제공하고 쓰는 방식만
-조금 다릅니다. `select()`쪽이 조금 더 이식성이 좋을지도 모르나 사용하기에는
+조금 다릅니다. `select()` 쪽이 조금 더 이식성이 좋을지도 모르나 사용하기에는
 조금 더 어색할 것입니다. 여러분의 시스템에서 지원되기만 한다면 더 마음에
 드는 쪽을 선택하세요.
 
@@ -435,10 +492,10 @@ int main(void)
 읽어들이고 싶습니다.
 
 별 문제가 없다고 말씀하실지도 모릅니다. 그냥 `accept()`와 몇 개의 `recv()`를
-쓰면 될 뿐입니다. 하지만 정말로 그럴까요? `accept()`호출이 블록 상태로 들어갔다면
+쓰면 될 뿐입니다. 하지만 정말로 그럴까요? `accept()` 호출이 블록 상태로 들어갔다면
 어떻게 할까요? 어떻게 `recv()`로 동시에 데이터를 받을 수 있을까요?
-"논 블로킹 소켓을 써봅시다!" 역시 해결책이 아닙니다. CPU를 모조리 쓰고 싶지는 않을
-것입니다. 그럼 어떻게 해야할까요?
+"논블로킹 소켓을 써봅시다!" 역시 해결책이 아닙니다. CPU를 모조리 쓰고 싶지는 않을
+것입니다. 그럼 어떻게 해야 할까요?
 
 `select()`가 여러 소켓을 동시에 관찰할 수 있는 능력을 줍니다. 그것이 어떤 것이
 읽을 준비가 되었는지, 어떤 것이 쓸 준비가 되었는지, 그리고 정말로 관심이
@@ -460,16 +517,16 @@ int select(int numfds, fd_set *readfds, fd_set *writefds,
            fd_set *exceptfds, struct timeval *timeout);
 ```
 
-이 함수는 특정한 `readfds`과 `writefds` 그리고 `exceptfds`로 이루어진
+이 함수는 `readfds`와 `writefds`, 그리고 `exceptfds`라는
 파일 설명자의 "집합들"을 관찰합니다. 만약 여러분이 표준 입력과 몇 개의 소켓
-설명자로부터 읽어들일 수 있는지 확인하고 싶다면 `readfds` 집합에 0과
+설명자로부터 읽어 들일 수 있는지 확인하고 싶다면 `readfds` 집합에 0과
 `sockfd`를 추가하세요. `numfds`는 가장 큰 파일 설명자에 1을 더한 값으로
 설정해야 합니다. 이 예제에서는 `sockfd+1`이 될 것이며 이유는 당연히 그것이
 표준 입력(`0`)보다 클 것이기 때문입니다.
 
-`select()`가 반환할 때 `readfds`는 여러분이 선택한 파일 설명자 중에서 읽기를
-위해 준비된 것들을 반영하기 위해서 변해있을 것입니다. 여러분은 그것들을
-아래에 나오는 `FD_ISSET()`매크로로 검사할 수 있습니다.
+`select()`가 반환할 때 `readfds`는 여러분이 선택한 파일 설명자 중에서 읽을
+준비가 된 것들을 반영하도록 바뀌어 있을 것입니다. 여러분은 그것들을
+아래에 나오는 `FD_ISSET()` 매크로로 검사할 수 있습니다.
 
 더 진행하기 전에 이 집합들을 어떻게 조작하는지에 대해 이야기할 것입니다. 각 집합은
 `fd_set`형입니다. 이 자료형에 대해서 아래의 매크로들을 쓸 수 있습니다.
@@ -478,15 +535,15 @@ int select(int numfds, fd_set *readfds, fd_set *writefds,
 | ------------------------------------------------------- | -------------------------------------- |
 | [i[`FD_SET()` macro]]`FD_SET(int fd, fd_set *set);`     | `fd`를 `set`에 더합니다.               |
 | [i[`FD_CLR()` macro]]`FD_CLR(int fd, fd_set *set);`     | `fd`를 `set`에서 제거합니다.           |
-| [i[`FD_ISSET()` macro]]`FD_ISSET(int fd, fd_set *set);` | `fd`이 `set`에 있다면 참을 돌려줍니다. |
+| [i[`FD_ISSET()` macro]]`FD_ISSET(int fd, fd_set *set);` | `fd`가 `set`에 있다면 참을 돌려줍니다. |
 | [i[`FD_ZERO()` macro]]`FD_ZERO(fd_set *set);`           | `set`의 모든 요소를 제거합니다.        |
 
 [i[`struct timeval` 형]<]
 
 마지막으로 이 이상한 `struct timeval`은 무엇일까요? 누군가 여러분에게 자료를
 보낼 때까지 무한히 기다리고 싶지 않을 때가 있습니다. 아마도 매 96초마다
-실제로는 아무 일도 일어나지 않았어도 "진행중..."이라고 출력하고 싶을 수도 있습니다.
-이 시간 구조체가 제한시간을 지정할 수 있도록 해 줍니다. 시간이 초과하고 `select()`
+실제로는 아무 일도 일어나지 않았어도 "진행 중..."이라고 출력하고 싶을 수도 있습니다.
+이 시간 구조체가 제한시간을 지정할 수 있도록 해 줍니다. 시간이 초과되고 `select()`
 가 준비된 파일 설명자를 찾지 못할 경우, 그것은 반환하고 여러분은 처리를 계속할
 수 있습니다.
 
@@ -504,14 +561,14 @@ struct timeval {
 그리고 1,000밀리초는 1초입니다. 그러므로 1초는 1,000,000마이크로초입니다. 왜 "usec"일까요?
 "u"는 우리가 "마이크로"를 뜻하기 위해서 쓰는 그리스 문자 μ(뮤)와 닮았기 때문입니다.
 또 함수가 반환할 때 `timeout`은 남아있는 시간을 보여주기 위해서 업데이트 _될 수도_
-있습니다. 이것은 여러분이 실행중인 유닉스의 종류에 따라 다릅니다.
+있습니다. 이것은 여러분이 실행 중인 유닉스의 종류에 따라 다릅니다.
 
 와! 우리는 마이크로초 해상도의 타이머를 가졌습니다! 사실 별로 기대하지 않는 것이 좋습니다.
 여러분이 `struct timeval`을 아무리 작게 설정해도 여러분의 표준 유닉스 타임슬라이스
 (역자 주 : 커널이 프로세스 스케쥴링의 최소 단위로 쓰는 시간)만큼은 기다려야 합니다.
 
 다른 흥미로운 것들도 있습니다. `struct timeval`을 `0`으로 설정하면 `select()`는 여러분의 집합에
-있는 모든 파일 설명자를 조사한 즉시 시간초과가 될 것입니다. 매개변수 `timeout`을 NULL
+있는 모든 파일 설명자를 폴링한 뒤 즉시 시간초과가 될 것입니다. 매개변수 `timeout`을 `NULL`
 로 설정하면 절대 시간초과가 되지 않으며 파일 설명자가 준비될 때까지 기다릴 것입니다.
 마지막으로 만약 특정 집합을 기다릴 필요가 없다면 그 집합은 `select()`를 호출할 때
 NULL로 설정하면 됩니다.
@@ -541,7 +598,7 @@ int main(void)
     FD_ZERO(&readfds);
     FD_SET(STDIN, &readfds);
 
-    // writefds와 exceptfds는 신경쓰지 않습니다
+    // writefds와 exceptfds는 신경 쓰지 않습니다
     select(STDIN+1, &readfds, NULL, NULL, &tv);
 
     if (FD_ISSET(STDIN, &readfds))
@@ -553,7 +610,7 @@ int main(void)
 }
 ```
 
-만약 여러분이 줄 단위로 버퍼처리되는 터미널을 사용한다면 엔터를 누르지 않으면
+	만약 여러분이 줄 단위로 버퍼 처리되는 터미널을 사용한다면 엔터를 누르지 않으면
 제한시간이 초과될 것입니다.
 
 이제 여러분 중 일부는 이것이 데이터그램 소켓의 데이터를 기다리는 아주 훌륭한
@@ -563,13 +620,13 @@ select를 이 목적으로 쓸 수 있고, 일부에서는 그럴 수 없습니�
 
 일부 유닉스는 제한시간이 초과되기까지 남은 시간을 반영하기 위해서 여러분의
 `struct timeval`를 업데이트합니다. 그러나 다른 것들은 그렇게 하지 않습니다.
-만약 이식성있는 코드를 작성하고자 한다면 그것에 의존해서는 안됩니다.
-(경과한 시간을 알고싶다면[i[`gettimeofday()`funtion]]`gettimeofday()`
+만약 이식성 있는 코드를 작성하고자 한다면 그것에 의존해서는 안 됩니다.
+(경과한 시간을 알고 싶다면 [i[`gettimeofday()`function]] `gettimeofday()`
 을 사용하세요. 실망스럽겠지만 그것이 올바른 방법입니다.)
 
 [i[`struct timeval` 형]>]
 
-만약 읽기 집합에 잇는 소켓이 연결을 닫는다면 어떤 일이 생길까요? 그 경우
+만약 읽기 집합에 있는 소켓이 연결을 닫는다면 어떤 일이 생길까요? 그 경우
 `select()`는 그 소켓 설명자를 "읽기 준비된 상태"로 설정할 것입니다. 실제로
 그 소켓에 `recv()`하면 `recv()`는 `0`을 돌려줄 것입니다. 그것이 클라이언트가
 연결을 닫았음을 알아내는 방법입니다.
@@ -577,18 +634,18 @@ select를 이 목적으로 쓸 수 있고, 일부에서는 그럴 수 없습니�
 `select()`에 관한 흥미로운 이야기가 하나 더 있습니다. 만약
 [i[`select()` function-->with `listen()`]]
 [i[`listen()` function-->with `select()`]]
-`listen()`작업중인 소켓을 가지고 있을 경우, 그 소켓의 파일 설명자를 `readfds`
+`listen()` 작업 중인 소켓을 가지고 있을 경우, 그 소켓의 파일 설명자를 `readfds`
 집합에 넣어서 새로운 연결이 있는지 알 수 있습니다.
 
-지금까지 전능한 `select()`함수에 대한 간단히 알아보았습니다.
+지금까지 전능한 `select()` 함수에 대해 간단히 알아보았습니다.
 
-그러나 대중적 요구가 있으므로 아래에 심도있는 예제를 첨부합니다. 불행하게도
+그러나 대중적 요구가 있으므로 아래에 심도 있는 예제를 첨부합니다. 불행하게도
 위의 아주 단순한 예제와 아래의 예제에는 상당한 차이가 있습니다. 그렇지만 한 번
 살펴보고 뒤따르는 설명을 읽어보세요.
 
-[flx[이 프로그램|selectserver.c]] 은 단순한 다중 사용자 챗 서버처럼 동작합니다.
+[flx[이 프로그램|selectserver.c]]은 단순한 다중 사용자 채팅 서버처럼 동작합니다.
 하나의 창에서 이것을 실행한 후 다른 창에서 `telnet`을 통해 접속하세요. ("`telnet
-hostname 9034`") 하나의 `telnet`세션에서 뭔가 입력하면 나머지 모두에서 그 내용이
+hostname 9034`") 하나의 `telnet` 세션에서 뭔가 입력하면 나머지 모두에서 그 내용이
 나타나야 합니다.
 
 ```{.c .numberLines}
@@ -606,194 +663,246 @@ hostname 9034`") 하나의 `telnet`세션에서 뭔가 입력하면 나머지 �
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define PORT "9034"   // 우리가 듣는 포트
+#define PORT "9034"   // 리스닝할 포트
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+/*
+ * 소켓 주소를 IP 주소 문자열로 변환합니다.
+ * addr: struct sockaddr_in 또는 struct sockaddr_in6
+ */
+const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+	struct sockaddr_storage *sas = addr;
+	struct sockaddr_in *sa4;
+	struct sockaddr_in6 *sa6;
+	void *src;
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	switch (sas->ss_family) {
+		case AF_INET:
+			sa4 = addr;
+			src = &(sa4->sin_addr);
+			break;
+		case AF_INET6:
+			sa6 = addr;
+			src = &(sa6->sin6_addr);
+			break;
+		default:
+			return NULL;
+	}
+
+	return inet_ntop(sas->ss_family, src, buf, size);
 }
 
+/*
+ * 리스닝 소켓을 반환합니다.
+ */
+int get_listener_socket(void)
+{
+	struct addrinfo hints, *ai, *p;
+	int yes=1;    // 아래 setsockopt() SO_REUSEADDR용
+	int rv;
+	int listener;
+
+	// 소켓을 얻어서 바인드합니다
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+		fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
+		exit(1);
+	}
+
+	for(p = ai; p != NULL; p = p->ai_next) {
+		listener = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol);
+		if (listener < 0) {
+			continue;
+		}
+
+		// 성가신 "address already in use" 오류 메시지를 피합니다
+		setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
+				sizeof(int));
+
+		if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
+			close(listener);
+			continue;
+		}
+
+		break;
+	}
+
+	// 여기까지 왔다면 바인드하지 못했다는 뜻입니다
+	if (p == NULL) {
+		fprintf(stderr, "selectserver: failed to bind\n");
+		exit(2);
+	}
+
+	freeaddrinfo(ai); // 이 구조체는 다 썼습니다
+
+	// 리스닝합니다
+	if (listen(listener, 10) == -1) {
+		perror("listen");
+		exit(3);
+	}
+
+	return listener;
+}
+
+/*
+ * 새로 들어온 연결을 적절한 집합에 추가합니다
+ */
+void handle_new_connection(int listener, fd_set *master, int *fdmax)
+{
+	socklen_t addrlen;
+	int newfd;        // 새로 accept()한 소켓 설명자
+		struct sockaddr_storage remoteaddr; // 클라이언트 주소
+	char remoteIP[INET6_ADDRSTRLEN];
+
+	addrlen = sizeof remoteaddr;
+	newfd = accept(listener,
+		(struct sockaddr *)&remoteaddr,
+		&addrlen);
+
+	if (newfd == -1) {
+		perror("accept");
+	} else {
+		FD_SET(newfd, master); // 마스터 집합에 추가합니다
+		if (newfd > *fdmax) {  // 최댓값을 기록합니다
+			*fdmax = newfd;
+		}
+		printf("selectserver: new connection from %s on "
+			"socket %d\n",
+			inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP),
+			newfd);
+	}
+}
+
+/*
+ * 모든 클라이언트에 메시지를 방송합니다
+ */
+void broadcast(char *buf, int nbytes, int listener, int s,
+               fd_set *master, int fdmax)
+{
+	for(int j = 0; j <= fdmax; j++) {
+		// 모두에게 보냅니다!
+		if (FD_ISSET(j, master)) {
+			// 리스너와 자기 자신은 제외합니다
+			if (j != listener && j != s) {
+				if (send(j, buf, nbytes, 0) == -1) {
+					perror("send");
+				}
+			}
+		}
+	}
+}
+
+/*
+ * 클라이언트 데이터와 연결 종료를 처리합니다
+ */
+void handle_client_data(int s, int listener, fd_set *master,
+                        int fdmax)
+{
+	char buf[256];    // 클라이언트 데이터용 버퍼
+	int nbytes;
+
+	// 클라이언트에서 온 데이터를 처리합니다
+	if ((nbytes = recv(s, buf, sizeof buf, 0)) <= 0) {
+		// 오류가 발생했거나 클라이언트가 연결을 닫았습니다
+		if (nbytes == 0) {
+			// 연결이 닫혔습니다
+			printf("selectserver: socket %d hung up\n", s);
+		} else {
+			perror("recv");
+		}
+		close(s); // 안녕!
+		FD_CLR(s, master); // 마스터 집합에서 제거합니다
+	} else {
+		// 클라이언트에서 데이터를 받았습니다
+		broadcast(buf, nbytes, listener, s, master, fdmax);
+	}
+}
+
+/*
+ * 메인
+ */
 int main(void)
 {
-    fd_set master;    // 마스터 파일 설명자 리스트
-    fd_set read_fds;  // select()를 위한 임시 파일 설명자 리스트
-    int fdmax;        // 가장 큰 파일 설명자 번호
+	fd_set master;    // 마스터 파일 설명자 목록
+	fd_set read_fds;  // select()용 임시 파일 설명자 목록
+	int fdmax;        // 가장 큰 파일 설명자 번호
 
-    int listener;     // 듣는 소켓 설명자
-    int newfd;        // 새롭게 accept() 처리한 소켓 설명자
-    struct sockaddr_storage remoteaddr; // 클라이언트 주소
-    socklen_t addrlen;
+	int listener;     // 리스닝 소켓 설명자
 
-    char buf[256];    // 클라이언트 데이터를 위한 버퍼
-    int nbytes;
+	FD_ZERO(&master);    // 마스터 집합과 임시 집합을 비웁니다
+	FD_ZERO(&read_fds);
 
-    char remoteIP[INET6_ADDRSTRLEN];
+	listener = get_listener_socket();
 
-    int yes=1;        // setsockopt() SO_REUSEADDR를 위해서는 아래를 보세요
-    int i, j, rv;
+	// 리스너를 마스터 집합에 추가합니다
+	FD_SET(listener, &master);
 
-    struct addrinfo hints, *ai, *p;
+	// 가장 큰 파일 설명자를 기록합니다
+	fdmax = listener; // 지금까지는 이것입니다
 
-    FD_ZERO(&master);    // 마스터와 임시 집합을 초기화
-    FD_ZERO(&read_fds);
+	// 메인 루프
+	for(;;) {
+		read_fds = master; // 복사합니다
+		if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
+			perror("select");
+			exit(4);
+		}
 
-    // 소켓을 하나 받아와서 바인드합니다
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
-        fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
-        exit(1);
-    }
+		// 기존 연결을 순회하며 읽을 데이터를 찾습니다
+		for(int i = 0; i <= fdmax; i++) {
+			if (FD_ISSET(i, &read_fds)) { // 하나 찾았습니다!!
+				if (i == listener)
+					handle_new_connection(i, &master, &fdmax);
+				else
+					handle_client_data(i, listener, &master, fdmax);
+			}
+		}
+	}
 
-    for(p = ai; p != NULL; p = p->ai_next) {
-        listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) {
-            continue;
-        }
-
-        // 짜증나는 "address already in use" 오류 메시지를 제거합니다
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
-            close(listener);
-            continue;
-        }
-
-        break;
-    }
-
-    // 이곳이 실행되면 바인드가 되지 않은 것입니다
-    if (p == NULL) {
-        fprintf(stderr, "selectserver: failed to bind\n");
-        exit(2);
-    }
-
-    freeaddrinfo(ai); // 더 이상 필요없습니다
-
-    // 듣습니다
-    if (listen(listener, 10) == -1) {
-        perror("listen");
-        exit(3);
-    }
-
-    // 리스너를 마스터 집합에 추가합니다
-    FD_SET(listener, &master);
-
-    // 가장 큰 파일 설명자를 기록합니다
-    fdmax = listener; // 현재까지는 이것입니다
-
-    // 주 반복문
-    for(;;) {
-        read_fds = master; // 복사합니다.
-        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
-            perror("select");
-            exit(4);
-        }
-
-        // 존재하는 연결을 순회하며 읽을 데이터가 있는지 확인합니다
-        for(i = 0; i <= fdmax; i++) {
-            if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (i == listener) {
-                    // 새 연결을 처리합니다
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
-
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        FD_SET(newfd, &master); // 마스터 집합에 추가합니다
-                        if (newfd > fdmax) {    // 가장 큰 것을 기록합니다
-                            fdmax = newfd;
-                        }
-                        printf("selectserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // 클라이언트에서 온 자료를 처리합니다
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
-                        // 오류가 발생했거나 클라이언트에 의해 연결이 종료되었습니다
-                        if (nbytes == 0) {
-                            // 연결이 종료되었습니다
-                            printf("selectserver: socket %d hung up\n", i);
-                        } else {
-                            perror("recv");
-                        }
-                        close(i); // 안녕히가세요!
-                        FD_CLR(i, &master); // 마스터 집합에서 삭제합니다
-                    } else {
-                        // 클라이언트로부터 데이터가 들어왔습니다
-                        for(j = 0; j <= fdmax; j++) {
-                            // 모두에게 보냅니다!
-                            if (FD_ISSET(j, &master)) {
-                                // 리스너와 그 자신을 제외합니다
-                                if (j != listener && j != i) {
-                                    if (send(j, buf, nbytes, 0) == -1) {
-                                        perror("send");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } // 클라이언트로부터 온 데이터를 다루는 부분의 끝
-            } // 새 연결을 얻는 부분의 끝
-        } // 파일 설명자 순회 코드의 끝
-    } // 무한루프의 끝. 물론 여기에 도달할 수는 없습니다!
-
-    return 0;
+	return 0;
 }
 ```
 
 코드에 `master`와 `read_fds` 두 개의 파일 설명자 집합이 있음에 주목하세요.
-전자인 `master`는 새 연결을 듣는 소켓 설명자와 현재 연결된 모든 소켓의
+전자인 `master`는 새 연결을 리스닝 소켓 설명자와 현재 연결된 모든 소켓의
 설명자를 가집니다.
 
 `master`를 가지는 이유는 `select()`가 사실 여러분이 넘기는 집합을 _변형해서_
-읽기 준비된 소켓을 반영하기 때문입니다. 우리는 하나의 `select()`호출과 다음
+읽기 준비된 소켓을 반영하기 때문입니다. 우리는 하나의 `select()` 호출과 다음
 호출 사이에서 연결들을 계속 기억해야 하므로 이것들은 다른 곳에 안전하게
 보관해야 하는 것입니다. 그래서 우리는 실제로 쓰기 전에 `master`를 `read_fds`에
 복사하고 `select()`를 호출하는 것입니다.
 
-하지만 그것은 우리가 새로운 연결을 받을 때마다 그것을 `master`집합에 추가해야
-한다는 의미가 아닌가? 맞다! 그리고 연결이 닫힐 때마다 `master`집합에서 제거해야
-하지않은가? 맞다, 그렇게 해야합니다.
+하지만 그것은 우리가 새로운 연결을 받을 때마다 그것을 `master` 집합에 추가해야
+한다는 의미일까요? 맞습니다! 그리고 연결이 닫힐 때마다 `master` 집합에서 제거해야
+할까요? 그렇습니다. 그렇게 해야 합니다.
 
-`listener`소켓이 읽을 준비가 되었는지 확인한다는 사실에 주목하세요. 준비가 되어있다면
-대기중인 새로운 연결이 있다는 의미이고, `accept()`한 후에 `master`집합에 추가합니다.
+`listener` 소켓이 읽을 준비가 되었는지 확인한다는 사실에 주목하세요. 준비가 되어 있다면
+대기 중인 새로운 연결이 있다는 의미이고, `accept()`한 후에 `master` 집합에 추가합니다.
 비슷하게 클라이언트 연결을 읽을 준비가 되고 `recv()`가 `0`을 돌려준다면 클라이언트가
 연결을 닫았다는 사실을 알 수 있고, 우리는 그 연결을 `master` 집합에서 제거해야 합니다.
 
 클라이언트에 대한 `recv()`가 0이 아닌 값을 돌려준다면 우리는 어떤 데이터가 도착했다는
-것을 알 수 있습니다. 그러므로 자료를 받은 후에 `master`목록을 순회하면서 모든 나머지
+것을 알 수 있습니다. 그러므로 자료를 받은 후에 `master` 목록을 순회하면서 모든 나머지
 연결된 클라이언트들에게 그 자료를 보냅니다.
 
-지금까지 전능한 `select()`함수에 대한 별로 단순하지 않은 개관이었습니다.
+지금까지 전능한 `select()` 함수에 대한 그다지 단순하지 않은 개관이었습니다.
 
 모든 리눅스 팬들을 위한 짧은 이야기가 있습니다. 드문 몇몇 상황에서 때때로 리눅스의 `select()`
-는 실제로는 읽을 준비가 되어있지 않음에도 "읽을 준비가 되었다"고 하면서 반환합니다.
+는 실제로는 읽을 준비가 되어 있지 않음에도 "읽을 준비가 되었다"고 하면서 반환합니다.
 이것은 `select()`가 읽기 동작에 대한 블로킹이 없을 것이라고 말함에도 `read()`
-가 블록될 것임을 의미합니다. 아무튼 해결책은 읽을 소켓에 [i[`O_NONBLOCK` macro]]
+가 블록될 것임을 의미합니다. 이런! 아무튼 해결책은 읽을 소켓에 [i[`O_NONBLOCK` macro]]
 `O_NONBLOCK` 플래그를 설정해서 `EWOULDBLOCK`오류가 발생하도록 하는 것입니다.
 (이 오류가 생겨도 무시해도 됩니다.) 소켓을 논블로킹 모드로 설정하는 방법에 대해서는
 [`fcntl()` 참조 페이지](#fcntlman)를 참고하세요.
 
 추가로 약간의 여담을 하자면 `select()`와 상당히 비슷한 일을 하지만 파일 설명자
-집합을 다른 방식으로 처리하는 [i[`poll()` funtion]] `poll()`이라는 다른 함수가 있습니다.
-[한 번 확인해 보세요!](#pollman)(역자 주 : 이 부분은 poll함수에 대한 절보다 먼저 작성된
-것으로 보입니다. 그렇기에 문서의 앞부분에서 `poll()`에 대해서 설명함에도 불구하고
-man page 링크를 제시하고 있습니다.)
+집합을 다른 방식으로 처리하는 [i[`poll()` function]] `poll()`이라는 다른 함수가 있습니다.
+[한 번 확인해 보세요!](#pollman)
 
 [i[`select()` 함수]>]
 
@@ -804,8 +913,8 @@ man page 링크를 제시하고 있습니다.)
 412일 수 있다는 의미입니다. 남은 100바이트에는 무슨 일이 생긴 것일까요?
 
 음, 그것들은 여전히 여러분의 작은 버퍼에 남아서 보내지길 기다리고 있습니다. 여러분의 통제 밖에 있는
-상황때문에 커널이 데이터를 한 덩어리로 전부 보내지는 않기로 결정한 것입니다. 그리고 친구여, 이제 남은
-데이터를 보내는 일은 여러분에게 달려있는 것입니다.
+상황 때문에 커널이 데이터를 한 덩어리로 전부 보내지는 않기로 결정한 것입니다. 그리고 이제 남은
+데이터를 보내는 일은 여러분에게 달려 있습니다.
 
 [i[`sendall()` 함수]<]
 그 일을 하는 함수를 만드는 한 가지 방법은 이렇습니다.
@@ -817,7 +926,7 @@ man page 링크를 제시하고 있습니다.)
 int sendall(int s, char *buf, int *len)
 {
     int total = 0;        // 몇 바이트를 보냈는가
-    int bytesleft = *len; // 보내야하는 데이터는 얼마나 남아있는가
+    int bytesleft = *len; // 보내야 하는 데이터는 얼마나 남아 있는가
     int n;
 
     while(total < *len) {
@@ -829,19 +938,19 @@ int sendall(int s, char *buf, int *len)
 
     *len = total; // 실제로 보낸 바이트 수를 기록해서 돌려줍니다
 
-    return n==-1?-1:0; // 실패시에는 -1을, 성공시에는 0을 돌려줍니다
+    return n==-1?-1:0; // 실패 시에는 -1을, 성공 시에는 0을 돌려줍니다
 }
 ```
 
 이 예제에서 `s`는 여러분이 데이터를 보내고 싶은 소켓이고 `buf`는 자료를 담은 버퍼입니다.
-`len`은 버퍼에 담긴 바이트의 갯수를 담은 `int`에 대한 포인터입니다.
+`len`은 버퍼에 담긴 바이트의 개수를 담은 `int`에 대한 포인터입니다.
 
-함수는 오류가 발생하면 `-1`을 돌려준다(`errno`는 `send()`에 대한 호출로 인해 여전히
-설정되어 있습니다). 또한 실제로 전송된 바이트의 갯수가 `len`을 통해 반환됩니다. 이 값은 오류가
+함수는 오류가 발생하면 `-1`을 돌려줍니다(`errno`는 `send()`에 대한 호출로 인해 여전히
+설정되어 있습니다). 또한 실제로 전송된 바이트의 개수가 `len`을 통해 반환됩니다. 이 값은 오류가
 발생하지 않는 이상 여러분이 전송하라고 요청한 바이트의 수와 같습니다. `sendall()`은 데이터를
 전송하기 위해서 최선을 다하지만 오류가 발생하면 바로 여러분에게 알려줄 것입니다.
 
-완결성을 위해 이 함수에 대한 호출 예제가 여기 있습니다.
+완성도를 위해 이 함수에 대한 호출 예제를 하나 더 보겠습니다.
 
 ```{.c .numberLines}
 char buf[10] = "Beej!";
@@ -850,24 +959,24 @@ int len;
 len = strlen(buf);
 if (sendall(s, buf, &len) == -1) {
     perror("sendall");
-    printf("오류가 발생해서 %d바이트만 전송했습니다!\n", len);
+    printf("오류가 발생해서 %d바이트만 보냈습니다!\n", len);
 }
 ```
 
 [i[`sendall()` 함수]>]
 
 수신자 측에 패킷의 일부가 도착하면 무슨 일이 벌어질까요? 만약 패킷이 가변 길이일 경우 수신자는
-어떻게 하나의 패킷이 끝나고 다른 하나가 시작되는 것을 알까요? 그렇습니다. 실세계의 시나리오는 [i[Donkeys]]
-뒤지게 고통스럽습니다. 여러분은 아마도 [i[Data encapsulation]]*캡슐화*를 해야 할 것입니다.
-(시작부에 있던 [데이터 캡슐화 절](#lowlevel)을 기억하시나요?) 자세한 내용을 알고싶다면 계속
-읽어보세요
+어떻게 하나의 패킷이 끝나고 다른 하나가 시작되는 것을 알까요? 그렇습니다. 현실 세계의 시나리오는
+정말 골치 아픕니다. 여러분은 아마도 [i[Data encapsulation]]*캡슐화*를 해야 할 것입니다.
+(시작부에 있던 [데이터 캡슐화 절](#lowlevel)을 기억하시나요?) 자세한 내용을 알고 싶다면 계속
+읽어보세요.
 
 ## 직렬화---데이터를 포장하는 방법 {#serialization}
 
 [i[Serialization]<]
 
 네트워크를 통해 문자열 데이터를 보내는 것은 꽤 쉽다는 것을 이제 알 것입니다. 하지만 만약
-`int`나 `float`같은 "이진" 자료를 전송하려고 하면 어떻게 해야할까요? 몇 가지 방법이
+`int`나 `float`같은 "이진" 자료를 전송하려고 하면 어떻게 해야 할까요? 몇 가지 방법이
 있습니다.
 
 1. `sprintf()`같은 함수를 써서 수를 텍스트로 변환하고 텍스트를 전송합니다. 수신자는
@@ -877,40 +986,37 @@ if (sendall(s, buf, &len) == -1) {
 
 3. 데이터를 호환성 있는 바이너리 형태로 인코드합니다. 수신자는 디코드합니다.
 
-오늘밤의 특별 사시회!
+오늘 밤 한정 미리보기!
 
 [_커튼이 올라간다_]
 
 Beej가 말합니다: "저는 위의 세 번째 방법을 좋아합니다."
 
 [_끝_]
-(역자 주 : 이 부분은 영화의 자막같은 것입니다.)
 
-(이 절을 기쁘게 시작하기에 앞서, 이 일을 하기 위한 라이브러리들이 이미 있다는 말을 미리
+(이 절을 본격적으로 시작하기에 앞서, 이 일을 하기 위한 라이브러리들이 이미 있다는 말을 미리
 해 두겠습니다. 이식성 있고 오류가 없는 여러분만의 라이브러리를 만드는 작업은 꽤 어려운 일이 될
-것입니다. 그러므로 그런 작업을 직접 하기 전에 그것들을 살펴보고 해야하는 다른 일을 처리하는
-것이 나을 것입니다. 저는 그런 것이 어떻게 동작하는지 궁금할 독자들을 위해서 관련된
+것입니다. 그러므로 직접 구현하기로 결정하기 전에 충분히 찾아보고 조사하는
+것이 좋습니다. 저는 그런 것이 어떻게 동작하는지 궁금할 독자들을 위해서 관련된
 내용을 여기에 담을 뿐입니다.)
 
-사실 위에 언급한 모든 방법에 각각의 장점과 단점이 있습니다. 그러나 위에 말한대로, 저는 일반적으로
+사실 위에 언급한 모든 방법에 각각의 장점과 단점이 있습니다. 그러나 위에 말한 대로, 저는 일반적으로
 세 번째 방법을 선호합니다. 그러나 먼저 다른 두 가지 방법의 장단점에 대해서 조금 더 알아봅시다.
 
-수를 보내기 전에 텍스트로 인코딩하는 첫 번재 방법은 랜선을 타고 오는 정보를 출력하고 읽어보기가
+수를 보내기 전에 텍스트로 인코딩하는 첫 번째 방법은 랜선을 타고 오는 정보를 출력하고 읽어 보기가
 쉽다는 장점이 있습니다. [i[IRC]] [fl[Internet
 Relay Chat (IRC)|https://en.wikipedia.org/wiki/Internet_Relay_Chat]]
 처럼 인간이 읽을 수 있는 프로토콜은 때때로 전송 대역폭에 민감하지 않은 상황에서 사용하기에 아주
-훌륭합니다. 그러나 그것은 변환이 느리다는 단점이 있고, 결과물은 언제나 원본 수보다 더 많은
+훌륭합니다. 그러나 그것은 변환이 느리다는 단점이 있고, 결과물은 거의 언제나 원본 수보다 더 많은
 공간을 차지한다는 단점이 있습니다.
 
 두 번째 방법: 원시 데이터(원문: raw data)를 넘기기. 이것은 꽤 간단(하고 위험)합니다.
-보낼 데이터에 대한 포인터를 얻은 후 그것에 send를 호출합니다.
+보낼 데이터에 대한 포인터를 얻은 후 그것으로 `send()`를 호출합니다.
 
 ```{.c}
 double d = 3490.15926535;
 
-send(s, &d, sizeof d, 0);
-/* 위험--이식성 없음!(역자 주 : 이식성은 컴퓨터 프로그램이나 소스코드가
-서로 다른 구조를 가진 컴퓨터에서 동작하는 특성을 의미합니다.) */
+send(s, &d, sizeof d, 0);  /* 위험--이식성 없음! */
 ```
 
 수신자는 이것을 아래와 같이 받습니다.
@@ -921,28 +1027,28 @@ double d;
 recv(s, &d, sizeof d, 0);  /* 위험--이식성 없음! */
 ```
 
-빠르고, 간단합니다.---문제될 것이 없어보이지요? 사실, 모든 아키텍처들이 `double`
+빠르고, 간단합니다. 문제 될 것이 없어 보이지요? 사실, 모든 아키텍처들이 `double`
 (이나 다른 예로는 `int`)을 동일한 비트 표현이나 심지어 동일한 바이트 순서로 표시하는
 것은 아니라는 문제가 있습니다! 위의 코드는 절대로 이식성이 없습니다. (잠깐---이식성이 필요 없는
 상황도 있지 않을까요? 그 경우에 이 방식은 좋고 빠른 방법이 됩니다.)
 
-정수 자료형을 포장할 때 [i[`htons()` function]] `htons()`-수를 [i[Byte ordering]]
-네트워크 바이트 순서로 변환해주는 종류의 함수를 어떻게 쓰는지, 그리고 그것이 왜 필요한지
-이미 살펴보았습니다. 불행하게도 `float`자료형에 대해서는 유사한 함수가 없습니다. 희망이 없는 것일까요?
+정수 자료형을 포장할 때 [i[`htons()` function]] `htons()` 계열 함수가 수를 [i[Byte ordering]]
+네트워크 바이트 순서로 변환해서 이식성을 지키는 데 어떻게 도움을 주는지, 그리고 그것이 왜 필요한지
+이미 살펴보았습니다. 불행하게도 `float` 자료형에 대해서는 유사한 함수가 없습니다. 희망이 없는 것일까요?
 
 두려워하지 마세요!(잠시 무섭지 않았나요? 정말로 조금도 무섭지 않았다고요?) 우리에게 방법이 있습니다.
-우리는 데이터를 원격지에서 풀어낼 수 있는 알려진 방식으로 포장(원문 : pack)(또는 "marshal"
-또는 "직렬화" 그것도 아니면 그런 일에 대한 천만개의 다른 이름)을 할 수 있습니다.
+우리는 데이터를 원격지에서 풀어낼 수 있는 알려진 방식으로 포장(pack)(또는 "marshal",
+"직렬화", 그것도 아니면 그런 일에 대한 천만 개의 다른 이름)할 수 있습니다.
 
 "알려진 이진 형식"은 무엇일까요? 우리는 이미 `htons()`의 예제를 보았습니다. 그것은 수를 호스트의
-형식이 무엇이든간에 네트워크 바이트 순서로 변환(또는 "인코드", 이것이 더 이해하기 쉽다면)합니다.
+형식이 무엇이든 간에 네트워크 바이트 순서로 변환(또는 "인코드", 이것이 더 이해하기 쉽다면)합니다.
 수를 원래대로 돌려놓기(디코드) 위해서 수신자는 `ntohs()`를 호출해야 합니다.
 
 하지만 제가 조금 전에 비-정수 타입에 대해서는 그런 함수가 없다고 했지요? 그렇습니다.
 그리고 C에서 이것을 처리하는 표준 방법이 없기 때문에 이것은 조금 까다로운 일입니다. (파이썬
-팬들은 이런 작업을 할 필요가 없을 것입니다.)
+팬들을 위한 쓸데없는 말장난입니다.)
 
-필요한 작업은 데이터를 알려진 형식으로 포장하고 유선상으로 실어보내는 것입니다. 예를 들어서
+필요한 작업은 데이터를 알려진 형식으로 포장하고 네트워크로 실어 보내는 것입니다. 예를 들어서
 `float`를 포장하는 작업을 위한 [flx[간단하고 지저분하고 개선할 점이 많은 예제코드|pack.c]]
 가 있습니다.
 
@@ -957,16 +1063,16 @@ uint32_t htonf(float f)
     if (f < 0) { sign = 1; f = -f; }
     else { sign = 0; }
 
-    p = ((((uint32_t)f)&0x7fff)<<16) | (sign<<31); // 전체 부분과 부호
-    p |= (uint32_t)(((f - (int)f) * 65536.0f))&0xffff; // 소수점
+    p = ((((uint32_t)f)&0x7fff)<<16) | (sign<<31); // 정수 부분과 부호
+    p |= (uint32_t)(((f - (int)f) * 65536.0f))&0xffff; // 소수 부분
 
     return p;
 }
 
 float ntohf(uint32_t p)
 {
-    float f = ((p>>16)&0x7fff); // 전체
-    f += (p&0xffff) / 65536.0f; // 소수점
+    float f = ((p>>16)&0x7fff); // 정수 부분
+    f += (p&0xffff) / 65536.0f; // 소수 부분
 
     if (((p>>31)&0x1) == 0x1) { f = -f; } // 부호 비트 설정
 
@@ -977,7 +1083,7 @@ float ntohf(uint32_t p)
 위의 코드는 `float`를 32비트 수에 저장하기 위한 단순한 구현입니다. 최상위 비트(31)가 수의 부호를
 저장하기 위해 쓰입니다. ("1"이 음수를 의미합니다.) 다음 15비트(30-16)(역자 주 : 원문에서는 7비트라고
 적혀 있으나 코드의 내용상 오타로 보임)가 `float`의 전체 수 부분을 저장하기 위해서 쓰입니다. 마지막으로
-남은 비트들(15-0)이 수의 소수점 부분을 기록하기 위해서 쓰입니다.
+남은 비트들(15-0)이 수의 소수 부분을 기록하기 위해서 쓰입니다.
 
 사용법은 꽤 직관적입니다.
 
@@ -1005,18 +1111,21 @@ int main(void)
 방법은 제대로 동작하지 않을 것입니다! 또한 여러분은 위의 예제에서 소수점의 마지막 2자리가
 제대로 보존되지 않은 것을 볼 수 있습니다.
 
-이것을 해결하려면 어떻게 해야할까요? 사실 부동소수점 수를 저장하기 위한 *표준*은 [i[IEEE-754]]
+이것을 해결하려면 어떻게 해야 할까요? 사실 부동 소수점 수를 저장하기 위한 *표준*은 [i[IEEE-754]]
 [fl[IEEE-754|https://en.wikipedia.org/wiki/IEEE_754]]로 알려져 있습니다.
 대부분의 컴퓨터는 부동 소수점 계산을 위해서 내부적으로 이 형식을 사용합니다.
 그러므로 그런 경우라면 엄밀히 말하자면 변환을 수행할 필요는 없습니다. 그러나
-여러분의 소스코드가 이식성이 있기를 바란다면 그런 가정을 할 수는 없습니다.
-(한 편으로 만약 속도를 원한다면 변환이 필요없는 플랫폼에서는 변환 작업을
-제거하는 최적화를 해야함을 의미합니다. `htons()`및 그와 유사한 함수들은 그런
-방식으로 동작합니다.)
+여러분의 소스 코드가 이식성이 있기를 바란다면 반드시 그런 가정을 할 수는 없습니다.
 
-[flx[여기 단정밀도 부동소수점 및 배정밀도 부동소수점 타입을 IEEE-754로 인코드하는
-코드가 있다|ieee754.c]]. (엄밀히는 거의 대부분을 인코드합니다. 이 코드는 NaN이나
-Infinity를 처리하지 않습니다. 그러나 그런 처리가 가능하게 수정할 수도 있습니다.)
+정말 그럴까요? 여러분의 시스템은 정수에 대해 아마 2의 보수 표현을 쓰는 것처럼,
+부동 소수점에 대해서도 매우 높은 확률로 IEEE-754를 쓸 것입니다. 그래서 그 사실을
+알고 있다면 데이터를 그대로 네트워크로 넘길 수 있습니다. 다만 `htonl()`이나 알맞은
+함수로 엔디언은 맞춰야 합니다. `float`에도 엔디언이 있습니다. 변환이 필요 없는
+빅 엔디언 시스템에서 `htons()`와 그 계열 함수들이 하는 일이 바로 이것입니다.
+
+[flx[여기 단정밀도 부동 소수점 및 배정밀도 부동 소수점 타입을 IEEE-754로 인코드하는
+코드가 있습니다|ieee754.c]]. (엄밀히는 거의 대부분을 인코드합니다. 이 코드는 NaN이나
+무한대를 처리하지 않습니다. 그러나 그런 처리가 가능하게 수정할 수도 있습니다.)
 
 ```{.c .numberLines}
 #define pack754_32(f) (pack754((f), 32, 8))
@@ -1043,13 +1152,13 @@ uint64_t pack754(long double f, unsigned bits, unsigned expbits)
     while(fnorm < 1.0) { fnorm *= 2.0; shift--; }
     fnorm = fnorm - 1.0;
 
-    // 실수부의 부동소수점이 아닌 이진 표현을 구합니다
+    // 실수부의 부동 소수점이 아닌 이진 표현을 구합니다
     significand = fnorm * ((1LL<<significandbits) + 0.5f);
 
     // 바이어스를 더한 지수부를 구합니다
     // (역자 주 : IEEE754에서는 지수부를 일정 비트의 정수로 나타내며,
-    // 바이어스보다 큰 수는 바이어스와 계산한 차의 절대값 만큼의 양의 지수,
-    // 바이어스 미만은 바이어스와 계산한 차의 절대값만큼의 음의 지수를 나타냅니다)
+    // 바이어스보다 큰 수는 바이어스와 계산한 차의 절댓값만큼의 양의 지수,
+    // 바이어스 미만은 바이어스와 계산한 차의 절댓값만큼의 음의 지수를 나타냅니다)
     exp = shift + ((1<<(expbits-1)) - 1); // shift + bias
 
     // 최종 값을 돌려줍니다
@@ -1065,9 +1174,9 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 
     if (i == 0) return 0.0;
 
-    // 실수부를 뽑아낸다.
+    // 유효숫자부를 뽑아냅니다
     result = (i&((1LL<<significandbits)-1)); // 마스크 처리
-    result /= (1LL<<significandbits); // 부동소수점으로 변환
+    result /= (1LL<<significandbits); // 부동 소수점으로 변환
     result += 1.0f; // 1을 다시 더합니다
 
     // 지수부를 처리합니다
@@ -1076,7 +1185,7 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
     while(shift > 0) { result *= 2.0; shift--; }
     while(shift < 0) { result /= 2.0; shift++; }
 
-    // 부호처리
+    // 부호 처리
     result *= (i>>(bits-1))&1? -1.0: 1.0;
 
     return result;
@@ -1085,7 +1194,7 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 
 32비트(아마도 `float`)와 64비트(아마도 `double`) 수를 위한 패킹과
 언패킹 매크로를 위에 넣어두었습니다. 그러나 `bits`크기의 데이터를 인코드
-하기위해서 `pack754()`함수를 직접 호출할 수도 있을 것입니다.(`expbits`
+하기 위해서 `pack754()`함수를 직접 호출할 수도 있을 것입니다.(`expbits`
 만큼의 지수부가 정규화된 수의 지수로 보존될 것입니다.)
 
 여기 사용 예시가 있습니다.
@@ -1117,7 +1226,6 @@ int main(void)
     printf("double encoded: 0x%016" PRIx64 "\n", di);
     printf("double after  : %.20lf\n", d2);
 
-    return 0;
 }
 ```
 
@@ -1133,7 +1241,7 @@ double encoded: 0x400921FB54442D18
 double after  : 3.14159265358979311600
 ```
 
-여러분이 가질 수 있는 또 다른 질문은 어떻게 `sturct`를 포장하는가입니다.
+여러분이 가질 수 있는 또 다른 질문은 `struct`를 어떻게 포장하느냐입니다.
 불행히도 컴파일러는 `struct`의 모든 곳에 자유롭게 패딩을 넣을 수 있습니다.
 그리고 그것은 구조체 전체를 한 번에 네트워크에 전송할 수는 없다는 것을
 의미합니다. ("이건 되고", "이건 안되고"를 듣는 것이 지겨운가요? 죄송합니다.
@@ -1141,35 +1249,34 @@ double after  : 3.14159265358979311600
 이 경우에는 아마도 마이크로소프트의 잘못만은 아닐 것입니다. 그러나 제 친구의
 말은 완전히 옳습니다.)
 
-다시 주제로 돌아가서, `stuct`를 전송하기 위한 최고의 방법은 각각의 필드를
-독립적으로 포장한 다음 반대편에 도착하면 다시 `struct`안에 풀어넣는 것입니다.
+다시 주제로 돌아가서, `struct`를 전송하는 가장 좋은 방법은 각각의 필드를
+독립적으로 포장한 다음 반대편에 도착하면 다시 `struct` 안에 풀어 넣는 것입니다.
 
 여러분은 이것이 굉장히 큰 작업일 것이라 예상할 것입니다. 맞습니다. 여러분이 할 일은
 데이터를 포장하는 일을 도와줄 도우미 함수를 작성하는 것입니다. 재미있을 것입니다!
 정말로!!
 
 Kernighan과 Pike가 지은 [flr[_The Practice of Programming_|tpop]]
-에서 그들은 바로 그 일을 하도록 `printf()`와 유사한 `pack()`과 `unpack()`함수를 작성했습니다.
-그것에 대한 링크를 제공하고 싶지만 그 함수들과 책의 다른 소스코드는 온라인으로
+에서 그들은 바로 그 일을 하도록 `printf()`와 유사한 `pack()`과 `unpack()` 함수를 작성했습니다.
+그것에 대한 링크를 제공하고 싶지만 그 함수들과 책의 다른 소스 코드는 온라인으로
 제공되지 않고 있습니다.
 
-(The Practice of Programming은 아주 좋은 책입니다. 제가 그 책을 추천할
-때마다 제우스 신이 고양이를 한 마리씩 구합니다.)
-(역자 주 : 신이 보답을 할 만큼 아주 좋은 선행이라는 뜻입니다.)
+(_The Practice of Programming_은 아주 좋은 책입니다. 제가 그 책을 추천할
+때마다 제우스 신이 좋은 일을 하나씩 합니다.)
 
 이 시점에서 저는 [fl[프로토콜 버퍼의 C 구현체|https://github.com/protobuf-c/protobuf-c]]
 에 대한 링크를 제공하려 합니다. 저는 이것을 써 본 적이 없으나 훌륭한 코드로
 보입니다. 파이썬과 펄 프로그래머들은 같은 일을 하기 위해서 그들의 언어가
-가진 `pack()`과 `unpack()` 함수를 확인해보길 바랍니다. 자바는 유사한 방식으로
+가진 `pack()`과 `unpack()` 함수를 확인해 보길 바랍니다. 자바는 유사한 방식으로
 사용할 수 있는 Serializable 인터페이스를 가지고 있습니다.
 
-그러나 만약 여러분이 자신만의 패킹 유틸리티를 C언어로 작성하고 싶다면, K&P의
-해결책은 패킷을 만들기 위해서 가변 길이 매개변수를 활용하는 `printf()`와
-유사한 함수를 만드는 것입니다. [flx[여기 제가 만든 버전이 있으며|pack2.c]]
+그러나 만약 여러분이 자신만의 패킹 유틸리티를 C 언어로 작성하고 싶다면, K&P의
+해결책은 패킷을 만들기 위해서 가변 길이 매개변수 목록을 활용하는 `printf()`와
+유사한 함수를 만드는 것입니다. [flx[여기 제가 직접 만든 버전이 있으며|pack2.c]]
 여러분이 그런 것이 어떻게 동작하는지 알기에 충분할 것입니다.
 
-(이 코드는 위의 `pack754()`함수를 참조합니다. `packi*()`함수는 또 다른 정수가
-아닌 `char`의 배열에 수를 담는다는 점을 제외하면 `htons()`계열 함수와 유사하게
+(이 코드는 위의 `pack754()` 함수를 참조합니다. `packi*()` 함수는 또 다른 정수가
+아닌 `char` 배열에 수를 담는다는 점을 제외하면 `htons()` 계열 함수와 유사하게
 동작합니다.)
 
 ```{.c .numberLines}
@@ -1179,7 +1286,7 @@ Kernighan과 Pike가 지은 [flr[_The Practice of Programming_|tpop]]
 #include <string.h>
 
 /*
-** packi16() -- 16비트를 char 버퍼에 저장합니다. (htons()처럼)
+** packi16() -- 16비트 정수를 char 버퍼에 저장합니다. (htons()처럼)
 */
 void packi16(unsigned char *buf, unsigned int i)
 {
@@ -1187,7 +1294,7 @@ void packi16(unsigned char *buf, unsigned int i)
 }
 
 /*
-** packi32() -- 32비트를 char 버퍼에 저장합니다. (htonl()처럼)
+** packi32() -- 32비트 정수를 char 버퍼에 저장합니다. (htonl()처럼)
 */
 void packi32(unsigned char *buf, unsigned long int i)
 {
@@ -1196,7 +1303,7 @@ void packi32(unsigned char *buf, unsigned long int i)
 }
 
 /*
-** packi64() -- 64비트를 char 버퍼에 저장합니다. (htonl()처럼)
+** packi64() -- 64비트 정수를 char 버퍼에 저장합니다. (htonl()처럼)
 */
 void packi64(unsigned char *buf, unsigned long long int i)
 {
@@ -1214,7 +1321,7 @@ int unpacki16(unsigned char *buf)
     unsigned int i2 = ((unsigned int)buf[0]<<8) | buf[1];
     int i;
 
-    // change unsigned numbers to signed
+    // 부호 없는 수를 부호 있는 수로 바꿉니다
     if (i2 <= 0x7fffu) { i = i2; }
     else { i = -1 - (unsigned int)(0xffffu - i2); }
 
@@ -1222,7 +1329,7 @@ int unpacki16(unsigned char *buf)
 }
 
 /*
-** unpacku16() -- 16비트 부호없는 정수를 char 버퍼에서 풀어냅니다. (ntohs()처럼)
+** unpacku16() -- 16비트 부호 없는 정수를 char 버퍼에서 풀어냅니다. (ntohs()처럼)
 */
 unsigned int unpacku16(unsigned char *buf)
 {
@@ -1240,7 +1347,7 @@ long int unpacki32(unsigned char *buf)
                            buf[3];
     long int i;
 
-    // change unsigned numbers to signed
+    // 부호 없는 수를 부호 있는 수로 바꿉니다
     if (i2 <= 0x7fffffffu) { i = i2; }
     else { i = -1 - (long int)(0xffffffffu - i2); }
 
@@ -1248,7 +1355,7 @@ long int unpacki32(unsigned char *buf)
 }
 
 /*
-** unpacku32() -- 32비트 부호없는 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
+** unpacku32() -- 32비트 부호 없는 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
 */
 unsigned long int unpacku32(unsigned char *buf)
 {
@@ -1259,7 +1366,7 @@ unsigned long int unpacku32(unsigned char *buf)
 }
 
 /*
-** unpacki64() -- 32비트 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
+** unpacki64() -- 64비트 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
 */
 long long int unpacki64(unsigned char *buf)
 {
@@ -1273,7 +1380,7 @@ long long int unpacki64(unsigned char *buf)
                                 buf[7];
     long long int i;
 
-    // change unsigned numbers to signed
+    // 부호 없는 수를 부호 있는 수로 바꿉니다
     if (i2 <= 0x7fffffffffffffffu) { i = i2; }
     else { i = -1 -(long long int)(0xffffffffffffffffu - i2); }
 
@@ -1281,7 +1388,7 @@ long long int unpacki64(unsigned char *buf)
 }
 
 /*
-** unpacku64() -- 64비트 부호없는 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
+** unpacku64() -- 64비트 부호 없는 정수를 char 버퍼에서 풀어냅니다. (ntohl()처럼)
 */
 unsigned long long int unpacku64(unsigned char *buf)
 {
@@ -1296,7 +1403,7 @@ unsigned long long int unpacku64(unsigned char *buf)
 }
 
 /*
-** pack() -- 버퍼의 형식화 문자열이 지시한 방식으로 데이터를 저장합니다
+** pack() -- 형식 문자열이 지시한 방식으로 버퍼에 데이터를 저장합니다
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
@@ -1306,7 +1413,7 @@ unsigned long long int unpacku64(unsigned char *buf)
 **     64 |   q        Q         g
 **      - |                               s
 **
-**  (16비트 부호없는 길이가 자동으로 문자열의 앞에 붙습니다.)
+**  (16비트 부호 없는 길이가 자동으로 문자열의 앞에 붙습니다.)
 */
 
 unsigned int pack(unsigned char *buf, char *format, ...)
@@ -1325,7 +1432,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
     long long int q;            // 64비트
     unsigned long long int Q;
 
-    float f;                    // 부동소수점
+    float f;                    // 부동 소수점
     double d;
     long double g;
     unsigned long long int fhold;
@@ -1345,7 +1452,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             *buf++ = c;
             break;
 
-        case 'C': // 부호없는 8비트
+        case 'C': // 부호 없는 8비트
             size += 1;
             C = (unsigned char)va_arg(ap, unsigned int); // 자료형 승급
             *buf++ = C;
@@ -1358,7 +1465,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             buf += 2;
             break;
 
-        case 'H': // 부호없는 16비트
+        case 'H': // 부호 없는 16비트
             size += 2;
             H = va_arg(ap, unsigned int);
             packi16(buf, H);
@@ -1372,7 +1479,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             buf += 4;
             break;
 
-        case 'L': // 부호없는 32비트
+        case 'L': // 부호 없는 32비트
             size += 4;
             L = va_arg(ap, unsigned long int);
             packi32(buf, L);
@@ -1386,14 +1493,14 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             buf += 8;
             break;
 
-        case 'Q': // 부호없는 64비트
+        case 'Q': // 부호 없는 64비트
             size += 8;
             Q = va_arg(ap, unsigned long long int);
             packi64(buf, Q);
             buf += 8;
             break;
 
-        case 'f': // 부동소수점 16비트
+        case 'f': // 부동 소수점 16비트
             size += 2;
             f = (float)va_arg(ap, double); // 자료형 승급
             fhold = pack754_16(f); // IEEE 754로 변환
@@ -1401,7 +1508,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             buf += 2;
             break;
 
-        case 'd': // 부동소수점 32비트
+        case 'd': // 부동 소수점 32비트
             size += 4;
             d = va_arg(ap, double);
             fhold = pack754_32(d); // IEEE 754로 변환
@@ -1409,7 +1516,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
             buf += 4;
             break;
 
-        case 'g': // 부동소수점 64비트
+        case 'g': // 부동 소수점 64비트
             size += 8;
             g = va_arg(ap, long double);
             fhold = pack754_64(g); // IEEE 754로 변환
@@ -1435,7 +1542,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 }
 
 /*
-** unpack() -- 형식화 문자열이 지정하는대로 버퍼에 데이터를 풀어놓습니다
+** unpack() -- 형식 문자열이 지정하는 대로 버퍼에 데이터를 풀어놓습니다
 **
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
@@ -1445,7 +1552,7 @@ unsigned int pack(unsigned char *buf, char *format, ...)
 **     64 |   q        Q         g
 **      - |                               s
 **
-**  (문자열은 저장된 길이에 근거해서 추출됩니다. 그러나 `s`의 앞에 최대 길이를 앞에 지정할 수 있습니다.)
+**  (문자열은 저장된 길이에 근거해서 추출됩니다. 단, `s` 앞에 최대 길이를 지정할 수 있습니다.)
 */
 void unpack(unsigned char *buf, char *format, ...)
 {
@@ -1463,7 +1570,7 @@ void unpack(unsigned char *buf, char *format, ...)
     long long int *q;            // 64비트
     unsigned long long int *Q;
 
-    float *f;                    // 부동소수점
+    float *f;                    // 부동 소수점
     double *d;
     long double *g;
     unsigned long long int fhold;
@@ -1482,7 +1589,7 @@ void unpack(unsigned char *buf, char *format, ...)
             buf++;
             break;
 
-        case 'C': // 부호없는 8비트
+        case 'C': // 부호 없는 8비트
             C = va_arg(ap, unsigned char*);
             *C = *buf++;
             break;
@@ -1493,7 +1600,7 @@ void unpack(unsigned char *buf, char *format, ...)
             buf += 2;
             break;
 
-        case 'H': // 부호없는 16비트
+        case 'H': // 부호 없는 16비트
             H = va_arg(ap, unsigned int*);
             *H = unpacku16(buf);
             buf += 2;
@@ -1505,7 +1612,7 @@ void unpack(unsigned char *buf, char *format, ...)
             buf += 4;
             break;
 
-        case 'L': // 부호없는 32비트
+        case 'L': // 부호 없는 32비트
             L = va_arg(ap, unsigned long int*);
             *L = unpacku32(buf);
             buf += 4;
@@ -1517,27 +1624,27 @@ void unpack(unsigned char *buf, char *format, ...)
             buf += 8;
             break;
 
-        case 'Q': // 부호없는 64비트
+        case 'Q': // 부호 없는 64비트
             Q = va_arg(ap, unsigned long long int*);
             *Q = unpacku64(buf);
             buf += 8;
             break;
 
-        case 'f': // 부동소수점
+        case 'f': // 부동 소수점
             f = va_arg(ap, float*);
             fhold = unpacku16(buf);
             *f = unpack754_16(fhold);
             buf += 2;
             break;
 
-        case 'd': // 32비트 부동소수점
+        case 'd': // 32비트 부동 소수점
             d = va_arg(ap, double*);
             fhold = unpacku32(buf);
             *d = unpack754_32(fhold);
             buf += 4;
             break;
 
-        case 'g': // 64비트 부동소수점
+        case 'g': // 64비트 부동 소수점
             g = va_arg(ap, long double*);
             fhold = unpacku64(buf);
             *g = unpack754_64(fhold);
@@ -1568,40 +1675,46 @@ void unpack(unsigned char *buf, char *format, ...)
 }
 ```
 
-그리고 위의 코드를 [flx[시연하는 프로그램|pack2.c]]이 여기에 있습니다. 이 프로그램은
-`buf`에 약간의 데이터를 포장한 후 다시 변수에 풀어놓습니다. `unpack()`을 문자열
-매개변수로 호출하는 경우(형식 지정자 "`s`") 버퍼 오버런을 방지하기 위해서
-"`96s`"처럼 최대 길이를 앞에 붙이는 것이 현명하다는 것을 기억하세요. 네트워크를
-통해 받은 데이터를 풀어놓을 때에는 주의해야 합니다. 악의적인 사용자가 여러분의
-시스템을 공격하기 위해서 악의적으로 구성된 패킷을 보낼 수 있습니다!
+위 코드의 [flx[시연 프로그램|pack2.c]]입니다. 이 프로그램은 `buf`에 데이터를
+조금 포장한 후 다시 변수에 풀어놓습니다. `unpack()`을 문자열 매개변수로 호출하는
+경우(형식 지정자 "`s`")에는 버퍼 오버런을 막기 위해 "`96s`"처럼 최대 길이를 앞에
+붙이는 것이 좋습니다. 네트워크를 통해 받은 데이터를 풀어놓을 때에는 주의해야 합니다.
+악의적인 사용자가 여러분의 시스템을 공격하려고 잘못 구성된 패킷을 보낼 수 있습니다!
 
 ```{.c .numberLines}
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
-// 부동 소수점 형의 다양한 비트의 변종
-// 아키텍처 별로 다릅니다
+// C23 컴파일러가 있다면
+#if __STDC_VERSION__ >= 202311L
+#include <stdfloat.h>
+#else
+// 아니면 직접 정의합니다.
+// 아키텍처에 따라 다릅니다! 하지만 아마 다음과 같을 것입니다.
 typedef float float32_t;
 typedef double float64_t;
+#endif
 
 int main(void)
 {
-    unsigned char buf[1024];
+    uint8_t buf[1024];
     int8_t magic;
     int16_t monkeycount;
     int32_t altitude;
     float32_t absurdityfactor;
-    char *s = "Great unmitigated Zot! You've found the Runestaff!";
+    char *s = "Great unmitigated Zot!  You've found the Runestaff!";
     char s2[96];
     int16_t packetsize, ps2;
 
-    packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0, (int16_t)37,
-            (int32_t)-5, s, (float32_t)-3490.6677);
-    packi16(buf+1, packetsize); // 시작을 위해 패킷 사이즈를 패킷에 넣어둡니다
+    packetsize = pack(buf, "chhlsf", (int8_t)'B', (int16_t)0,
+            (int16_t)37, (int32_t)-5, s, (float32_t)-3490.6677);
+    packi16(buf+1, packetsize); // 재미삼아 패킷 크기를 넣어 둡니다
 
     printf("packet is %" PRId32 " bytes\n", packetsize);
 
-    unpack(buf, "chhl96sf", &magic, &ps2, &monkeycount, &altitude, s2,
-        &absurdityfactor);
+    unpack(buf, "chhl96sf", &magic, &ps2, &monkeycount, &altitude,
+            s2, &absurdityfactor);
 
     printf("'%c' %" PRId32" %" PRId16 " %" PRId32
             " \"%s\" %f\n", magic, ps2, monkeycount,
@@ -1612,17 +1725,17 @@ int main(void)
 ```
 
 여러분이 직접 만든 코드를 쓰건 다른 사람이 작성한 것을 쓰건, 매번 각 비트를
-수동으로 포장하기보다는 버그를 쉽게 잡아내기 위해서 일반적인 데이터 패킹 루틴을
+수동으로 포장하기보다는 버그를 통제하기 위해 일반적인 데이터 패킹 루틴을
 사용하는 것이 좋은 습관입니다.
 
 데이터를 포장할 때에 쓰기 좋은 형식은 무엇일까요? 아주 좋은 질문입니다. 다행히도
-[i[XDR]] [flrfc[RFC 4506|4506]], 외부 데이터 표현 표준이 부동소수점과 정수,
+[i[XDR]] [flrfc[RFC 4506|4506]], 외부 데이터 표현 표준이 부동 소수점과 정수,
 배열 등 다양한 자료형에 대해서 이진 형식을 정의합니다. 만약 데이터를 직접 처리할
 생각이라면 이것을 준수하는 것을 권장합니다. 그러나 반드시 그래야 하는 것은 아닙니다.
 패킷 경찰들이 문 앞에 지키고 서 있는 것은 아닙니다. 최소한 저는 그렇지 않을 것이라고
 _생각합니다._
 
-어떤 경우에도, 데이터를 보내기 전에 인코드하는 것이 옳은 일입니다.
+어떤 경우에도, 데이터를 보내기 전에 어떤 식으로든 인코딩하는 것이 올바른 방식입니다.
 
 [i[Serialization]>]
 
@@ -1644,10 +1757,10 @@ _생각합니다._
 여기까지는 좋아보입니다. "그럼 무엇이 문제인가요?"라고 여러분은 질문할 것입니다.
 
 문제는 메시지가 가변 길이일 수 있다는 점입니다. "Tom"이라는 사용자가 "Hi"라고
-말할 수 있고 "Benjamin"이라는 또다른 사용자가 "Hey guys what is up?"이라고
+말할 수 있고 "Benjamin"이라는 또 다른 사용자가 "Hey guys what is up?"이라고
 말할 수도 있습니다.
 
-그것이 들어오는대로 클라이언트에게 `send()`한다고 합시다. 여러분의 송출 자료 스트림은
+그것이 들어오는 대로 클라이언트에게 `send()`한다고 합시다. 여러분의 송출 자료 스트림은
 아래와 같을 것입니다.
 
 ```
@@ -1657,29 +1770,29 @@ t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
 이런 식일 것입니다. 클라이언트가 어떻게 하면 메시지의 시작과 끝을 알 수 있을까요?
 원한다면 모든 메시지가 같은 길이를 갖도록 하고 우리가 구현한 [i[`sendall()` function]] `sendall()`
 함수를 그냥 호출할 수 있을 것입니다. 그러나 그렇게 하면 대역폭을 낭비하게 됩니다!
-"tom"이 "Hi"라고 말하는 일을 위해서 1024바이트를 `send()`하고싶지는 않을
+"tom"이 "Hi"라고 말하는 일을 위해서 1024바이트를 `send()`하고 싶지는 않을
 것입니다.
 
 그래서 우리는 데이터를 작은 헤더와 패킷 구조에 *캡슐화*합니다. 클라이언트와
 서버 모두 이 데이터를 어떻게 포장하고 풀어내는지(때때로 "marshal"과 "unmarshal"
-이라고 부른다) 알고있습니다. 지금 이해할 필요는 없지만 우리는 클라이언트와
-서버가 어떻게 통신하는지를 정의하는 *프로토콜*을 정의하려고 하고있습니다.
+이라고 부릅니다) 알고 있습니다. 어느새 클라이언트와 서버가 어떻게 통신하는지를
+설명하는 *프로토콜*을 정의하기 시작한 셈입니다!
 
 지금은 사용자의 이름이 `'\0'`으로 패드된 고정된 8개의 문자라고 가정합시다.
-데이터는 최대 128개 문자로 구성되는 가변길이 형태라고 합시다. 이 상황에서
+데이터는 최대 128개 문자로 구성되는 가변 길이 형태라고 합시다. 이 상황에서
 쓸 수 있는 예제 패킷 구조를 살펴봅시다.
 
 1. `len` (1바이트, 부호 없음)---패킷의 전체 길이, 8바이트의 사용자 이름과
    대화 데이터의 길이를 센다.
 
-2. `name` (8 바이트)---사용자의 이름, 필요한 경우 0이 덧대집니다.
+2. `name` (8바이트)---사용자의 이름, 필요한 경우 NUL로 덧댑니다.
 
 3. `chatdata` (*n*바이트)---데이터 자체, 최대 128바이트. 패킷의 길이는 이
    데이터의 길이에 8을 더한 값으로 계산되어야 합니다.(위에서 언급한 이름 필드의 길이)
 
-필자가 8바이트와 128바이트를 필드의 길이 제한으로 선택한 이유가 궁금한가?
-특별한 이유는 없고, 충분히 길 것이라 생각했다. 그러나 아마도 8바이트는 여러분의
-필요에는 조금 못 미칠수도 있습니다. 그런 경우에는 이름 필드의 길이를 30바이트나
+필자가 8바이트와 128바이트를 필드의 길이 제한으로 선택한 이유가 궁금한가요?
+특별한 이유는 없고, 충분히 길 것이라고 생각했습니다. 그러나 아마도 8바이트는 여러분의
+필요에는 조금 못 미칠 수도 있습니다. 그런 경우에는 이름 필드의 길이를 30바이트나
 다른 값으로 설정할 수 있습니다. 선택은 여러분의 몫입니다.
 
 위의 패킷 정의를 사용하는 첫 번째 패킷은 아래와 같은 정보로 구성될 수 있습니다.
@@ -1710,85 +1823,90 @@ t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
 "`18 42 65 6E 6A`"뿐일 수도 있습니다.)을 받을 가능성을 염두에 둬야 합니다. 전체 패킷을
 받을 때까지 `recv()`를 반복적으로 호출해야 합니다.
 
-그러나 어떻게 해야할까요? 우리는 패킷이 완성되기 위해서 받아야 하는 바이트의
-총 갯수를 알고있습니다. 갯수가 패킷의 앞쪽에 붙어있기 때문입니다. 우리는 또한 패킷의
-최대 크기가 1 + 8 + 128, 즉 137바이트라는 것을 알고있습니다. (우리가 그렇게 정의했기
+그러나 어떻게 해야 할까요? 우리는 패킷이 완성되기 위해서 받아야 하는 바이트의
+총 개수를 알고 있습니다. 개수가 패킷의 앞쪽에 붙어 있기 때문입니다. 우리는 또한 패킷의
+최대 크기가 1 + 8 + 128, 즉 137바이트라는 것을 알고 있습니다. (우리가 그렇게 정의했기
 때문입니다.)
 
 여기에서는 몇 가지 방식으로 일을 할 수 있습니다. 모든 패킷이 길이 정보로 시작한다는 것을
-알고있으므로 패킷의 길이를 얻기 위해서 `recv()`를 호출할 수 있습니다. 그리고
+알고 있으므로 패킷의 길이를 얻기 위해서 `recv()`를 호출할 수 있습니다. 그리고
 길이를 가지고 있으면 전체 패킷을 받을 때까지 남은 길이를 명시하면서 `recv()`
 를(아마도 반복적으로) 호출하는 것입니다. 이 방식의 장점은 하나의 패킷을 담기에 충분한
 크기의 버퍼만 있으면 된다는 것이고, 단점은 모든 데이터를 받기 위해서 `recv()`를
 최소 두 번 호출해야 한다는 것입니다.
 
-다른 옵션은 `recv()`을 호출할 때 한 패킷의 최대 크기만큼을 받겠다고 지정하는 것입니다.
+다른 옵션은 `recv()`를 호출할 때 한 패킷의 최대 크기만큼을 받겠다고 지정하는 것입니다.
 그 후에 받은 자료를 버퍼의 뒤쪽에 쌓아두고, 패킷이 완성되었는지 확인합니다. 물론
 다음 패킷의 일부를 받을 수 있으므로 그것을 위한 여분의 공간이 필요합니다.
 
 이를 위해서 두 개의 패킷을 담기에 충분한 배열을 선언하면 됩니다. 이것은 패킷이
 도착하는대로 재구성하는 일에 사용할 작업 공간입니다.
 
-자료를 `recv()`처리할 때마다 그것을 작업 버퍼에 덧붙이고 패킷이 완성되었는지
-확인합니다. 버퍼에 담긴 바이트의 갯수가 헤더에 명시된 길이보다 많거나 같은지
+자료를 `recv()`로 받을 때마다 그것을 작업 버퍼에 덧붙이고 패킷이 완성되었는지
+확인합니다. 버퍼에 담긴 바이트의 개수가 헤더에 명시된 길이보다 많거나 같은지
 확인한다는 뜻입니다(사실은 헤더에 헤더 자신의 길이가 포함되지 않으므로 +1을
-해야한다). 만약 버퍼의 바이트 수가 1보다 적다면 물론 패킷은 완성되지 않은
+해야 합니다). 만약 버퍼의 바이트 수가 1보다 적다면 물론 패킷은 완성되지 않은
 것입니다. 또한 이 경우 버퍼의 첫 바이트를 읽어들인다고 해도 그것은 쓰레기값이므로
-그것을 감안한 처리를 해야합니다.
+그것을 감안한 처리를 해야 합니다.
 
 패킷이 완성되면 여러분은 그것으로 여러분이 원하는 일을 할 수 있습니다. 패킷을
 사용하거나, 그것을 여러분의 작업 버퍼에서 제거할 수 있습니다.
 
-휴! 아직 머릿속이 어지러운가요? 여기 원투펀치의 두 번째 부분이 있습니다. 한 번의
-`recv()`호출로 한 패킷을 넘어서는 분량을 읽어들일 수가 있습니다. 즉 작업버퍼에
+휴! 머릿속으로 아직 잘 따라오고 있나요? 여기 두 번째 문제가 있습니다. 한 번의
+`recv()` 호출로 한 패킷을 넘어서는 분량을 읽어들일 수가 있습니다. 즉 작업 버퍼에
 하나의 완전한 패킷과 다음 패킷의 불완전한 부분이 있을 수 있다는 것입니다.
 제기랄. (그러나 이런 경우를 처리하기 위해서 여러분의 작업 버퍼를 _두_ 개의
 패킷을 담기에 충분한 크기로 만들어둔 것입니다.)
 
 첫 패킷의 길이를 헤더를 통해 알고있고 작업 버퍼에 있는 바이트의 수를 추적하고
 있으므로, 뺄셈을 해서 작업 버퍼에 있는 바이트 중 몇 개가 다음(미완성된) 패킷에
-속해있는지 계산할 수 있습니다. 첫 번째 패킷을 처리한 후에는 그것을 작업 버퍼에서
+속해 있는지 계산할 수 있습니다. 첫 번째 패킷을 처리한 후에는 그것을 작업 버퍼에서
 제거하고 부분적인 두 번째 패킷을 버퍼의 앞쪽으로 옮겨서 다음 `recv()`를
 처리할 준비를 할 수 있습니다.
 
 (독자 여러분 중 일부는 부분적인 두 번째 패킷을 작업 버퍼의 앞쪽으로 옮기는 것에
 시간이 걸리고, 환형 버퍼를 사용하면 그 작업이 필요하지 않다는 것에 주목할 것입니다.
 다른 독자들에게는 불행하게도, 환형 버퍼에 대한 논의는 이 글의 범위를 벗어납니다.
-흥미가 있다면 데이터 구조 책을 집어들고 거기서부터 시작할 수 있을 것입니다.)
+흥미가 있다면 자료 구조 책을 집어 들고 거기서부터 시작하면 됩니다.)
 
-쉽다고 한 적은 없습니다. 사실 앞에서 쉽다고 말했습니다. 또 실제로도 그렇습니다. 단지 연습이 필요하고
-오래지않아 익숙해질 것입니다. [i[Excalibur]] 엑스칼리버에 맹세합니다!
+쉽다고 한 적은 없습니다. 사실 앞에서 쉽다고 말했습니다. 또 실제로도 그렇습니다.
+단지 연습이 필요하고, 머지않아 자연스럽게 익숙해질 것입니다.
+[i[Excalibur]] 엑스칼리버에 맹세합니다!
 
 ## 브로드캐스트(Broadcast) 패킷 --- Hello, World!
 
-지금까지 이 안내서에서는 데이터를 하나의 호스트에서 다른 호스트로 보내는 일에
-대해서 이야기했다. 그러나 적절한 권한이 있다면 _한 번에_ 여러 호스트에게
-자료를 보낼 수 있다!
+지금까지 이 안내서에서는 데이터를 하나의 호스트에서 다른 하나의 호스트로 보내는
+일에 대해서 이야기했습니다. 그러나 적절한 권한이 있다면 _한 번에_ 여러 호스트에게
+자료를 보낼 수도 있습니다!
 
 [i[UDP]] UDP(TCP는 안 됩니다)와 표준 IPv4에서 이것은 [i[Broadcast]]
-*브로드캐스팅(Broadcasting)*이라는 매커니즘으로 가능합니다. IPv6에서 브로드캐스팅은
-지원되지 않으며, 더 상위의 기술인 *멀티캐스팅(Multicasting)*을 사용해야 합니다.
-그러나 이번에는 그것에 대해서 다루지 않을 것입니다. 촉망받는 미래에 대해서는
-그만 이야기합시다. 우리는 32비트의 현재에 갇혀있습니다.
+*브로드캐스팅(Broadcasting)*이라는 메커니즘으로 가능합니다. IPv6에서 브로드캐스팅은
+지원되지 않으며, 보통은 더 나은 기술인 *멀티캐스팅(Multicasting)*을 사용해야 합니다.
+그러나 이번에는 그것에 대해서 다루지 않을 것입니다. 눈부신 미래에 대해서는
+그만 이야기합시다. 우리는 32비트의 현재에 갇혀 있습니다.
 
 잠깐! 그러나 무작정 브로드캐스팅을 시작할 수는 없습니다. 네트워크에 브로드캐스트 패킷을
 전송하기 전에 [i[`SO_BROADCAST` macro]] `SO_BROADCAST` 소켓 옵션을
 [i[`setsockopt()` function]] 설정해야 합니다. 이것은 미사일 발사 스위치에 달아두는
-플라스틱 덮개같은 것입니다. 그만큼 강력한 도구라는 뜻입니다.
+플라스틱 덮개 같은 것입니다. 그만큼 강력한 도구라는 뜻입니다.
 
 아무튼 진지하게 말하자면 브로드캐스트 패킷을 쓰는 일에는 위험이 따릅니다. 브로드캐스트
 패킷을 받는 모든 시스템은 반드시 그 데이터가 어떤 포트를 목적지로 삼는지 알아내기
-위해서 패킷의 데이터 캡슐화 계층이라는 양파껍질을 벗겨내야 한다는 점이 바로 그것입니다.
+위해서 패킷의 데이터 캡슐화 계층이라는 양파 껍질을 벗겨내야 한다는 점이 바로 그것입니다.
 그렇게 하고 난 후에야 시스템은 데이터를 포트에 건네줄지 아니면 무시할지를 결정합니다.
 어떤 경우건 그것은 브로드캐스트 패킷을 받는 각각의 장치에게 큰 작업이고, 상당히 많은
 장치들이 불필요한 작업을 할 수 있습니다. 게임 둠이 처음 세상에 나왔을 때 그것의 네트워크
-코드에 대한 불평이 이런 것이었다.
+코드에 대한 불평이 이런 것이었습니다.
 
-자, 고양이 가죽을 벗기는 일에도 여러 방법이 있을 수 있으니 잠깐 기다려봅시다.
-(역자 주 : 서양의 속담) 잠깐, 무슨 그런 속담이 다 있을까요? 정말로 고양이
-가죽을 벗기는 일에 여러 방법이 있을까요? 그리고 브로드캐스트 패킷을 보내는
-일에도 여러 방법이 있을까요? 핵심을 말하자면 이것입니다. 어떻게 브로드캐스트 메시지의
+자, 고양이 가죽을 벗기는 방법은 하나만 있는 게 아니라는 말도 있죠[^6178]...
+잠깐만요. 정말 고양이 가죽을 벗기는 방법이 여러 가지라는 말을 하고 있는 건가요?
+대체 그런 표현은 왜 있는 걸까요? 아무튼 마찬가지로, 브로드캐스트 패킷을 보내는
+방법도 하나만 있는 것은 아닙니다. 핵심을 말하자면 이것입니다. 어떻게 브로드캐스트 메시지의
 목적지 주소를 지정할 수 있을까요? 두 개의 일반적인 방법이 있습니다.
+
+[^6178]: 기록 차원에서 말해 두자면, 저는 고양이를 좋아합니다. 최고죠. 평생 여러
+    마리를 사랑하며 함께 살았습니다. 기원을 알 수 없는 이 음울한 비유 표현을 싫어하는
+    분들이 있다는 것도 알지만, 이 안내서의 이 부분에는 이 표현이 가장 잘 맞는다고 생각합니다.
 
 1. 데이터를 특정 서브넷의 브로드캐스트 주소로 보냅니다. 이것은 주소의 모든 호스트
    부분 비트가 1로 설정된 서브넷 네트워크 주소입니다. 예를 들어 저의 네트워크는
@@ -1798,13 +1916,13 @@ t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
    입니다. 유닉스에서는 `ifconfig` 명령이 이 모든 정보를 줄 것입니다. (궁금한 분을
    위해 적자면 브로드캐스트 주소를 얻기 위한 비트단위 논리연산은 `네트워크 번호`
    OR (NOT `넷마스크`)입니다.) 여러분은 이 종류의 브로드캐스트 패킷을
-   로컬 네트워크 뿐 아니라 원격 네트워크에도 보낼 수 있습니다. 그러나 이 경우
+   로컬 네트워크뿐 아니라 원격 네트워크에도 보낼 수 있습니다. 그러나 이 경우
    목적지의 라우터가 패킷을 무시할 가능성이 존재합니다. (이런 패킷을 무시하지
    않으면 공격자가 브로드캐스트 통신을 과다하게 발송할 수 있습니다.)
 
 2. 데이터를 "전역" 브로드캐스트 주소로 보냅니다. 이것은 [i[`255.255.255.255`]]
    `255.255.255.255`, 통칭 [i[`INADDR_BROADCAST`
-   macro]] `INADDR_BROADCAST`다. 많은 장치들은 이것을 자동으로 여러분의 네트워크
+   macro]] `INADDR_BROADCAST`입니다. 많은 장치들은 이것을 자동으로 여러분의 네트워크
    번호와 비트단위 AND연산 해서 네트워크 브로드캐스트 주소로 변환할 것입니다.
    그러나 일부는 그렇게 하지 않을 것입니다. 그것은 장치별로 다릅니다. 역설적이게도
    라우터들은 이 종류의 브로드캐스트 패킷을 로컬 네트워크 너머로 전송하지 않습니다.
@@ -1826,7 +1944,7 @@ sendto: Permission denied
 한 뒤에는 원하는 곳 어디에든 `sendto()`를 할 수 있습니다.
 
 사실 그것이 브로드캐스트를 할 수 있는 UDP 응용프로그램과 그렇지 않은
-응용프로그램의 *유일한 차이*다. 그러나 오래된 `talker` 응용프로그램에
+응용프로그램의 *유일한 차이*입니다. 그러니 오래된 `talker` 응용프로그램에
 `SO_BROADCAST` 소켓 옵션을 설정하는 부분을 하나 추가해봅시다. 이 프로그램을
 [flx[`broadcaster.c`|broadcaster.c]]라고 부를 것입니다.
 
@@ -1852,7 +1970,7 @@ sendto: Permission denied
 int main(int argc, char *argv[])
 {
     int sockfd;
-    struct sockaddr_in their_addr; // 연결자(Connector)의 주소 정보
+    struct sockaddr_in their_addr; // 연결 대상의 주소 정보
     struct hostent *he;
     int numbytes;
     int broadcast = 1;
@@ -1868,7 +1986,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+    if ((sockfd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
         perror("socket");
         exit(1);
     }
@@ -1881,12 +1999,14 @@ int main(int argc, char *argv[])
     }
 
     their_addr.sin_family = AF_INET;     // 호스트 바이트 순서
-    their_addr.sin_port = htons(SERVERPORT); // 숏, 네트워크 바이트 순서
+    their_addr.sin_port = htons(SERVERPORT); // short, 네트워크 바이트 순서
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
 
-    if ((numbytes=sendto(sockfd, argv[2], strlen(argv[2]), 0,
-             (struct sockaddr *)&their_addr, sizeof their_addr)) == -1) {
+    numbytes = sendto(sockfd, argv[2], strlen(argv[2]), 0,
+             (struct sockaddr *)&their_addr, sizeof their_addr);
+
+    if (numbytes == -1) {
         perror("sendto");
         exit(1);
     }
@@ -1901,7 +2021,7 @@ int main(int argc, char *argv[])
 ```
 
 이 프로그램과 "평범한" UDP 클라이언트/서버의 상황에는 어떤 차이가 있을까요?
-아무 것도 없습니다! (이 경우에는 클라이언트가 브로드캐스트 패킷을 보낼 수 있다는
+아무것도 없습니다! (이 경우에는 클라이언트가 브로드캐스트 패킷을 보낼 수 있다는
 점을 빼면) 앞서와 마찬가지로 이전에 언급한 UDP [`listener`](#datagram)를
 한 창에 실행하고 다른 창에 `broadcaster`를 실행하세요. 위에서 실패한 전송이
 성공할 것입니다.
@@ -1916,21 +2036,21 @@ sent 3 bytes to 255.255.255.255
 ```
 
 `listener`가 수신한 패킷에 반응하는 것을 볼 수 있어야 합니다. (만약 `listener`가
-반응하지 않는다면 그것이 IPv6주소에 연결되어서 그럴 수 있습니다. `listener.c`의
-`AF_INET6`를 `AF_INET`로 바꿔서 IPv4를 강제해보세요.)
+반응하지 않는다면 그것이 IPv6 주소에 바인드되어서 그럴 수 있습니다. `listener.c`의
+`AF_INET6`를 `AF_INET`으로 바꿔서 IPv4를 강제해 보세요.)
 
 자, 여기까지도 조금 재미있었습니다. 그러나 여러분이 가진 다른 장치 중 같은
 네트워크에 있는 것에서 `listener`를 실행해서 각 장치에 1개씩 실행되게 한 후에
 `broadcaster`에 브로드캐스트 주소를 넣고 다시 실행해봅시다. `sendto()`를 한 번만
 실행했음에도 두 개의 `listener` 모두가 패킷을 받습니다! 멋지네요!
 
-만약 `listener`가 실행중인 장치의 아이피 주소를 목적지로 발송된 데이터는 받는데
+만약 `listener`가 실행 중인 장치의 IP 주소를 목적지로 발송된 데이터는 받는데
 브로드캐스트 주소로 보낸 데이터는 받지 못한다면 아마도 [i[Firewall]] 방화벽이
 장치에 있어서 패킷을 막고 있을 것입니다. (그래요, [i[Pat]] Pat, [i[Bapper]] Bapper.
-이게 제 샘플 코드가 동작하지 않을 수 있는 이유라는 것을 나보다 먼저 깨달아줘서
+이게 제 샘플 코드가 동작하지 않았던 이유라는 것을 저보다 먼저 깨달아 줘서
 고마워요. 안내서에 여러분을 언급하겠다고 했지요. 바로 이 부분에 적었습니다.)
 
-다시 말하지만 브로드캐스트 패킷을 다룰 때에는 주의하세요. LAN(역자 주 : Local Area Network)
-에 있는 모든 장치들이 `recvfrom()` 수행 여부와 상관없이 패킷을 처리해야 하므로
+다시 말하지만 브로드캐스트 패킷을 다룰 때에는 주의하세요. LAN에 있는 모든 장치들이
+`recvfrom()` 수행 여부와 상관없이 패킷을 처리해야 하므로
 전체 컴퓨터 네트워크에 상당한 부하를 줄 수 있습니다. 브로드캐스트 패킷은 반드시
 가끔씩만, 그리고 적절한 상황에서만 쓰여야 합니다.

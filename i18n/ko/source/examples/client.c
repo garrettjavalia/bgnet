@@ -1,5 +1,5 @@
 /*
-** client.c -- a stream socket client demo
+** client.c -- 스트림 소켓 클라이언트 데모
 */
 
 #include <stdio.h>
@@ -14,11 +14,11 @@
 
 #include <arpa/inet.h>
 
-#define PORT "3490" // the port client will be connecting to 
+#define PORT "3490" // 클라이언트가 연결할 포트
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 100 // 한 번에 받을 수 있는 최대 바이트 수
 
-// get sockaddr, IPv4 or IPv6:
+// sockaddr를 얻습니다. IPv4 또는 IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// loop through all the results and connect to the first we can
+	// 모든 결과를 순회하면서 연결 가능한 첫 번째 것에 연결합니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 			s, sizeof s);
 	printf("client: connected to %s\n", s);
 
-	freeaddrinfo(servinfo); // all done with this structure
+	freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
 
 	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
 	    perror("recv");
@@ -97,4 +97,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

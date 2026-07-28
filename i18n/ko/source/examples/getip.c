@@ -1,5 +1,5 @@
 /*
-** getip.c -- a hostname lookup demo
+** getip.c -- 호스트 이름 조회 데모
 */
 
 #include <stdio.h>
@@ -15,12 +15,12 @@ int main(int argc, char *argv[])
 {
 	struct hostent *h;
 
-	if (argc != 2) {  // error check the command line
+	if (argc != 2) {  // 명령줄 오류 확인
 		fprintf(stderr,"usage: getip address\n");
 		exit(1);
 	}
 
-	if ((h=gethostbyname(argv[1])) == NULL) {  // get the host info
+	if ((h=gethostbyname(argv[1])) == NULL) {  // 호스트 정보 얻기
 		herror("gethostbyname");
 		exit(1);
 	}

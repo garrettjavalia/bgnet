@@ -3,18 +3,18 @@
 
 int main(void)
 {
-	struct pollfd pfds[1]; // More if you want to monitor more
+	struct pollfd pfds[1]; // 더 많이 감시하려면 더 크게 만드세요
 
-	pfds[0].fd = 0;          // Standard input
-	pfds[0].events = POLLIN; // Tell me when ready to read
+	pfds[0].fd = 0;          // 표준 입력
+	pfds[0].events = POLLIN; // 읽을 준비가 되면 알려줍니다
 
-	// If you needed to monitor other things, as well:
-	//pfds[1].fd = some_socket; // Some socket descriptor
-	//pfds[1].events = POLLIN;  // Tell me when ready to read
+	// 다른 것도 감시해야 한다면:
+	//pfds[1].fd = some_socket; // 어떤 소켓 설명자
+	//pfds[1].events = POLLIN;  // 읽을 준비가 되면 알려줍니다
 
 	printf("Hit RETURN or wait 2.5 seconds for timeout\n");
 
-	int num_events = poll(pfds, 1, 2500); // 2.5 second timeout
+	int num_events = poll(pfds, 1, 2500); // 2.5초 제한 시간
 
 	if (num_events == 0) {
 		printf("Poll timed out!\n");

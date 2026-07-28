@@ -1,5 +1,5 @@
 /*
-** pollserver.c -- a cheezy multiperson chat server
+** pollserver.c -- 간단한 다중 사용자 채팅 서버
 */
 
 #include <stdio.h>
@@ -13,11 +13,11 @@
 #include <netdb.h>
 #include <poll.h>
 
-#define PORT "9034"   // Port we're listening on
+#define PORT "9034"   // 리스닝할 포트
 
 /*
- * Convert socket to IP address string.
- * addr: struct sockaddr_in or struct sockaddr_in6
+ * 소켓을 IP 주소 문자열로 변환합니다.
+ * addr: struct sockaddr_in 또는 struct sockaddr_in6
  */
 const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
@@ -43,17 +43,17 @@ const char *inet_ntop2(void *addr, char *buf, size_t size)
 }
 
 /*
- * Return a listening socket.
+ * 리스닝 소켓을 반환합니다.
  */
 int get_listener_socket(void)
 {
-	int listener;	 // Listening socket descriptor
-	int yes=1;		// For setsockopt() SO_REUSEADDR, below
+	int listener;	 // 리스닝 소켓 설명자
+	int yes=1;		// 아래 setsockopt() SO_REUSEADDR용
 	int rv;
 
 	struct addrinfo hints, *ai, *p;
 
-	// Get us a socket and bind it
+	// 소켓을 얻고 바인드합니다
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
@@ -70,7 +70,7 @@ int get_listener_socket(void)
 			continue;
 		}
 
-		// Lose the pesky "address already in use" error message
+		// 성가신 "address already in use" 오류 메시지를 피합니다
 		setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int));
 
@@ -82,14 +82,14 @@ int get_listener_socket(void)
 		break;
 	}
 
-	// If we got here, it means we didn't get bound
+	// 여기까지 왔다면 바인드하지 못했다는 뜻입니다
 	if (p == NULL) {
 		return -1;
 	}
 
-	freeaddrinfo(ai); // All done with this
+	freeaddrinfo(ai); // 이것은 다 썼습니다
 
-	// Listen
+	// 리스닝합니다
 	if (listen(listener, 10) == -1) {
 		return -1;
 	}
@@ -98,44 +98,44 @@ int get_listener_socket(void)
 }
 
 /*
- * Add a new file descriptor to the set.
+ * 집합에 새 파일 설명자를 추가합니다.
  */
 void add_to_pfds(struct pollfd **pfds, int newfd, int *fd_count,
 		int *fd_size)
 {
-	// If we don't have room, add more space in the pfds array
+	// 공간이 부족하면 pfds 배열에 공간을 더 추가합니다
 	if (*fd_count == *fd_size) {
-		*fd_size *= 2; // Double it
+		*fd_size *= 2; // 두 배로 늘립니다
 		*pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
 	}
 
 	(*pfds)[*fd_count].fd = newfd;
-	(*pfds)[*fd_count].events = POLLIN; // Check ready-to-read
+	(*pfds)[*fd_count].events = POLLIN; // 읽을 준비가 되었는지 확인
 	(*pfds)[*fd_count].revents = 0;
 
 	(*fd_count)++;
 }
 
 /*
- * Remove a file descriptor at a given index from the set.
+ * 주어진 인덱스의 파일 설명자를 집합에서 제거합니다.
  */
 void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
 {
-	// Copy the one from the end over this one
+	// 끝에 있는 항목을 이 위치로 복사합니다
 	pfds[i] = pfds[*fd_count-1];
 
 	(*fd_count)--;
 }
 
 /*
- * Handle incoming connections.
+ * 들어오는 연결을 처리합니다.
  */
 void handle_new_connection(int listener, int *fd_count,
 		int *fd_size, struct pollfd **pfds)
 {
-	struct sockaddr_storage remoteaddr; // Client address
+	struct sockaddr_storage remoteaddr; // 클라이언트 주소
 	socklen_t addrlen;
-	int newfd;  // Newly accept()ed socket descriptor
+	int newfd;  // 새로 accept()한 소켓 설명자
 	char remoteIP[INET6_ADDRSTRLEN];
 
 	addrlen = sizeof remoteaddr;
@@ -154,40 +154,40 @@ void handle_new_connection(int listener, int *fd_count,
 }
 
 /*
- * Handle regular client data or client hangups.
+ * 일반 클라이언트 데이터나 클라이언트 연결 종료를 처리합니다.
  */
 void handle_client_data(int listener, int *fd_count,
 		struct pollfd *pfds, int *pfd_i)
 {
-	char buf[256];	// Buffer for client data
+	char buf[256];	// 클라이언트 데이터용 버퍼
 
 	int nbytes = recv(pfds[*pfd_i].fd, buf, sizeof buf, 0);
 
 	int sender_fd = pfds[*pfd_i].fd;
 
-	if (nbytes <= 0) { // Got error or connection closed by client
+	if (nbytes <= 0) { // 오류가 났거나 클라이언트가 연결을 닫았습니다
 		if (nbytes == 0) {
-			// Connection closed
+			// 연결 종료
 			printf("pollserver: socket %d hung up\n", sender_fd);
 		} else {
 			perror("recv");
 		}
 
-		close(pfds[*pfd_i].fd); // Bye!
+		close(pfds[*pfd_i].fd); // 안녕!
 
 		del_from_pfds(pfds, *pfd_i, fd_count);
 
-		// reexamine the slot we just deleted
+		// 방금 삭제한 슬롯을 다시 검사합니다
 		(*pfd_i)--;
 
-	} else { // We got some good data from a client
+	} else { // 클라이언트에게서 정상 데이터를 받았습니다
 		printf("pollserver: recv from fd %d: %.*s", sender_fd,
 				nbytes, buf);
-		// Send to everyone!
+		// 모두에게 보냅니다!
 		for(int j = 0; j < *fd_count; j++) {
 			int dest_fd = pfds[j].fd;
 
-			// Except the listener and ourselves
+			// 리스너와 자신은 제외합니다
 			if (dest_fd != listener && dest_fd != sender_fd) {
 				if (send(dest_fd, buf, nbytes, 0) == -1) {
 					perror("send");
@@ -198,23 +198,23 @@ void handle_client_data(int listener, int *fd_count,
 }
 
 /*
- * Process all existing connections.
+ * 기존 연결을 모두 처리합니다.
  */
 void process_connections(int listener, int *fd_count, int *fd_size,
 		struct pollfd **pfds)
 {
 	for(int i = 0; i < *fd_count; i++) {
 
-		// Check if someone's ready to read
+		// 누군가 읽을 준비가 되었는지 확인합니다
 		if ((*pfds)[i].revents & (POLLIN | POLLHUP)) {
-			// We got one!!
+			// 하나 찾았습니다!!
 
 			if ((*pfds)[i].fd == listener) {
-				// If we're the listener, it's a new connection
+				// 리스너라면 새 연결입니다
 				handle_new_connection(listener, fd_count, fd_size,
 						pfds);
 			} else {
-				// Otherwise we're just a regular client
+				// 아니면 일반 클라이언트입니다
 				handle_client_data(listener, fd_count, *pfds, &i);
 			}
 		}
@@ -222,20 +222,20 @@ void process_connections(int listener, int *fd_count, int *fd_size,
 }
 
 /*
- * Main: create a listener and connection set, loop forever
- * processing connections.
+ * 주 함수: 리스너와 연결 집합을 만들고, 영원히 반복하면서
+ * 연결을 처리합니다.
  */
 int main(void)
 {
-	int listener;	 // Listening socket descriptor
+	int listener;	 // 리스닝 소켓 설명자
 
-	// Start off with room for 5 connections
-	// (We'll realloc as necessary)
+	// 연결 5개를 담을 공간으로 시작합니다
+	// (필요하면 realloc합니다)
 	int fd_size = 5;
 	int fd_count = 0;
 	struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
 
-	// Set up and get a listening socket
+	// 리스닝 소켓을 설정하고 얻습니다
 	listener = get_listener_socket();
 
 	if (listener == -1) {
@@ -243,16 +243,16 @@ int main(void)
 		exit(1);
 	}
 
-	// Add the listener to set;
-	// Report ready to read on incoming connection
+	// 리스너를 집합에 추가합니다.
+	// 들어오는 연결이 있으면 읽을 준비가 되었다고 보고합니다
 	pfds[0].fd = listener;
 	pfds[0].events = POLLIN;
 
-	fd_count = 1; // For the listener
+	fd_count = 1; // 리스너용
 
 	puts("pollserver: waiting for connections...");
 
-	// Main loop
+	// 주 루프
 	for(;;) {
 		int poll_count = poll(pfds, fd_count, -1);
 
@@ -261,10 +261,9 @@ int main(void)
 			exit(1);
 		}
 
-		// Run through connections looking for data to read
+		// 연결을 순회하면서 읽을 데이터를 찾습니다
 		process_connections(listener, &fd_count, &fd_size, &pfds);
 	}
 
 	free(pfds);
 }
-

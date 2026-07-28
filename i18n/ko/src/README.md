@@ -1,123 +1,115 @@
-# Beej's Guide to Network Programming source markdown
+# Beej의 네트워크 프로그래밍 안내서 소스 마크다운
 
-## Beej' extensions to markdown
+## Beej의 마크다운 확장
 
-These are brought to life with the `bin/preproc` script.
+이 확장들은 `bin/preproc` 스크립트로 처리됩니다.
 
 * `[[pagebreak]]`
 
-  Issue a page break on the printed version. Renders as LaTeX
-  `\newpage`.
+  인쇄용 판본에서 페이지 나눔을 만듭니다. LaTeX에서는 `\newpage`로 렌더링됩니다.
 
 * `[nh[word]]`
 
-  Don't allow hypenation of this word. Translates to
-  `\hyphenation{word}`. Underscores are prohibited due to LaTeX
-  restrictions.
+  이 단어의 하이픈 분리를 막습니다. `\hyphenation{word}`로 변환됩니다.
+  LaTeX 제약 때문에 밑줄 문자는 사용할 수 없습니다.
 
 * `[ix[entry]]`
 
-  Build a LaTeX index entry, substituting it as-is into an `\index{}`
-  element. **Remember to escape your underscores with `\_` in these
-  entries!** [LaTeX indexing examples
-  here](https://en.wikibooks.org/wiki/LaTeX/Indexing#Sophisticated_indexing).
+  LaTeX 색인 항목을 만들고 `\index{}` 요소 안에 그대로 넣습니다.
+  **이 항목 안에서는 밑줄을 반드시 `\_`로 이스케이프해야 합니다!**
+  [LaTeX 색인 예제는 여기](https://en.wikibooks.org/wiki/LaTeX/Indexing#Sophisticated_indexing)에
+  있습니다.
 
 * `[ixtt[entry]]`
 
-  For a single, simple index entry, renders in typewriter text with
-  `\index{entry@\texttt{entry}}`.  More complex entries should be
-  rendered by passing raw LaTeX into `[ix[]]`.
+  단일하고 단순한 색인 항목을 `\index{entry@\texttt{entry}}` 형태의
+  타자체 텍스트로 렌더링합니다. 더 복잡한 항목은 `[ix[]]`에 원시 LaTeX를
+  넘겨서 렌더링해야 합니다.
 
 * `[fl[linktext|url]]`
 
-  Footnote Link. Hyperlink linktext to the url and show the URL in a
-  footnote. Translates to `[linktext](url)^[url]`.
+  각주 링크입니다. 링크 텍스트에 URL을 연결하고, URL을 각주에 표시합니다.
+  `[linktext](url)^[url]`로 변환됩니다.
     
 * `[flx[linktext|file]]`
 
-  Footnote Link to Beej's Examples. Automatically prepends
-  `https://beej.us/guide/bgnet/examples/` to the file and shows the URL
-  in a footnote.
+  Beej의 예제 파일로 가는 각주 링크입니다. 파일 이름 앞에
+  `https://beej.us/guide/bgnet/examples/`를 자동으로 붙이고 URL을 각주에
+  표시합니다.
 
 * `[flr[link|id]]`
 
-   Footnote Link to Beej's Redirect. Automatically prepends
-   `https://beej.us/guide/url/` to the link id and shows the URL in a
-   footnote.
+   Beej의 리다이렉트로 가는 각주 링크입니다. 링크 ID 앞에
+   `https://beej.us/guide/url/`을 자동으로 붙이고 URL을 각주에 표시합니다.
 
 * `[flrfc[link|num]]`
 
-   Footnote Link to RFC. Automatically prepends
-   `https://tools.ietf.org/html/rfc` to the RFC number and shows the URL
-   in a footnote.
+   RFC로 가는 각주 링크입니다. RFC 번호 앞에
+   `https://tools.ietf.org/html/rfc`를 자동으로 붙이고 URL을 각주에 표시합니다.
    
 
-## pandoc markdown quirks
+## pandoc 마크다운 특이사항
 
-If you have multiple inline footnotes in the same paragraph but on
-different lines of the markdown, all lines except the last must end with
-a trailing space.
+같은 문단 안에 여러 개의 인라인 각주가 있고 그 각주들이 마크다운의 서로 다른
+줄에 있다면, 마지막 줄을 제외한 모든 줄은 끝에 공백이 있어야 합니다.
 
-man page subsections are h4 `####` to keep from showing up in the
-contents. Pandoc 2.8 should have a way to suppress h3 from contents.
+맨페이지 하위 절은 목차에 나타나지 않도록 h4 `####`로 둡니다. Pandoc 2.8에는
+h3가 목차에 나타나지 않게 하는 방법이 있을 것입니다.
 
-Table rows need to be on one line for proper wrapping (newlines are
-preserved in table cells).
+표 행은 줄바꿈이 제대로 되도록 한 줄에 있어야 합니다. 표 셀 안에서는 줄바꿈이
+보존됩니다.
 
-Tables: the relative widths of the headers is reflected in the final
-output.
+표에서는 헤더의 상대 너비가 최종 출력에 반영됩니다.
 
-Table header template:
+표 헤더 템플릿:
 
 ```
-| Macro           | Description                                            |
+| 매크로          | 설명                                                   |
 |-----------------|--------------------------------------------------------|
 ```
 
-`<a name>` doesn't work. Use header `{#tags}`.
+`<a name>`은 동작하지 않습니다. 헤더의 `{#tags}`를 사용하세요.
 
-Fenced code with a standard language name can sometimes cause LaTeX to puke.
+표준 언어 이름을 붙인 fenced code는 때때로 LaTeX를 실패하게 만들 수 있습니다.
 
 ````
-```c                   Don't do this
+```c                   이렇게 하지 마세요
 
-``` {.c}               Do this
-``` {.c .numberLines}  Or this
+``` {.c}               이렇게 하세요
+``` {.c .numberLines}  또는 이렇게 하세요
 ````
 
-Indexing done with latex `\index{foo}` markers. They don't show up in
-HTML output.
+색인은 LaTeX `\index{foo}` 마커로 만듭니다. 이 마커는 HTML 출력에는 나타나지
+않습니다.
 
-LaTex indexing examples:
+LaTeX 색인 예제:
 
-(Escape underscores with `\_`!)
+(밑줄은 `\_`로 이스케이프하세요!)
 
 ```latex
-\index{foo} plain element
-\index{foo\_bar} element with underscore
-\index{foo()@\texttt{foo()}} render foo() in monospace in index
-\index{O\_NONBLOCK@\texttt{O\_NONBLOCK}} mono with underscores
-\index{foo!bar} subindex bar in foo
-\index{bind()@\texttt{bind()}!implicit} subindex with mono
+\index{foo} 일반 요소
+\index{foo\_bar} 밑줄이 있는 요소
+\index{foo()@\texttt{foo()}} 색인에서 foo()를 고정폭으로 렌더링
+\index{O\_NONBLOCK@\texttt{O\_NONBLOCK}} 밑줄이 있는 고정폭 항목
+\index{foo!bar} foo 아래의 하위 색인 bar
+\index{bind()@\texttt{bind()}!implicit} 고정폭이 들어간 하위 색인
 ```
 
-[More LaTeX indexing examples
-here](https://en.wikibooks.org/wiki/LaTeX/Indexing#Sophisticated_indexing).
+[더 많은 LaTeX 색인 예제는 여기](https://en.wikibooks.org/wiki/LaTeX/Indexing#Sophisticated_indexing)에
+있습니다.
 
-Index entries should be at the main level and not in headers or bold or
-italicized text (or they'll appear as seperate entries in the index).
+색인 항목은 헤더, 굵은 글씨, 기울임 글씨 안이 아니라 본문 최상위 수준에 있어야
+합니다. 그렇지 않으면 색인에 별도 항목으로 나타납니다.
 
-Put a `\newpage` before each manpage to force a page break.
+각 맨페이지 앞에는 페이지 나눔을 강제하기 위해 `\newpage`를 넣습니다.
 
-When editing `bgnet_amazon.md`, use `\newpage` to force widows onto the
-next page.
+`bgnet_amazon.md`를 편집할 때는 widow를 다음 페이지로 넘기기 위해 `\newpage`를
+사용합니다.
 
-Footnotes after links on sequential lines need a blank space at the end
-of the line to work properly...?
+연속된 줄의 링크 뒤에 붙은 각주가 제대로 동작하려면 줄 끝에 공백이 필요할 수
+있습니다.
 
 ```markdown
-[Hey](url)^[footnote],   <-- Need a blank space at the end of this line
+[Hey](url)^[footnote],   <-- 이 줄 끝에 공백이 필요합니다
 [Again](url2)^[footnote2].
 ```
-
-

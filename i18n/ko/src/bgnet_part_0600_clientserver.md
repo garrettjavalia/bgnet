@@ -1,27 +1,27 @@
-# 클라인트-서버 배경지식
+# 클라이언트-서버 배경지식
 
 [i[Client/Server]<]
 
-클라이언트-서버에 대해 이야기할 차례입니다. 통신망에 있는 거의 모든 것들은
-서버 프로세스에게 이야기하는 클라이언트 프로세스를 상대하거나 그 반대입니다.
+클라이언트-서버에 대해 이야기할 차례입니다. 통신망에 있는 거의 모든 것은
+클라이언트 프로세스가 서버 프로세스와 이야기하거나 그 반대로 동작합니다.
 `telnet`을 예로 들어봅시다. 여러분이 텔넷(클라이언트)로 원격지 호스트의 23번
-포트에 접속할 때 그 호스트의 프로그램(`telnetd`라고 불리는 서버)이 생명을
-얻는다. 그것이 들어오는 텔넷 요청을 처리하고 여러분에게 로그인 프롬프트를
+포트에 접속할 때 그 호스트의 프로그램(`telnetd`라고 불리는 서버)이 살아납니다.
+그 프로그램이 들어오는 텔넷 요청을 처리하고 여러분에게 로그인 프롬프트를
 띄워주는 등의 일을 처리합니다.
 
 ![클라이언트 - 서버 상호작용](cs.pdf "[클라이언트- 서버 상호작용 도표]")
 
 위의 도표에 클라이언트와 서버의 정보 교환이 정리되어 있습니다.
 
-클라이언트-서버 쌍은 `SOCK_STREAM`이나 `SOCK_DGRAM` 또는 다른 어떤 것이라도
-말할 수 있음을 기억하세요.(둘이 같은 방식으로 말하기만 한다면) 클라이언트-서버
+클라이언트-서버 쌍은 `SOCK_STREAM`이나 `SOCK_DGRAM` 또는 다른 어떤 방식이라도
+사용할 수 있음을 기억하세요. (둘이 같은 방식으로 말하기만 한다면) 클라이언트-서버
 쌍의 좋은 예시는 `telnet`/`telnetd`, `ftp`/`ftpd` 또는 `Firefox`/`Apache`
 입니다. 여러분이 `ftp`를 쓸 때마다 여러분의 요청을 받아들이는 원격지 프로그램인
 `ftpd`가 있습니다.
 
 흔히 한 대의 장치에는 오직 하나의 서버만이 있을 것이며 그 서버는 [i[`fork()` function]] `fork()`
-를 통해서 여러 클라이언트를 처리할 것입니다.(역자 주 : 한 대의 장치에서 여러 개의
-서버를 실행하는 많은 방법이 있지만 이 문서의 초판은 90년대에 작성되었습니다. )
+를 통해서 여러 클라이언트를 처리할 것입니다. (역자 주 : 한 대의 장치에서 여러 개의
+서버를 실행하는 많은 방법이 있지만 이 문서의 초판은 90년대에 작성되었습니다.)
 기본적인 과정은 아래와 같습니다. 서버가 연결을 기다리고, `accept()`한 후,
 요청을 처리할 자식 프로세스를 `fork()`합니다. 이것이 다음 절에서 우리의
 예제 서버가 하는 일입니다.
@@ -30,15 +30,15 @@
 
 [i[Server-->stream]<]
 
-이 서버가 하는 일은 스트림 연결에 "`Hello, world!`"을 전송하는 것 뿐입니다.
+이 서버가 하는 일은 스트림 연결에 "`Hello, world!`"을 전송하는 것뿐입니다.
 이 서버를 시험하기 위해서 할 일은 하나의 창에서 이것을 실행한 후 다른 창에서
-텔넷에 아래 명령어로 접속하는 일 뿐입니다.
+텔넷에 아래 명령어로 접속하는 일뿐입니다.
 
 ```
 $ telnet remotehostname 3490
 ```
 
-`remotehostname`은 여러분이 실행하는 장치의 아이피입니다.
+`remotehostname`은 여러분이 서버를 실행하는 장치의 이름입니다.
 
 [flx[서버 코드|server.c]]:
 
@@ -62,11 +62,13 @@ $ telnet remotehostname 3490
 
 #define PORT "3490"  // 사용자들이 접속할 포트
 
-#define BACKLOG 10   // 몇 개의 대기중인 연결이 유지될 것인가
+#define BACKLOG 10   // 대기 중인 연결을 몇 개까지 큐에 둘 것인가
 
 void sigchld_handler(int s)
 {
-    // waitpid()이 errno를 덮어쓸 수 있으므로 저장했다가 되살린다.
+    (void)s; // 사용하지 않는 변수 경고를 끕니다
+
+    // waitpid()가 errno를 덮어쓸 수 있으므로 저장했다가 복원합니다.
     int saved_errno = errno;
 
     while(waitpid(-1, NULL, WNOHANG) > 0);
@@ -75,7 +77,7 @@ void sigchld_handler(int s)
 }
 
 
-// IPv4 또는 IPv6 sockaddr을 받아온다.
+// IPv4 또는 IPv6 sockaddr을 얻습니다.
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -87,7 +89,8 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(void)
 {
-    int sockfd, new_fd;  // sock_fd에서 대기하고 들어오는 연결은 new_fd에 저장
+    // sock_fd에서 대기하고 들어오는 연결은 new_fd에 저장
+    int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr; // 접속자의 주소 정보
     socklen_t sin_size;
@@ -97,9 +100,9 @@ int main(void)
     int rv;
 
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
+    hints.ai_flags = AI_PASSIVE; // 내 IP를 씁니다
 
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -129,7 +132,7 @@ int main(void)
         break;
     }
 
-    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요없음
+    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없음
 
     if (p == NULL)  {
         fprintf(stderr, "server: failed to bind\n");
@@ -141,9 +144,9 @@ int main(void)
         exit(1);
     }
 
-    sa.sa_handler = sigchld_handler; // 죽은 프로세스를 다 거둬들이자
+    sa.sa_handler = sigchld_handler; // 죽은 프로세스를 모두 거둡니다
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags =   ;
+    sa.sa_flags = SA_RESTART;
     if (sigaction(SIGCHLD, &sa, NULL) == -1) {
         perror("sigaction");
         exit(1);
@@ -153,7 +156,8 @@ int main(void)
 
     while(1) {  // 주 accept() 루프
         sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+        new_fd = accept(sockfd, (struct sockaddr *)&their_addr,
+            &sin_size);
         if (new_fd == -1) {
             perror("accept");
             continue;
@@ -165,13 +169,13 @@ int main(void)
         printf("server: got connection from %s\n", s);
 
         if (!fork()) { // 자식 프로세스입니다.
-            close(sockfd); // 자식은 리스너가 필요없습니다.
+            close(sockfd); // 자식은 리스너가 필요 없습니다.
             if (send(new_fd, "Hello, world!", 13, 0) == -1)
                 perror("send");
             close(new_fd);
             exit(0);
         }
-        close(new_fd);  // 부모는 이것이 필요없습니다.
+        close(new_fd);  // 부모는 이것이 필요 없습니다.
     }
 
     return 0;
@@ -182,9 +186,9 @@ int main(void)
 안에 모든 코드를 다 적었습니다. 원한다면 더 작은 함수들로 나누어도 좋습니다.
 
 (아마도 이 [i[`sigaction()` function]] `sigaction()`을 처음 볼 수도 있는데
-괜찮다. 이 코드는 `fork()`된 자식 프로세스가 종료되면서 생기는 좀비 프로세스를
+괜찮습니다. 이 코드는 `fork()`된 자식 프로세스가 종료되면서 생기는 좀비 프로세스를
 거둬들이는 데 사용됩니다. 좀비 프로세스를 많이 만들고 거둬들이지 않으면 시스템
-관리자가 흥분할 것입니다.)
+관리자가 화를 낼 것입니다.)
 
 다음 절에 나오는 클라이언트를 사용해서 이 서버로부터 데이터를 얻을 수 있습니다.
 
@@ -195,7 +199,7 @@ int main(void)
 [i[Client-->stream]<]
 
 이 녀석은 서버보다도 더 쉽습니다. 이 클라이언트가 하는 일은 여러분이 명령줄에
-지정한 호스트의 3490번 포트로 접속하는 것입니다. 이것은 서버가 보낸 문자열을
+지정한 호스트의 3490번 포트로 접속하는 것입니다. 그리고 서버가 보낸 문자열을
 받습니다.
 
 [flx[클라이언트 소스|client.c]]:
@@ -219,9 +223,9 @@ int main(void)
 
 #define PORT "3490" // 클라이언트가 접속할 포트
 
-#define MAXDATASIZE 100 // 한 번에 받을 수 있는 최대 바이트 갯수
+#define MAXDATASIZE 100 // 한 번에 받을 수 있는 최대 바이트 개수
 
-// IPv4 또는 IPv6 sockaddr를 받아온다
+// IPv4 또는 IPv6 sockaddr을 얻습니다
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -253,7 +257,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // 모든 결과를 순회하면서 쓸 수 있는 가장 첫 번째 것을 사용한다
+    // 모든 결과를 순회하면서 쓸 수 있는 첫 번째 것을 사용합니다
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
@@ -261,9 +265,14 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        inet_ntop(p->ai_family,
+            get_in_addr((struct sockaddr *)p->ai_addr),
+            s, sizeof s);
+        printf("client: attempting connection to %s\n", s);
+
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
             perror("client: connect");
+            close(sockfd);
             continue;
         }
 
@@ -275,11 +284,12 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+    inet_ntop(p->ai_family,
+            get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-    printf("client: connecting to %s\n", s);
+    printf("client: connected to %s\n", s);
 
-    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없다
+    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없습니다
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
@@ -306,21 +316,21 @@ int main(int argc, char *argv[])
 
 [i[Server-->datagram]<]
 
-위에서 `sendto()`과 `recvfrom()`에 대해 논의할 때 UDP 데이터그램 소켓의
-기본에 대해서 이미 알아보았습니다. 그러므로 바로 2개의 예제 프로그램을
+위에서 `sendto()`와 `recvfrom()`에 대해 논의할 때 UDP 데이터그램 소켓의
+기본에 대해서 이미 알아보았습니다. 그러므로 바로 두 개의 예제 프로그램을
 제시하겠습니다. `talker.c`와 `listener.c`입니다.
 
 `listener`는 장치에서 포트 4950으로 들어오는 패킷을 대기합니다. `talker`는
 지정한 장치의 해당 포트로 사용자가 명령줄에 입력한 내용을 담은 패킷을 보냅니다.
 
-데이터그램 소켓은 연결이 없고 소켓을 이더넷에 발송한 후 성공 여부는 신경쓰지
+데이터그램 소켓은 연결이 없고 패킷을 허공에 던진 뒤 성공 여부는 신경 쓰지
 않기 때문에 클라이언트와 서버에 IPv6을 사용하도록 명시할 것입니다. 이렇게 하면
-서버가 IPv6에서 듣고 클라이언트가 IPv4에서 발송해서 데이터를 받을 수 없는
+서버가 IPv6에서 리스닝하고 클라이언트가 IPv4에서 발송해서 데이터를 받을 수 없는
 상황을 피할 수 있을 것입니다. (우리의 TCP 스트림 소켓 세상에서도 이런 불일치가
-발생할 수 있지만 `connect()`에서 하나의 주소 체계에 대해 에러를 발생시키고
-다른 주소체계를 쓰도록 해줍니다.)
+발생할 수 있지만 `connect()`에서 하나의 주소 계열에 대해 오류가 발생하면
+다른 주소 계열로 다시 시도하게 됩니다.)
 
-여기에 [flx[`listener.c`의 소스코드가 있습니다.|listener.c]]:
+여기에 [flx[`listener.c`의 소스 코드가 있습니다.|listener.c]]:
 
 ```{.c .numberLines}
 /*
@@ -342,7 +352,7 @@ int main(int argc, char *argv[])
 
 #define MAXBUFLEN 100
 
-// get sockaddr, IPv4 or IPv6:
+// IPv4 또는 IPv6 sockaddr을 얻습니다:
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -421,15 +431,15 @@ int main(void)
 ```
 
 `getaddrinfo()`에서 우리가 마침내 `SOCK_DGRAM`을 사용한다는 것에
-주목하세요. 또한, `listen()`와 `accept()`이 필요하지 않다는 점도
-기억하세요. 이것이 연결없는 데이터그램 소켓을 사용할 때의 장점
+주목하세요. 또한, `listen()`과 `accept()`가 필요하지 않다는 점도
+기억하세요. 이것이 연결 없는 데이터그램 소켓을 사용할 때의 장점
 중 하나입니다.
 
 [i[Server-->datagram]>]
 
 [i[Client-->datagram]<]
 
-다음으로 [flx[`talker.c`의 소스코드|talker.c]]입니다.
+다음으로 [flx[`talker.c`의 소스 코드|talker.c]]입니다.
 
 ```{.c .numberLines}
 /*
@@ -462,7 +472,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET6; // IPv4을 쓰려면 AF_INET으로 설정합니다
+	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
 
 	if ((rv = getaddrinfo(argv[1], SERVERPORT, &hints, &servinfo)) != 0) {
@@ -502,22 +512,24 @@ int main(int argc, char *argv[])
 ```
 
 이것이 전부입니다! 하나의 장치에서 `listener`를 실행하고 `talker`를 다른 장치에서
-실행하세요.(역자 주 : 하나의 장치에서도 순서만 맞게 실행하면 문제는 없습니다. 여러
-터미널을 동시에 열 수 있는 다양한 방법이 있습니다.) 그것들이 통신하는 것을 지켜보세요.
-온 가족을 위한 즐거운 쑈가 될 것이라 확신합니다.
+실행하세요. 그것들이 통신하는 것을 지켜보세요.
 
-이번에는 서버를 실행할 필요도 없습니다! `talker`를 혼자 실행시키면 패킷을 행복하게
-발송하고, 아무도 반대쪽에서 `recvfrom()`을 호출하지 않는다면 그저 패킷은 사라질
+(역자 주 : 한 장치에서도 순서만 맞게 실행하면 문제없이 시험할 수 있습니다.)
+
+온 가족이 안심하고 즐길 수 있는 건전한 재미입니다.
+
+이번에는 서버를 실행할 필요도 없습니다! `talker`를 혼자 실행시키면 패킷을 신나게
+날려 보내고, 아무도 반대쪽에서 `recvfrom()`을 호출하지 않는다면 그저 패킷은 사라질
 뿐입니다. UDP 데이터그램 소켓으로 보낸 데이터는 도착을 보장하지 않는다는 점을 기억하세요!
 
 [i[Client-->datagram]>]
 
 전에 몇 번 말한 사소한 것 한 가지를 빼면 전부입니다: [i[`connect()` function-->on datagram sockets]]
-연결된 데이터그램 소켓이 그것입니다. 그것에 대해서 여기에서 말해야하는데,
+연결된 데이터그램 소켓이 그것입니다. 그것에 대해서 여기에서 말해야 하는데,
 이 문서의 데이터그램에 대한 부분이 바로 여기이기 때문입니다. 위의 `talker`
 가 `listener`의 주소를 지정하고 `connect()`를 호출한다고 합시다. 그 순간부터
 `talker`는 `connect()`로 지정한 주소로만 데이터를 보내고 받을 수 있습니다.
-이런 이유로 `sendto()`와 `recvfrom()`을 쓸 필요가 없습니다. 단순히 `send()`
-와 `recv()`를 쓰면 됩니다.
+이런 이유로 `sendto()`와 `recvfrom()`을 쓸 필요가 없습니다. 단순히 `send()`와
+`recv()`를 쓰면 됩니다.
 
 [i[Client/Server]>]
