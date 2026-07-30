@@ -89,7 +89,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(void)
 {
-    // sock_fd에서 대기하고 들어오는 연결은 new_fd에 저장
+    // sockfd에서 대기하고 들어오는 연결은 new_fd에 저장
     int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr; // 접속자의 주소 정보

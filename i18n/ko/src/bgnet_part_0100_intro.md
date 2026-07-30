@@ -1,4 +1,131 @@
 # 도입부
+<!--
+Beej's Guide to Network Programming book source
+
+# vim: ts=4:sw=4:nosi:et:tw=72
+-->
+
+<!--
+	History:
+
+	2.3.2:		socket man page
+	2.3.3:		sockaddr_in man page
+	2.3.4:		bind, listen man page
+	2.3.5:		connect man page
+	2.3.6:		listen, perror man page
+	2.3.7:		errno man page
+	2.3.8:		htonl etc man page
+	2.3.9:		close man page, expanded man page leader
+	2.3.10:		inet_ntoa, setsockopt man pages
+	2.3.11:		getpeername man page
+	2.3.12:		send/sendto man pages
+	2.3.13:		shutdown man pages
+	2.3.14:		gethostname man pages, fix inet_aton links
+	2.3.15:		fcntl man page
+	2.3.16:		recv/recvfrom man page
+	2.3.17:		gethostbyname/gethostbyaddr man page
+	2.3.18:		changed GET / to GET / HTTP/1.0
+	2.3.19:		added select() man page
+	2.3.20:		added poll() man page
+	2.3.21:		section on NAT and reserved networks
+	2.3.22:		typo fixes in sects "man" and "privnet"
+	2.3.23:		added broadcast packets section
+	2.3.24:		manpage prototype changed to code, subtitle moved out of title
+	2.4.0:		big overhaul, serialization stuff
+	2.4.1:		minor text changes in intro
+	2.4.2:		changed all sizeofs to use variable names instead of types
+	2.4.3:		fix myaddr->my_addr in listener.c, sockaddr_inman example
+	2.4.4:		fix myaddr->my_addr in server.c
+	2.4.5:		fix 14->18 in son of data encap
+	3.0.0:		IPv6 overhaul
+	3.0.1:		sa-to-sa6 typo fix
+	3.0.2:		typo fixes
+	3.0.3:		typo fixes
+	3.0.4:		cut-n-paste errors, selectserver hints fix
+	3.0.5:		typo fixes
+	3.0.6:		typo fixes
+	3.0.7:		typo fixes, added front matter
+	3.0.8:		getpeername() code fixes
+	3.0.9:		getpeername() code fixes, this time fer sure
+	3.0.10:		bind() man page code fix, comment changes
+	3.0.11:		socket syscall section code fix, comment changes
+	3.0.12:		typos in "IP Addresses, structs, and Data Munging"
+	3.0.13:		amp removals, note about errno and multithreading
+	3.0.14:		type changes to listener.c, pack2.c
+	3.0.15:		fix inet_pton example
+	3.0.16:		fix simple server output, optlen in getsockopt man page
+	3.0.17:		fix small typo
+	3.0.18:		reverse perror and close calls in getaddrinfo
+	3.0.19:		add notes about O_NONBLOCK with select() under Linux
+	3.0.20:		fix missing .fd in poll() example
+	3.0.21:		change sizeof(int) to sizeof yes
+    3.0.22:     C99 updates, bug fixes, markdown
+    3.0.23:     Book reference and URL updates
+    3.1.0:      Section on poll()
+    3.1.1:      Add WSL note, telnot
+    3.1.2:      pollserver.c bugfix
+    3.1.3:      Fix freeaddrinfo memleak
+    3.1.4:      Fix accept example header files
+    3.1.5:      Fix dgram AF_UNSPEC
+-->
+
+<!-- prevent hyphenation of the following words: -->
+[nh[strtol]]
+[nh[sprintf]]
+[nh[accept]]
+[nh[bind]]
+[nh[connect]]
+[nh[close]]
+[nh[getaddrinfo]]
+[nh[freeaddrinfo]]
+<!--
+Don't know how to make this work with underscores. I love
+you, Knuth, but... daaahm.
+
+[nh[gai_strerr]]
+-->
+[nh[gethostname]]
+[nh[gethostbyname]]
+[nh[gethostbyaddr]]
+[nh[getnameinfo]]
+[nh[getpeername]]
+[nh[errno]]
+[nh[fcntl]]
+[nh[htons]]
+[nh[htonl]]
+[nh[ntohs]]
+[nh[ntohl]]
+<!--
+[nh[inet_ntoa]]
+[nh[inet_aton]]
+[nh[inet_addr]]
+[nh[inet_ntop]]
+[nh[inet_pton]]
+-->
+[nh[listen]]
+[nh[perror]]
+[nh[strerror]]
+[nh[poll]]
+[nh[recv]]
+[nh[recvfrom]]
+[nh[select]]
+[nh[setsockopt]]
+[nh[getsockopt]]
+[nh[send]]
+[nh[sendto]]
+[nh[shutdown]]
+[nh[socket]]
+[nh[struct]]
+[nh[sockaddr]]
+<!--
+[nh[sockaddr_in]]
+[nh[in_addr]]
+[nh[sockaddr_in6]]
+[nh[in6_addr]]
+-->
+[nh[hostent]]
+[nh[addrinfo]]
+[nh[closesocket]]
 
 안녕하세요! 소켓 프로그래밍 때문에 힘든가요? `man`페이지로 공부하기가 너무
 어려운가요? 멋진 인터넷 프로그래밍을 하고 싶지만 `connect()`를 호출하기 전에
@@ -97,14 +224,14 @@ Windows 11이라면 가능합니다.
 
 갑자기 흥분해서 연설을 해버렸네요.
 
-하지만 사람들은 하던 대로 하고 싶어하기 마련이고, 윈도우를 쓰는 분들은 이
+하지만 사람들은 하던 대로 하고 싶어 하기 마련이고, 윈도우를 쓰는 분들은 이
 문서의 정보가 Windows에도 약간의 차이만 빼면 보통 적용된다는 것을 알면 기뻐할 것입니다.
 
 여러분이 진지하게 고려해봐야 할 것은 [i[WSL]] [i[Windows
 Subsystem For Linux]] [fl[Windows Subsystem for
 Linux|https://learn.microsoft.com/en-us/windows/wsl/]]입니다. 이것은 간단히
 말하자면 Windows 10에 리눅스 VM 비슷한 것을 깔게 해 줍니다. 그렇게 하면 개발 환경을
-갖출 수 있고, 예제 프로그램을 있는 그대로 빌드할 수 있습니다.
+갖출 수 있고, 예제 프로그램을 있는 그대로 빌드하고 실행할 수 있습니다.
 
 여러분이 할 수 있는 다른 일은 [i[Cygwin]][fl[Cygwin|https://cygwin.com/]]을
 설치하는 것입니다. 이것은 Windows를 위한 유닉스 도구 모음입니다. 그렇게 하면 예제
@@ -127,7 +254,7 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]]입니다. 이것은 간�
 #include <ws2tcpip.h>
 ```
 
-`winsock`은 "새로운"(대략 1994년 기준으로) 윈도우 소켓 라이브러리입니다.
+`winsock2`는 "새로운"(대략 1994년 기준으로) 윈도우 소켓 라이브러리입니다.
 
 불행하게도 여러분이 `windows.h`를 인클루드하면 그것이 자동으로 버전1인 오래된 `winsock.h`
 를 끌어오고 `winsock2.h`와 충돌을 일으킬 것입니다. 정말 재밌지요.
@@ -196,7 +323,7 @@ Winsock에 대한 정보를 더 얻고 싶다면 [마이크로소프트의 공�
 불행히도 제 예제 코드 중 일부는 `fork()`를 사용합니다. 아마 그것을 동작하게 하려면
 POSIX 라이브러리에 링크하거나 다른 작업이 필요할 것입니다.
 아니면 [i[`CreateProcess()` function]] `CreateProcess()`를 대신 쓸 수도 있습니다.
-`fork()`는 인수를 받지 않지만 `CreateProcess()`는 인수를 4천8백만 개 정도 받습니다.
+`fork()`는 인수를 받지 않지만 `CreateProcess()`는 인수를 480억 개 정도 받습니다.
 그게 부담스럽다면 [i[`CreateThread()` function]] `CreateThread()`
 이 조금 더 쓰기 쉬울 겁니다. 불행히도 멀티스레딩에 대한 논의는 이 문서의
 범위를 벗어납니다. 저는 이 정도까지밖에 말씀드릴 수가 없습니다.
@@ -243,7 +370,7 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 
 이 원본 마크다운 문서는 UTF-8로 인코딩되었습니다.
 
-아래의 Copyright, Distribution, and Legal 절을 참고하세요.
+아래의 Copyright, Distribution, and Legal 절에 있는 라이선스 제한 사항에 유의하세요.
 
 제가 번역본을 호스트하길 바란다면 말씀해 주세요. 여러분이 호스트하길 원한다면
 그것도 링크하겠습니다. 어느 쪽이든 좋습니다.

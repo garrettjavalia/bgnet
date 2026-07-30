@@ -16,7 +16,7 @@
 데이터를 쏘아 보낼 수 있게 될 것입니다. (역자 주 : John Postel은 인터넷의 초기에 큰
 기여를 한 컴퓨터 과학자 중 한 명입니다.)
 
-_(아래의 예제 코드들은 대개 필수적인 오류 확인을 간략함을 위해 생략했음을
+_(아래의 예제 코드들은 대개 간략히 보여주기 위해 필수적인 오류 확인을 생략했음을
 기억하세요. 그리고 예제 코드들은 대개 `getaddrinfo()`의 호출이 성공하고
 연결 리스트로 적절한 결과물을 돌려준다고 가정합니다. 이런 상황은 독립 실행형
 프로그램에서는 제대로 처리되어 있으니, 그것들을 지침으로 삼으세요.)_
@@ -89,7 +89,7 @@ if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
 freeaddrinfo(servinfo); // 연결 리스트를 해제
 ```
 
-`ai_family`을 `AF_UNSPEC`으로 설정해서 IPv4든 IPv6이든 신경 쓰지 않음을 나타낸
+`ai_family`를 `AF_UNSPEC`으로 설정해서 IPv4든 IPv6이든 신경 쓰지 않음을 나타낸
 것에 주목하세요. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있습니다.
 
 `AI_PASSIVE`도 볼 수 있습니다. 이것은 `getaddrinfo()`에게 소켓 구조체에
@@ -285,14 +285,14 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
 ## `bind()`---나는 어떤 포트에 있나요? {#bind}
 
-[i[`bind()` function]] 소켓을 가지면 여러분 장치의 [i[Port]] 포트에 연결해야 할
+[i[`bind()` function]] 소켓을 가지면 여러분 장치의 [i[Port]] 포트에 바인드해야 할
 수도 있습니다. (이 작업은 보통 여러분이 [i[`listen()` function]] `listen()`
 으로 특정 포트에서 들어오는 연결을 받으려고 할 때 이루어집니다. 다중 사용자
 네트워크 게임들은 "192.168.5.10의 3490 포트에 연결합니다"라고 말할 때 이런
-작업을 합니다.)(역자 주 : 90년대~2000년대 초의 멀티플레이어 게임들이 접속시에
+작업을 합니다.)(역자 주 : 90년대~2000년대 초의 멀티플레이어 게임들이 접속 시에
 이런 문구를 흔히 보여줬습니다.) 포트 번호는 커널이 특정 프로세스의 소켓 설명자를 들어오는 패킷과
 연관 짓기 위해서 사용합니다. 만약 여러분이 [i[`connect()`] function] `connect()`만
-할 생각이라면 `bind()`는 불필요합니다. 그러나 재미를 위해 읽어봅시다.
+할 생각이라면 `bind()`는 대개 필요하지 않습니다. 그러나 재미를 위해 읽어봅시다.
 
 이것이 `bind()` 시스템 콜의 개요입니다.
 
@@ -314,7 +314,7 @@ int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()으로 구조체에 정보를 불러옵니다
+// 먼저 getaddrinfo()로 구조체에 정보를 불러옵니다
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4나 IPv6 중 아무 것이나 씁니다
@@ -340,7 +340,7 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 
 많은 오래된 코드들이 `bind()`를 호출하기 전에 `struct sockaddr_in`을 직접
 채워 넣습니다. 이것은 분명히 IPv4 전용이지만 같은 일을 IPv6에 대해서도 못 할
-이유는 없습니다. 단지 `getaddrinfo()`을 쓰는 편이 일반적으로 더 쉽습니다. 어쨌든
+이유는 없습니다. 단지 `getaddrinfo()`를 쓰는 편이 일반적으로 더 쉽습니다. 어쨌든
 예전 코드는 이런 방식입니다.
 
 ```{.c .numberLines}
@@ -428,7 +428,7 @@ IP 주소를 담고 있습니다. `addrlen`은 서버 주소 구조체의 바이
 struct addrinfo hints, *res;
 int sockfd;
 
-// getaddrinfo()으로 주소 구조체를 채웁니다
+// getaddrinfo()로 주소 구조체를 채웁니다
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;
@@ -525,9 +525,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 `addr`은 대개 로컬 `struct sockaddr_storage`에 대한 포인터입니다.
 여기에 들어오는 연결의 정보가 들어가게 됩니다(그리고 그것을 통해서 어떤 호스트가
 어떤 포트에서 여러분을 호출하고 있는지 알 수 있습니다.) `addrlen`은
-`sockaddr_storage`를 `accept()`에 넘기기 전에 `sizeof(struct
-sockaddr_storage)`으로 설정되어야 하는 로컬 정수 변수입니다.
-`accept()`는 `addr`에 `addrlen`의 크기 이상의 바이트를 적지 않을 것입니다.
+로컬 정수 변수로, 그 주소를 `accept()`에 넘기기 전에 `sizeof(struct
+sockaddr_storage)`으로 설정해 두어야 합니다.
+`accept()`는 그보다 많은 바이트를 `addr`에 적지 않을 것입니다.
 더 적은 바이트를 적었다면, 그 사실을 반영하도록 `addrlen` 값을 바꿀 것입니다.
 `accept()`도 오류가 발생하면 `-1`을 돌려주고 `errno`에
 값을 설정합니다. 어느 정도는 예상하셨으리라 생각합니다.
@@ -553,7 +553,7 @@ int main(void)
 
     // !! 이 호출들에 대한 오류 확인을 잊지 마세요 !!
 
-    // getaddrinfo()으로 정보를 채워 넣습니다
+    // getaddrinfo()로 정보를 채워 넣습니다
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;  // IPv4 또는 IPv6, 아무것이나 씁니다

@@ -1499,8 +1499,8 @@ s2 = socket(PF_INET, SOCK_STREAM, 0);
 
 // 파일 설명자 배열을 설정합니다.
 //
-	// 이 예제에서는 일반 데이터나 out-of-band 데이터가
-	// recv()로 수신될 준비가 되었는지 알고 싶습니다...
+// 이 예제에서는 일반 데이터나 out-of-band 데이터가
+// recv()로 수신될 준비가 되었는지 알고 싶습니다...
 
 ufds[0].fd = s1;
 ufds[0].events = POLLIN | POLLPRI; // 일반 데이터나 out-of-band 확인
