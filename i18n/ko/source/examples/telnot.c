@@ -1,17 +1,16 @@
 /*
-** telnot.c -- Not telnet, but can be used in place of telnet for
-**             the guide demos.
+** telnot.c -- telnet은 아니지만, 안내서 데모에서 telnet 대신
+**             사용할 수 있습니다.
 **
-** This doesn't implement the telnet protocol in the least.
+** 이 프로그램은 telnet 프로토콜을 전혀 구현하지 않습니다.
 **
-** Usage: telnot hostname port
+** 사용법: telnot hostname port
 **
-** Then type things and hit RETURN to send them. (It uses the current
-** terminal line discipline, which is probably line-buffered so nothing
-** will get sent until you hit RETURN.) It will print things to
-** standard output as it receives them.
+** 그런 다음 내용을 입력하고 RETURN을 눌러 보내세요. (현재 터미널의
+** 라인 규칙을 사용하며, 아마 줄 단위 버퍼링이 적용되어 RETURN을 누르기 전에는
+** 아무것도 전송되지 않을 것입니다.) 데이터를 받으면 표준 출력으로 출력합니다.
 **
-** Hit ^C to break out.
+** 빠져나가려면 ^C를 누르세요.
 */
 
 #include <stdio.h>
@@ -30,7 +29,7 @@
 #define BUFSIZE 1024
 
 /**
- * Get a sockaddr, IPv4 or IPv6
+ * sockaddr를 얻습니다. IPv4 또는 IPv6
  */
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -42,7 +41,7 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 /**
- * Main
+ * 메인 함수
  */
 int main(int argc, char *argv[])
 {
@@ -59,7 +58,7 @@ int main(int argc, char *argv[])
 	char *hostname = argv[1];
 	char *port = argv[2];
 
-	// Try to connect
+	// 연결을 시도합니다
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// loop through all the results and connect to the first we can
+	// 모든 결과를 순회하면서 연결 가능한 첫 번째 것에 연결합니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	// Connected!
+	// 연결되었습니다!
 
 	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
 			s, sizeof s);
@@ -100,9 +99,9 @@ int main(int argc, char *argv[])
 	printf("Connected to %s port %s\n", s, port);
 	printf("Hit ^C to exit\n");
 
-	freeaddrinfo(servinfo); // All done with this structure
+	freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
-	// Poll stdin and sockfd for incoming data (ready-to-read)
+	// 들어오는 데이터(읽기 준비됨)를 위해 stdin과 sockfd를 poll합니다
 	struct pollfd fds[2];
 
 	fds[0].fd = 0;
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
 	fds[1].fd = sockfd;
 	fds[1].events = POLLIN;
 
-	// Main loop
+	// 주 루프
 	for(;;) {
 		if (poll(fds, 2, -1) == -1) {
 			perror("poll");
@@ -120,20 +119,19 @@ int main(int argc, char *argv[])
 
 		for (int i = 0; i < 2; i++) {
 
-			// Check for ready-to-read
+			// 읽을 준비가 되었는지 확인합니다
 			if (fds[i].revents & POLLIN) {
 
 				int readbytes, writebytes;
 				char buf[BUFSIZE];
 
-				// Compute where to write data. If we're stdin (0),
-				// we'll write to the sockfd. If we're the sockfd, we'll
-				// write to stdout (1).
+				// 데이터를 어디에 쓸지 계산합니다. stdin(0)이면
+				// sockfd에 씁니다. sockfd라면 stdout(1)에 씁니다.
 				int outfd = fds[i].fd == 0? sockfd: 1;
 
-				// We use read() and write() in here since those work on
-				// all fds, not just sockets. send() and recv() would
-				// fail on stdin and stdout since they're not sockets.
+				// 여기에서는 read()와 write()를 사용합니다. 이 함수들은
+				// 소켓뿐 아니라 모든 fd에서 동작하기 때문입니다. stdin과
+				// stdout은 소켓이 아니므로 send()와 recv()는 실패할 것입니다.
 				if ((readbytes = read(fds[i].fd, buf, BUFSIZE)) == -1) {
 					perror("read");
 					exit(2);
@@ -142,7 +140,7 @@ int main(int argc, char *argv[])
 				char *p = buf;
 				int remainingbytes = readbytes;
 
-				// Write all data out
+				// 모든 데이터를 씁니다
 				while (remainingbytes > 0) {
 					if ((writebytes = write(outfd, p, remainingbytes)) == -1) {
 						perror("write");
@@ -156,8 +154,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// Not reached--use ^C to exit.
+	// 여기에 도달하지 않습니다. 종료하려면 ^C를 쓰세요.
 
 	return 0;
 }
-

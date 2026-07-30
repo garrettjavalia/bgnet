@@ -1,7 +1,7 @@
 /*
 ** showip.c
 **
-** show IP addresses for a host given on the command line
+** 명령줄로 받은 호스트의 IP 주소를 보여줍니다
 */
 
 #include <stdio.h>
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;  // Either IPv4 or IPv6
+	hints.ai_family = AF_UNSPEC;  // IPv4와 IPv6 어느 쪽이든
 	hints.ai_socktype = SOCK_STREAM;
 
 	if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
         struct sockaddr_in *ipv4;
         struct sockaddr_in6 *ipv6;
 
-		// get the pointer to the address itself,
-		// different fields in IPv4 and IPv6:
+		// 주소 자체에 대한 포인터를 얻습니다.
+		// IPv4와 IPv6에서는 필드가 다릅니다:
 		if (p->ai_family == AF_INET) { // IPv4
 			ipv4 = (struct sockaddr_in *)p->ai_addr;
 			addr = &(ipv4->sin_addr);
@@ -52,13 +52,12 @@ int main(int argc, char *argv[])
 			ipver = "IPv6";
 		}
 
-		// convert the IP to a string and print it:
+		// IP를 문자열로 변환해서 출력합니다:
 		inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
 		printf("  %s: %s\n", ipver, ipstr);
 	}
 
-	freeaddrinfo(res); // free the linked list
+	freeaddrinfo(res); // 연결 리스트를 해제합니다
 
 	return 0;
 }
-

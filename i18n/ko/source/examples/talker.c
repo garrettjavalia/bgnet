@@ -1,5 +1,5 @@
 /*
-** talker.c -- a datagram "client" demo
+** talker.c -- 데이터그램 "클라이언트" 데모
 */
 
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SERVERPORT "4950"   // the port users will be connecting to
+#define SERVERPORT "4950"   // 사용자들이 연결할 포트
 
 int main(int argc, char *argv[])
 {
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
+	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
 
 	rv = getaddrinfo(argv[1], SERVERPORT, &hints, &servinfo);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// loop through all the results and make a socket
+	// 모든 결과를 순회하면서 소켓을 만듭니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {

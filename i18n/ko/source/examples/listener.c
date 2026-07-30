@@ -1,5 +1,5 @@
 /*
-** listener.c -- a datagram sockets "server" demo
+** listener.c -- 데이터그램 소켓 "서버" 데모
 */
 
 #include <stdio.h>
@@ -13,11 +13,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define MYPORT "4950"	// the port users will be connecting to
+#define MYPORT "4950"	// 사용자들이 연결할 포트
 
 #define MAXBUFLEN 100
 
-// get sockaddr, IPv4 or IPv6:
+// sockaddr를 얻습니다. IPv4 또는 IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -39,16 +39,16 @@ int main(void)
 	char s[INET6_ADDRSTRLEN];
 
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET6; // or set to AF_INET to use IPv4
+	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_PASSIVE; // use my IP
+	hints.ai_flags = AI_PASSIVE; // 내 IP를 사용합니다
 
 	if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
 
-	// loop through all the results and bind to the first we can
+	// 모든 결과를 순회하면서 바인드 가능한 첫 번째 것에 바인드합니다
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {

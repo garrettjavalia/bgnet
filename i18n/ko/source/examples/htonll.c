@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-// Only define this if you're on a little-endian system!
+// 리틀엔디언 시스템에서만 이것을 정의하세요!
 #define LITTLE_ENDIAN
 #define ntohll htonll
 

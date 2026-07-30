@@ -1,5 +1,5 @@
 /*
-** selectserver.c -- a cheezy multiperson chat server
+** selectserver.c -- 간단한 다중 사용자 채팅 서버
 */
 
 #include <stdio.h>
@@ -12,11 +12,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define PORT "9034"   // port we're listening on
+#define PORT "9034"   // 리스닝할 포트
 
 /*
- * Convert socket to IP address string.
- * addr: struct sockaddr_in or struct sockaddr_in6
+ * 소켓을 IP 주소 문자열로 변환합니다.
+ * addr: struct sockaddr_in 또는 struct sockaddr_in6
  */
 const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
@@ -42,16 +42,16 @@ const char *inet_ntop2(void *addr, char *buf, size_t size)
 }
 
 /*
- * Return a listening socket
+ * 리스닝 소켓을 반환합니다
  */
 int get_listener_socket(void)
 {
 	struct addrinfo hints, *ai, *p;
-	int yes=1;    // for setsockopt() SO_REUSEADDR, below
+	int yes=1;    // 아래의 setsockopt() SO_REUSEADDR용
 	int rv;
 	int listener;
 
-	// get us a socket and bind it
+	// 소켓을 얻고 바인드합니다
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -68,7 +68,7 @@ int get_listener_socket(void)
 			continue;
 		}
 
-		// lose the pesky "address already in use" error message
+		// 성가신 "address already in use" 오류 메시지를 피합니다
 		setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int));
 
@@ -80,15 +80,15 @@ int get_listener_socket(void)
 		break;
 	}
 
-	// if we got here, it means we didn't get bound
+	// 여기까지 왔다면 바인드하지 못했다는 뜻입니다
 	if (p == NULL) {
 		fprintf(stderr, "selectserver: failed to bind\n");
 		exit(2);
 	}
 
-	freeaddrinfo(ai); // all done with this
+	freeaddrinfo(ai); // 이 구조체는 이제 필요 없습니다
 
-	// listen
+	// 리스닝합니다
 	if (listen(listener, 10) == -1) {
 		perror("listen");
 		exit(3);
@@ -98,13 +98,13 @@ int get_listener_socket(void)
 }
 
 /*
- * Add new incoming connections to the proper sets
+ * 새로 들어오는 연결을 적절한 집합에 추가합니다
  */
 void handle_new_connection(int listener, fd_set *master, int *fdmax)
 {
 	socklen_t addrlen;
-	int newfd;        // newly accept()ed socket descriptor
-	struct sockaddr_storage remoteaddr; // client address
+	int newfd;        // 새로 accept()한 소켓 설명자
+	struct sockaddr_storage remoteaddr; // 클라이언트 주소
 	char remoteIP[INET6_ADDRSTRLEN];
 
 	addrlen = sizeof remoteaddr;
@@ -115,8 +115,8 @@ void handle_new_connection(int listener, fd_set *master, int *fdmax)
 	if (newfd == -1) {
 		perror("accept");
 	} else {
-		FD_SET(newfd, master); // add to master set
-		if (newfd > *fdmax) {  // keep track of the max
+		FD_SET(newfd, master); // master 집합에 추가합니다
+		if (newfd > *fdmax) {  // 최댓값을 추적합니다
 			*fdmax = newfd;
 		}
 		printf("selectserver: new connection from %s on "
@@ -127,15 +127,15 @@ void handle_new_connection(int listener, fd_set *master, int *fdmax)
 }
 
 /*
- * Broadcast a message to all clients
+ * 모든 클라이언트에 메시지를 브로드캐스트합니다
  */
 void broadcast(char *buf, int nbytes, int listener, int s,
                fd_set *master, int fdmax)
 {
 	for(int j = 0; j <= fdmax; j++) {
-		// send to everyone!
+		// 모두에게 보냅니다!
 		if (FD_ISSET(j, master)) {
-			// except the listener and ourselves
+			// 리스너와 자신은 제외합니다
 			if (j != listener && j != s) {
 				if (send(j, buf, nbytes, 0) == -1) {
 					perror("send");
@@ -146,65 +146,64 @@ void broadcast(char *buf, int nbytes, int listener, int s,
 }
 
 /*
- * Handle client data and hangups
+ * 클라이언트 데이터와 연결 종료를 처리합니다
  */
 void handle_client_data(int s, int listener, fd_set *master,
                         int fdmax)
 {
-	char buf[256];    // buffer for client data
+	char buf[256];    // 클라이언트 데이터용 버퍼
 	int nbytes;
 
-	// handle data from a client
+	// 클라이언트의 데이터를 처리합니다
 	if ((nbytes = recv(s, buf, sizeof buf, 0)) <= 0) {
-		// got error or connection closed by client
+		// 오류가 났거나 클라이언트가 연결을 닫았습니다
 		if (nbytes == 0) {
-			// connection closed
+			// 연결 종료
 			printf("selectserver: socket %d hung up\n", s);
 		} else {
 			perror("recv");
 		}
-		close(s); // bye!
-		FD_CLR(s, master); // remove from master set
+		close(s); // 잘 가!
+		FD_CLR(s, master); // master 집합에서 제거합니다
 	} else {
-		// we got some data from a client
+		// 클라이언트에게서 데이터를 받았습니다
 		broadcast(buf, nbytes, listener, s, master, fdmax);
 	}
 }
 
 /*
- * Main
+ * 메인 함수
  */
 int main(void)
 {
-	fd_set master;    // master file descriptor list
-	fd_set read_fds;  // temp file descriptor list for select()
-	int fdmax;        // maximum file descriptor number
+	fd_set master;    // master 파일 설명자 목록
+	fd_set read_fds;  // select()용 임시 파일 설명자 목록
+	int fdmax;        // 최대 파일 설명자 번호
 
-	int listener;     // listening socket descriptor
+	int listener;     // 리스닝 소켓 설명자
 
-	FD_ZERO(&master);    // clear the master and temp sets
+	FD_ZERO(&master);    // master와 임시 집합을 비웁니다
 	FD_ZERO(&read_fds);
 
 	listener = get_listener_socket();
 
-	// add the listener to the master set
+	// 리스너를 master 집합에 추가합니다
 	FD_SET(listener, &master);
 
-	// keep track of the biggest file descriptor
-	fdmax = listener; // so far, it's this one
+	// 가장 큰 파일 설명자를 추적합니다
+	fdmax = listener; // 지금까지는 이것입니다
 
-	// main loop
+	// 주 루프
 	for(;;) {
-		read_fds = master; // copy it
+		read_fds = master; // 복사합니다
 		if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
 			perror("select");
 			exit(4);
 		}
 
-		// run through the existing connections looking for data
-		// to read
+		// 기존 연결을 순회하면서 읽을 데이터를 찾습니다
 		for(int i = 0; i <= fdmax; i++) {
-			if (FD_ISSET(i, &read_fds)) { // we got one!!
+			if (FD_ISSET(i, &read_fds)) { // 하나 찾았습니다!!
 				if (i == listener)
 					handle_new_connection(i, &master, &fdmax);
 				else
@@ -215,4 +214,3 @@ int main(void)
 
 	return 0;
 }
-

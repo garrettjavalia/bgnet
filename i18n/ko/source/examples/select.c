@@ -1,5 +1,5 @@
 /*
-** select.c -- a select() demo
+** select.c -- select() 데모
 */
 
 #include <stdio.h>
@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define STDIN 0  // file descriptor for standard input
+#define STDIN 0  // 표준 입력의 파일 설명자
 
 int main(void)
 {
@@ -20,7 +20,7 @@ int main(void)
 	FD_ZERO(&readfds);
 	FD_SET(STDIN, &readfds);
 
-	// don't care about writefds and exceptfds:
+	// writefds와 exceptfds는 신경 쓰지 않습니다:
 	select(STDIN+1, &readfds, NULL, NULL, &tv);
 
 	if (FD_ISSET(STDIN, &readfds))
@@ -30,4 +30,3 @@ int main(void)
 
 	return 0;
 }
-

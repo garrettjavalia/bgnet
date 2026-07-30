@@ -1,7 +1,7 @@
 TITLE="Beej의 네트워크 프로그래밍 안내서"
 SUBTITLE="인터넷 소켓 사용법"
 AUTHOR='Brian “Beej Jorgensen” Hall'
-VERSION_DATE="v3.1.11, Copyright © April 8, 2023"
+VERSION_DATE="v3.3.2, Copyright © April 18, 2026"
 
 GUIDE_ID=bgnet
 BGBSPD_BUILD_DIR?=../../../../bgbspd
@@ -13,8 +13,8 @@ include $(BGBSPD_BUILD_DIR)/source.make
 
 PREPROC=./preproc_ko.py
 
-bg-css.html: ko-css-src.html
-bg-css-wide.html: ko-css-src.html
+bg-css.html: ko-css-src.html ko-head-src.html
+bg-css-wide.html: ko-css-src.html ko-head-src.html
 
 PDF_OPTS= \
 	-H $(BGBSPD_BUILD_DIR)/latex/header_general.latex \
