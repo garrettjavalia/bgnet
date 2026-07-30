@@ -1264,8 +1264,7 @@ Kernighan과 Pike가 지은 [flr[_The Practice of Programming_|tpop]]
 
 (_The Practice of Programming_은 아주 좋은 책입니다. 제가 그 책을 추천할
 때마다 제우스가 고양이를 한 마리씩 구합니다.)
-(역자 주 : 원문의 "Zeus saves a kitten"은 누군가 좋은 일을 할 때마다 초월적인
-보상이 일어난다는 식의 농담입니다.)
+(역자 주 : 신이 보답을 할 만큼 아주 좋은 선행이라는 뜻입니다.)
 
 이 시점에서 저는 [fl[프로토콜 버퍼의 C 구현체|https://github.com/protobuf-c/protobuf-c]]
 에 대한 링크를 제공하려 합니다. 저는 이것을 써 본 적이 없으나 훌륭한 코드로
