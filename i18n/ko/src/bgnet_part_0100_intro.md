@@ -234,7 +234,7 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 공개적으로 미러링하고 제가 메인 페이지에 링크를 걸게 하고 싶다면 [`beej@beej.us`](mailto:beej@beej.us)
 로 메일을 보내주세요.
 
-## Note for Translators 번역자를 위한 노트
+## 번역자를 위한 노트
 
 [i[Translating the Guide]] 이 안내서를 다른 언어로 번역하고 싶다면
 [`beej@beej.us`](mailto:beej@beej.us)에 메일을 보내주세요. 여러분의 번역본의
