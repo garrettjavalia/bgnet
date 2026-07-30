@@ -41,7 +41,7 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 /**
- * 주 함수
+ * 메인 함수
  */
 int main(int argc, char *argv[])
 {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	printf("Connected to %s port %s\n", s, port);
 	printf("Hit ^C to exit\n");
 
-	freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
+	freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
 	// 들어오는 데이터(읽기 준비됨)를 위해 stdin과 sockfd를 poll합니다
 	struct pollfd fds[2];

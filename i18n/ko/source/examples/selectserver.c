@@ -47,7 +47,7 @@ const char *inet_ntop2(void *addr, char *buf, size_t size)
 int get_listener_socket(void)
 {
 	struct addrinfo hints, *ai, *p;
-	int yes=1;    // 아래 setsockopt() SO_REUSEADDR용
+	int yes=1;    // 아래의 setsockopt() SO_REUSEADDR용
 	int rv;
 	int listener;
 
@@ -86,7 +86,7 @@ int get_listener_socket(void)
 		exit(2);
 	}
 
-	freeaddrinfo(ai); // 이것은 다 썼습니다
+	freeaddrinfo(ai); // 이 구조체는 이제 필요 없습니다
 
 	// 리스닝합니다
 	if (listen(listener, 10) == -1) {
@@ -163,7 +163,7 @@ void handle_client_data(int s, int listener, fd_set *master,
 		} else {
 			perror("recv");
 		}
-		close(s); // 안녕!
+		close(s); // 잘 가!
 		FD_CLR(s, master); // master 집합에서 제거합니다
 	} else {
 		// 클라이언트에게서 데이터를 받았습니다
@@ -172,7 +172,7 @@ void handle_client_data(int s, int listener, fd_set *master,
 }
 
 /*
- * 주 함수
+ * 메인 함수
  */
 int main(void)
 {

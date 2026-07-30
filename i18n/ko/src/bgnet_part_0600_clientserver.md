@@ -132,7 +132,7 @@ int main(void)
         break;
     }
 
-    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없음
+    freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
     if (p == NULL)  {
         fprintf(stderr, "server: failed to bind\n");
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
             s, sizeof s);
     printf("client: connected to %s\n", s);
 
-    freeaddrinfo(servinfo); // 이 구조체는 더 이상 필요 없습니다
+    freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
 
 (역자 주 : 한 장치에서도 순서만 맞게 실행하면 문제없이 시험할 수 있습니다.)
 
-온 가족이 안심하고 즐길 수 있는 건전한 재미입니다.
+온 가족이 즐길 수 있는 전연령 프로그램입니다!
 
 이번에는 서버를 실행할 필요도 없습니다! `talker`를 혼자 실행시키면 패킷을 신나게
 날려 보내고, 아무도 반대쪽에서 `recvfrom()`을 호출하지 않는다면 그저 패킷은 사라질

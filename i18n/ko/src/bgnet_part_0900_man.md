@@ -258,7 +258,7 @@ int connect(int sockfd, const struct sockaddr *serv_addr,
 `struct sockaddr`를 채워도 됩니다.
 
 아직 그 소켓 설명자에 대해 `bind()`를 호출하지 않았다면, 그 소켓은 여러분의 IP 주소와
-무작위 로컬 포트에 자동으로 바인드됩니다. 서버가 아니라면 보통 이걸로 충분합니다.
+무작위 로컬 포트에 자동으로 바인드됩니다. 서버가 아니라면 보통 이것으로 충분합니다.
 여러분은 로컬 포트가 무엇인지에는 별 관심이 없고, `serv_addr` 매개변수에 넣어야 할
 원격 포트가 무엇인지만 신경 쓰기 때문입니다. 클라이언트 소켓이 특정 IP 주소와 포트에
 있어야 한다면 `bind()`를 호출할 _수는_ 있지만, 그런 일은 꽤 드뭅니다.
@@ -507,7 +507,7 @@ if (p == NULL) {
     exit(2);
 }
 
-freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
+freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 ```
 
 ```{.c .numberLines}
@@ -552,7 +552,7 @@ if (p == NULL) {
     exit(2);
 }
 
-freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
+freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 ```
 
 ### 함께 보기 {.unnumbered .unlisted}
@@ -1190,7 +1190,7 @@ int inet_pton(int af, const char *src, void *dst);
 이 함수들은 사람이 읽을 수 있는 IP 주소를 다루고, 그것을 여러 함수와 시스템 호출에서
 쓸 수 있도록 이진 표현으로 변환합니다. "n"은 "network"를, "p"는 "presentation"을
 뜻합니다. 또는 "text presentation"입니다. 하지만 "printable"이라고 생각해도 됩니다.
-"ntop"은 "network to printable"입니다. 보이시죠?
+"ntop"은 "network to printable"입니다. 보이지요?
 
 가끔은 IP 주소를 볼 때 이진 숫자 더미를 보고 싶지 않습니다. `192.0.2.180`이나
 `2001:db8:8714:3a90::12`처럼 보기 좋게 출력 가능한 형식으로 보고 싶습니다.

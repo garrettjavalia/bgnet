@@ -87,7 +87,7 @@ int main(void)
 		break;
 	}
 
-	freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
+	freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
 	if (p == NULL)  {
 		fprintf(stderr, "server: failed to bind\n");

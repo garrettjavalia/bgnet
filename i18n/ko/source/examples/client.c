@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 			s, sizeof s);
 	printf("client: connected to %s\n", s);
 
-	freeaddrinfo(servinfo); // 이 구조체는 다 썼습니다
+	freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
 	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
 	    perror("recv");

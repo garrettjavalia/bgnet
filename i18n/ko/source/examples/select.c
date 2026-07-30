@@ -20,7 +20,7 @@ int main(void)
 	FD_ZERO(&readfds);
 	FD_SET(STDIN, &readfds);
 
-	// writefds와 exceptfds에는 관심이 없습니다:
+	// writefds와 exceptfds는 신경 쓰지 않습니다:
 	select(STDIN+1, &readfds, NULL, NULL, &tv);
 
 	if (FD_ISSET(STDIN, &readfds))
