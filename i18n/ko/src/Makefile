@@ -12,6 +12,7 @@ EPUB_SVGS=$(wildcard *.svg)
 include $(BGBSPD_BUILD_DIR)/source.make
 
 PREPROC=./preproc_ko.py
+SPLIT=python3 ./bgsplit_ko.py
 
 bg-css.html: ko-css-src.html ko-head-src.html
 bg-css-wide.html: ko-css-src.html ko-head-src.html
