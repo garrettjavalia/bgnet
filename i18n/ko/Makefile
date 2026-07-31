@@ -21,8 +21,8 @@ stage:
 	cp -v $(SRCDIR)/$(PACKAGE)*.pdf $(DISTDIR)/pdf
 	cp -v $(SRCDIR)/$(PACKAGE).html $(DISTDIR)/html/index.html
 	cp -v $(SRCDIR)/$(PACKAGE)-wide.html $(DISTDIR)/html/index-wide.html
-	mkdir -p $(DISTDIR)/html/fonts/yeomil-mono
-	cp -v fonts/yeomil-mono/web/* $(DISTDIR)/html/fonts/yeomil-mono
+	mkdir -p $(DISTDIR)/html/fonts/d2coding/ttf
+	cp -v fonts/d2coding/ttf/* $(DISTDIR)/html/fonts/d2coding/ttf
 	cp -v $(SRCDIR)/*.svg $(DISTDIR)/html
 	mkdir -p $(DISTDIR)/html/$(PACKAGE)
 	cp -v $(SRCDIR)/split/* $(DISTDIR)/html/$(PACKAGE)

@@ -19,14 +19,17 @@
     ItalicFeatures={FakeSlant=0.16},
     BoldItalicFeatures={FakeSlant=0.16}
 ]
-\setmonofont{YeomilMono}[
-    Path=../fonts/yeomil-mono/ttf/,
+\setmonofont{D2Coding}[
+    Path=../fonts/d2coding/ttf/,
     Extension=.ttf,
     UprightFont=*-Regular,
     BoldFont=*-Bold,
     ItalicFont=*-Regular,
-    BoldItalicFont=*-Bold,
-    ItalicFeatures={FakeSlant=0.16},
-    BoldItalicFeatures={FakeSlant=0.16}
+    BoldItalicFont=*-Bold
 ]
 \fi
+
+% Pandoc emits fenced code blocks as `verbatim` inside tcolorbox. Redefine
+% that environment only so long code tokens wrap within the PDF page.
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true}

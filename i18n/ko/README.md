@@ -6,7 +6,7 @@
 
 ## fonts
 
-Pretendard와 Yeomil Mono 폰트 관련 파일이 들어있습니다. Pretendard는 본문 폰트로, Yeomil Mono는 코드/고정폭 폰트로 사용합니다. Pretendard는 HTML에서 참조하는 공식 CDN 버전과 맞추기 위해 v1.3.9 릴리스 파일을 이 리포지토리에 고정해 두었습니다. Yeomil Mono는 아직 Pretendard처럼 널리 쓰이는 공식 CDN 배포 구조가 있다고 보기 어려워, 릴리스 파일을 이 리포지토리에 고정해 두고 HTML/PDF 빌드가 로컬 파일만 사용하도록 구성했습니다.
+Pretendard와 D2Coding 폰트 관련 파일이 들어있습니다. Pretendard는 본문 폰트로, D2Coding은 코드/고정폭 폰트로 사용합니다. Pretendard는 HTML에서 참조하는 공식 CDN 버전과 맞추기 위해 v1.3.9 릴리스 파일을 이 리포지토리에 고정해 두었습니다. D2Coding은 [VER1.3.3 릴리스](https://github.com/naver/d2-coding-font/releases/tag/VER1.3.3)의 Regular/Bold TTF와 OFL 라이선스를 고정해 두고 HTML/PDF 빌드가 로컬 파일만 사용하도록 구성했습니다.
 
 ## src
 
@@ -25,7 +25,7 @@ docker build -f i18n/ko/Dockerfile -t bgnet-ko-builder .
 docker run --rm -v "$PWD":/guide -ti bgnet-ko-builder
 ```
 
-Docker 이미지 안에 Pandoc, XeLaTeX, 고정된 `bgbspd` 빌드 도구 버전이 포함되므로 호스트에는 별도 빌드 의존성을 설치하지 않아도 됩니다. Pretendard와 Yeomil Mono는 이 리포지토리에 포함된 폰트 파일을 직접 참조하므로 Docker 이미지나 호스트 시스템에 폰트를 설치하지 않습니다.
+Docker 이미지 안에 Pandoc, XeLaTeX, 고정된 `bgbspd` 빌드 도구 버전이 포함되므로 호스트에는 별도 빌드 의존성을 설치하지 않아도 됩니다. Pretendard와 D2Coding은 이 리포지토리에 포함된 폰트 파일을 직접 참조하므로 Docker 이미지나 호스트 시스템에 폰트를 설치하지 않습니다.
 
 영어 원본과 동일하게 `BGBSPD_BUILD_DIR` 설정과 `bgbspd/source.make` 빌드 규칙을 사용합니다. 로컬에서 빌드하려면 루트 리포지토리와 같은 부모 폴더에 `bgbspd`를 클론하거나, `BGBSPD_BUILD_DIR` 환경 변수로 경로를 지정하세요. 로컬 빌드에는 Pandoc, XeLaTeX, Make가 필요하지만 폰트 설치는 필요하지 않습니다. 빌드 결과물은 `i18n/ko/dist` 폴더에 생성됩니다.
 
