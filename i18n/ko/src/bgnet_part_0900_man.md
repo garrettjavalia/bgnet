@@ -2078,7 +2078,7 @@ sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 [i[`struct in6_addr` type]i]
 [i[`struct sockaddr_storage` type]i]
 
-인터넷 주소를 다루는 `struct`
+인터넷 주소를 다루는 구조체들
 
 ### 개요 {.unnumbered .unlisted}
 

@@ -37,7 +37,7 @@
 $ telnet remotehostname 3490
 ```
 
-(역자 주: 이 예제의 `telnet` 클라이언트는 최신 macOS에 기본 포함되지 않을 수 있습니다. 로컬 시험에는 동등한 TCP 클라이언트를 사용할 수 있습니다.)
+(역자 주: 최신 macOS에는 `telnet`이 기본 포함되지 않습니다. Debian과 Fedora 등의 Linux 배포판에서는 패키지로 계속 제공됩니다. `telnet`을 쓸 수 없다면 이 책에 포함된 [flx[`telnot` 예제|telnot.c]]를 컴파일해 데모에 사용할 수 있습니다.)
 
 `remotehostname`은 서버를 실행하는 컴퓨터의 이름입니다.
 
@@ -133,7 +133,7 @@ int main(void)
         break;
     }
 
-    freeaddrinfo(servinfo); // 이 연결 리스트는 이제 필요 없습니다
+    freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
     if (p == NULL)  {
         fprintf(stderr, "server: failed to bind\n");
@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
             s, sizeof s);
     printf("client: connected to %s\n", s);
 
-    freeaddrinfo(servinfo); // 이 연결 리스트는 이제 필요 없습니다
+    freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
