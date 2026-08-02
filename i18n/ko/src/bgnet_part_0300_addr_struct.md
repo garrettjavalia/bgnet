@@ -235,8 +235,8 @@ HTTP(웹)는 80번 포트를 사용하고, telnet은 23번을, SMTP는 25를 쓰
 | [i[`ntohs()` function]]`ntohs()` | `n`etwork `to` `h`ost `s`hort |
 | [i[`ntohl()` function]]`ntohl()` | `n`etwork `to` `h`ost `l`ong  |
 
-간단히 말하자면 숫자가 네트워크로 나가기 전에 네트워크 바이트 순서로
-변환해야 하며 네트워크에서 들어올 때 호스트 바이트 순서로 변환해야 합니다.
+간단히 말하자면 숫자를 네트워크로 내보내기 전에 네트워크 바이트 순서로
+변환해야 하며 네트워크에서 들어올 때는 호스트 바이트 순서로 변환해야 합니다.
 
 소켓 API에는 표준 64비트 변종이 없지만, 다른 선택지는 [`htons()` 참조
 페이지](#htonsman)에서 이야기합니다. 그리고 부동 소수점 숫자를 다루고 싶다면
@@ -273,7 +273,7 @@ struct addrinfo {
     int              ai_socktype;  // SOCK_STREAM, SOCK_DGRAM
     int              ai_protocol;  // "미지정"을 위해서 0을 쓰세요
     size_t           ai_addrlen;   // ai_addr의 바이트 단위 크기
-    struct sockaddr *ai_addr;      // sockaddr_in 또는 _in6 구조체
+    struct sockaddr *ai_addr;      // sockaddr_in 또는 sockaddr_in6 구조체
     char            *ai_canonname; // 완전한 정규화된 호스트 이름
 
     struct addrinfo *ai_next;      // 연결 리스트의 다음 노드

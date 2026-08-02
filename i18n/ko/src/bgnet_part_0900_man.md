@@ -151,7 +151,7 @@ int bind(int sockfd, struct sockaddr *my_addr, socklen_t addrlen);
 원격 호스트가 여러분의 서버 프로그램에 연결하려면 두 가지 정보가 필요합니다.
 IP 주소와 포트 번호입니다. `bind()` 호출은 바로 그 일을 할 수 있게 해 줍니다.
 
-먼저 `getaddrinfo()`를 호출해서 목적지 주소와 포트 정보가 담긴 `struct sockaddr`를
+먼저 `getaddrinfo()`를 호출해서 로컬 주소와 포트 정보가 담긴 `struct sockaddr`를
 불러옵니다. 그런 다음 `socket()`을 호출해서 소켓 설명자를 얻고, 그 소켓과 주소를
 `bind()`에 넘깁니다. 그러면 IP 주소와 포트가 마법처럼(진짜 마법으로) 소켓에
 묶입니다!
@@ -216,7 +216,7 @@ myaddr.sin_port = htons(3490);
 // IP 주소를 지정할 수도 있고:
 inet_pton(AF_INET, "63.161.169.137", &(myaddr.sin_addr));
 
-// 자동으로 고르게 할 수도 있습니다:
+// 모든 로컬 IPv4 인터페이스에서 받도록 설정할 수도 있습니다:
 myaddr.sin_addr.s_addr = INADDR_ANY;
 
 s = socket(PF_INET, SOCK_STREAM, 0);
@@ -832,8 +832,8 @@ int getpeername(int s, struct sockaddr *addr, socklen_t *len);
 부르는 것이 생깁니다. 피어는 간단히 말해 여러분이 연결된 컴퓨터이며, IP 주소와 포트로
 식별됩니다. 그래서...
 
-`getpeername()`은 여러분이 연결된 호스트의 정보로 채워진 `struct sockaddr_in`을
-그냥 반환합니다.
+`getpeername()`은 여러분이 연결된 피어의 주소 정보를 `addr`이 가리키는 주소 구조체에
+채웁니다.
 
 왜 "name"이라고 부를까요? 음, 이 안내서에서 사용하는 인터넷 소켓뿐 아니라 여러
 종류의 소켓이 있기 때문에, "name"은 모든 경우를 포괄하는 괜찮은 일반 용어였습니다.
@@ -1565,8 +1565,8 @@ ssize_t recvfrom(int s, void *buf, size_t len, int flags,
 `len`, 함수 동작을 제어하는 `flags` 집합을 받습니다.
 
 추가로 `recvfrom()`은 데이터가 어디에서 왔는지 알려줄 [i[`struct sockaddr` type]]
-`struct sockaddr*`인 `from`을 받고, `fromlen`을 `struct sockaddr`의 크기로
-채웁니다. (`fromlen`도 `from` 또는 `struct sockaddr`의 크기로 초기화해야 합니다.)
+`struct sockaddr*`인 `from`을 받습니다. `fromlen`에는 호출 전에 `from`이 가리키는
+주소 구조체의 크기를 넣어야 하며, 호출 뒤에는 실제 송신자 주소 길이가 저장됩니다.
 
 그러면 이 함수에 넘길 수 있는 놀라운 플래그에는 무엇이 있을까요? 일부는 아래와
 같습니다. 더 자세한 정보와 여러분 시스템에서 실제로 지원하는 값은 로컬 맨페이지를
@@ -1645,7 +1645,7 @@ printf("from IP address %s\n",
         addr.ss_family == AF_INET?
             ((struct sockaddr_in *)&addr)->sin_addr:
             ((struct sockaddr_in6 *)&addr)->sin6_addr,
-        ipstr, sizeof ipstr);
+        ipstr, sizeof ipstr));
 ```
 
 ### 함께 보기 {.unnumbered .unlisted}
