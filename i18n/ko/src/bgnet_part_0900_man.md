@@ -654,10 +654,6 @@ _주의하세요: 이 두 함수는 `getaddrinfo()`와 `getnameinfo()`로 대체
 넘기고 싶을 것입니다. `len`은 `sizeof(struct in_addr)`이어야 하고, `type`은
 `AF_INET`이어야 합니다.
 
-(역자 주: 위 함수 원형과 동작 설명은 오래된 BSD/POSIX 계열 표기입니다. 최신
-구현에서는 함수 원형이 조금 다르고 IPv6도 지원하지만, 이 함수의 사용은 권장되지
-않습니다.)
-
 그러면 반환되는 [i[`struct hostent` type]i] `struct hostent`는 무엇일까요?
 여기에는 해당 호스트에 대한 정보를 담은 여러 필드가 있습니다.
 
