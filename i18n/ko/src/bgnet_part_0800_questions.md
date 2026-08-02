@@ -67,11 +67,11 @@ Stevens' UNIX Network Programming source code에서 `ping/` 하위 디렉터리�
 
 **`connect()`에 대한 제한 시간을 변경하거나 단축할 수 있을까요?**
 
-W. Richard Stevens이 여러분에게 줄 수 있는 답과 동일한 답을 드리는 대신,
+W. Richard Stevens가 여러분에게 줄 수 있는 답과 동일한 답을 드리는 대신,
 [fl[UNIX Network Programming source code의 `lib/connect_nonb.c`|http://www.unpbook.com/src.html]]
 를 안내해드리겠습니다.
 
-요점은 `socket()`으로 소켓 설명자를 만든 후 [논블로킹으로 만든 후에](#blocking)
+요점은 `socket()`으로 소켓 설명자를 만든 후 [논블로킹으로 설정한 뒤](#blocking)
 `connect()`를 호출할 때 모든 것이 잘 돌아간다면 `connect()`는 즉시 `-1`을
 반환할 것이고 `errno`는 `EINPROGRESS`로 설정될 것이라는 것입니다. 그 후
 [`select()`](#select)를 호출할 때 소켓 설명자를 읽기와 쓰기 집합에 모두 넣으면서

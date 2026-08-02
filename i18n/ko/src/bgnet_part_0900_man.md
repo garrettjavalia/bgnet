@@ -2097,7 +2097,7 @@ struct sockaddr {
 // IPv4 AF_INET 소켓:
 
 struct sockaddr_in {
-    short            sin_family;   // 예: AF_INET, AF_INET6
+    short            sin_family;   // 예: AF_INET
     unsigned short   sin_port;     // 예: htons(3490)
     struct in_addr   sin_addr;     // 아래 struct in_addr를 보세요
     char             sin_zero[8];  // 원한다면 0으로 만드세요
