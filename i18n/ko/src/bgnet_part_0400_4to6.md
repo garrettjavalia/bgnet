@@ -11,7 +11,7 @@
 요약판이라고 생각하시면 됩니다. (물론 실제로는 이것보다 더 많은 내용이 있겠지만,
 이 안내서에서 다루는 범위는 이 정도입니다.)
 
-1. 우선 `struct sockaddr` 정보를 얻어내기 위해서 수작업 대신
+1. 우선 `struct sockaddr` 정보를 얻기 위해 수작업 대신
    [i[`getaddrinfo()` function]] [`getaddrinfo()`](#structs) 함수를 사용하세요.
    이렇게 하면 여러분은 IP 버전에 신경 쓰지 않아도 되고, 뒤따르는 여러 단계를
    없앨 수 있습니다.
@@ -40,11 +40,11 @@
    struct in6_addr ia6 = IN6ADDR_ANY_INIT;
    ```
 
-6. `struct sockaddr_in` 대신에 `struct sockaddr_in6`을 사용하시고, 필요한
+6. `struct sockaddr_in` 대신 `struct sockaddr_in6`을 사용하고, 필요한
    필드에 "6"을 적절히 덧붙이세요. (위의 [`struct`s](#structs)을
    참고하세요) `sin6_zero` 필드는 없습니다.
 
-7. `struct in_addr` 대신에 `struct in6_addr`를 사용하시고, 필요한
+7. `struct in_addr` 대신 `struct in6_addr`를 사용하고, 필요한
    필드에 "6"을 적절히 덧붙이세요. (위의 [`struct`s](#structs)을
    참고하세요)
 
