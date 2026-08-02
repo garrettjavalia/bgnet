@@ -75,7 +75,7 @@ struct addrinfo *servinfo;  // 결과를 가리킵니다
 memset(&hints, 0, sizeof hints); // 구조체를 비웁니다
 hints.ai_family = AF_UNSPEC;     // IPv4든 IPv6이든 상관없습니다
 hints.ai_socktype = SOCK_STREAM; // TCP 스트림 소켓
-hints.ai_flags = AI_PASSIVE;     // 내 IP 주소를 채웁니다
+hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
 if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
     fprintf(stderr, "gai error: %s\n", gai_strerror(status));
@@ -93,10 +93,16 @@ freeaddrinfo(servinfo); // 연결 리스트를 해제
 `ai_family`를 `AF_UNSPEC`으로 설정해서 IPv4든 IPv6이든 신경 쓰지 않음을 나타낸
 것에 주목하세요. 만약 특정한 하나를 원한다면 `AF_INET`이나 `AF_INET6`을 쓸 수 있습니다.
 
-`AI_PASSIVE`도 볼 수 있습니다. 이것은 `getaddrinfo()`에게 소켓 구조체에
-내 로컬 호스트의 주소를 할당해 달라고 말해 줍니다. 이것은 여러분이 하드코딩할 필요를
-없애주기에 좋습니다. (아니면 위에서 `NULL`을 넣은 `getaddrinfo()`의 첫 번째
-매개변수에 특정한 주소를 넣을 수 있습니다.)
+`AI_PASSIVE`도 볼 수 있습니다. `getaddrinfo()`의 첫 번째 인수가 `NULL`일 때 이
+플래그를 지정하면, `getaddrinfo()`는 `bind()`에 쓸 와일드카드 주소를 반환합니다.
+그러므로 특정 로컬 IP 주소를 하드코딩하지 않고도 서버를 설정할 수 있습니다. 특정한
+로컬 IP 주소에만 바인드하려면 첫 번째 매개변수에 그 주소를 넣으세요.
+
+(역자 주: 와일드카드 주소는 IPv4에서는 `INADDR_ANY`(`0.0.0.0`), IPv6에서는
+`in6addr_any`(`::`)입니다. 이 주소로 `bind()`하면 해당 주소 계열의 모든 로컬
+인터페이스에서 그 포트로 들어오는 요청을 받을 수 있습니다. `AI_PASSIVE`와
+`getaddrinfo()`는 주소를 반환할 뿐 바인드 자체를 수행하지 않습니다. 첫 번째 인수에
+특정 노드를 지정하면 `AI_PASSIVE`는 영향을 주지 않습니다.)
 
 이렇게 함수를 호출합니다. 오류가 있다면(`getaddrinfo()`가 0이 아닌 값을 반환한다면)
 보시다시피 `gai_strerror()` 함수를 통해 오류를 출력할 수 있습니다. 만약 모든
@@ -320,7 +326,7 @@ int sockfd;
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4나 IPv6 중 아무 것이나 씁니다
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;     // 내 IP 주소를 채웁니다
+hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
 getaddrinfo(NULL, "3490", &hints, &res);
 
@@ -333,9 +339,9 @@ sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 bind(sockfd, res->ai_addr, res->ai_addrlen);
 ```
 
-`AI_PASSIVE` 플래그를 써서 프로그램에게 실행 중인 호스트의 IP에 바인드하라고
-알려줍니다. 특정한 로컬 IP 주소에 바인드하고 싶다면 `AI_PASSIVE`를 빼고
-`getaddrinfo()`의 첫 번째 인수로 IP 주소를 넣으세요.
+`AI_PASSIVE` 플래그와 `NULL` 첫 번째 인수는 `bind()`에 쓸 와일드카드 주소를
+요청합니다. 특정한 로컬 IP 주소에만 바인드하고 싶다면 `AI_PASSIVE`를 빼고
+`getaddrinfo()`의 첫 번째 인수로 그 IP 주소를 넣으세요.
 
 `bind()`도 오류가 발생하면 `-1`을 반환하고 `errno`를 오류 값으로 설정합니다.
 
@@ -360,8 +366,8 @@ memset(my_addr.sin_zero, '\0', sizeof my_addr.sin_zero);
 bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 ```
 
-위의 코드에서 여러분의 로컬 IP 주소에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
-`s_addr` 필드에 `INADDR_ANY`를 대입할 수 있습니다. IPv6 버전의 `INADDR_ANY`는
+위의 코드에서 모든 로컬 IPv4 인터페이스에 바인드하고 싶었다면(위의 `AI_PASSIVE`처럼)
+`s_addr` 필드에 `INADDR_ANY`를 대입할 수 있습니다. IPv6에서 이에 해당하는 값은
 여러분의 `struct sockaddr_in6`의 `sin6_addr` 필드에 대입해야 하는 전역 변수인
 `in6addr_any`입니다. (변수 초기화식에 쓸 수 있는 `IN6ADDR_ANY_INIT`이라는 매크로도
 있습니다.)
@@ -429,7 +435,7 @@ IP 주소를 담고 있습니다. `addrlen`은 서버 주소 구조체의 바이
 struct addrinfo hints, *res;
 int sockfd;
 
-// getaddrinfo()로 주소 구조체를 채웁니다
+// getaddrinfo()로 주소 구조체 목록을 가져옵니다
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;
@@ -556,12 +562,12 @@ int main(void)
 
     // !! 이 호출들에 대한 오류 확인을 잊지 마세요 !!
 
-    // getaddrinfo()로 주소 구조체를 채웁니다
+    // getaddrinfo()로 주소 구조체 목록을 가져옵니다
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;  // IPv4 또는 IPv6, 아무것이나 씁니다
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;     // 내 IP 주소를 자동으로 채웁니다
+    hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
     getaddrinfo(NULL, MYPORT, &hints, &res);
 

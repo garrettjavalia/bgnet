@@ -103,7 +103,7 @@ int main(void)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // 내 IP를 씁니다
+    hints.ai_flags = AI_PASSIVE; // bind()에 쓸 와일드카드 주소를 요청합니다
 
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -377,7 +377,7 @@ int main(void)
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_PASSIVE; // 내 주소를 씁니다
+	hints.ai_flags = AI_PASSIVE; // bind()에 쓸 와일드카드 주소를 요청합니다
 
 	if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));

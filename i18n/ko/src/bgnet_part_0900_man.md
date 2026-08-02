@@ -101,12 +101,12 @@ socklen_t addr_size;
 struct addrinfo hints, *res;
 int sockfd, new_fd;
 
-// 먼저 getaddrinfo()로 주소 구조체를 채웁니다:
+// 먼저 getaddrinfo()로 주소 구조체 목록을 가져옵니다:
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4와 IPv6 어느 쪽이든 사용
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;     // 내 IP를 대신 채웁니다
+hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
 getaddrinfo(NULL, MYPORT, &hints, &res);
 
@@ -156,14 +156,13 @@ IP 주소와 포트 번호입니다. `bind()` 호출은 바로 그 일을 할 �
 `bind()`에 넘깁니다. 그러면 IP 주소와 포트가 마법처럼(진짜 마법으로) 소켓에
 묶입니다!
 
-여러분의 IP 주소를 모르거나, 시스템에 IP 주소가 하나뿐임을 알고 있거나, 그 시스템의
-어떤 IP 주소가 쓰이든 신경 쓰지 않는다면 `getaddrinfo()`의 `hints` 매개변수에
-`AI_PASSIVE` 플래그를 넘기면 됩니다. 이 플래그는 `struct sockaddr`의 IP 주소
-부분에 특별한 값을 넣는데, 그 값은 `bind()`에게 이 호스트의 IP 주소를 자동으로
-채우라고 알려줍니다.
+특정 로컬 IP 주소를 지정하지 않고 서버를 설정하려면 `getaddrinfo()`의 `hints`
+매개변수에 `AI_PASSIVE` 플래그를 넣고 첫 번째 인수에는 `NULL`을 넘기면 됩니다.
+그러면 결과 `struct sockaddr`의 IP 주소 부분에는 `bind()`에 쓸 와일드카드 값이
+들어갑니다.
 
-뭐라고요? 현재 호스트 주소를 자동으로 채우게 만들려면 `struct sockaddr`의 IP 주소에
-어떤 특별한 값을 넣어야 하느냐고요? 알려드리겠습니다. 하지만 이것은 여러분이
+뭐라고요? 모든 로컬 인터페이스에 바인드하려면 `struct sockaddr`의 IP 주소에 어떤
+특별한 값을 넣어야 하느냐고요? 알려드리겠습니다. 하지만 이것은 여러분이
 `struct sockaddr`를 손으로 직접 채우는 경우에만 해당합니다. 그렇지 않다면 위에서
 말한 대로 `getaddrinfo()`의 결과를 쓰세요. IPv4에서는 `struct sockaddr_in` 구조체의
 `sin_addr.s_addr` 필드를 `INADDR_ANY`로 설정합니다. IPv6에서는 `struct
@@ -186,12 +185,12 @@ sockaddr_in6` 구조체의 `sin6_addr` 필드에 전역 변수 `in6addr_any`를 
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()로 주소 구조체를 채웁니다:
+// 먼저 getaddrinfo()로 주소 구조체 목록을 가져옵니다:
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4와 IPv6 어느 쪽이든 사용
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;     // 내 IP를 대신 채웁니다
+hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
 getaddrinfo(NULL, "3490", &hints, &res);
 
@@ -283,7 +282,7 @@ int connect(int sockfd, const struct sockaddr *serv_addr,
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()로 주소 구조체를 채웁니다:
+// 먼저 getaddrinfo()로 주소 구조체 목록을 가져옵니다:
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4와 IPv6 어느 쪽이든 사용
@@ -425,13 +424,14 @@ struct addrinfo {
 여러분의 맨페이지를 확인하세요.
 
 `AI_CANONNAME`은 결과의 `ai_canonname`을 호스트의 정규(진짜) 이름으로 채우게
-합니다. `AI_PASSIVE`는 결과의 IP 주소를 `INADDR_ANY`(IPv4) 또는
-`in6addr_any`(IPv6)로 채우게 합니다. 그러면 나중에 `bind()`를 호출할 때
-`struct sockaddr`의 IP 주소가 현재 호스트의 주소로 자동 채워집니다. 주소를
-하드코딩하고 싶지 않은 서버 설정에 아주 좋습니다.
+합니다. 첫 번째 인수가 `NULL`일 때 `AI_PASSIVE`는 결과의 IP 주소를
+`INADDR_ANY`(IPv4) 또는 `in6addr_any`(IPv6)로 채웁니다. 이 와일드카드 주소로
+`bind()`하면 해당 주소 계열의 모든 로컬 인터페이스에서 그 포트로 들어오는 요청을
+받을 수 있습니다. 주소를 하드코딩하고 싶지 않은 서버 설정에 아주 좋습니다.
 
-`AI_PASSIVE` 플래그를 사용한다면 `nodename`에 `NULL`을 넘길 수 있습니다.
-(`bind()`가 나중에 여러분 대신 채울 것이기 때문입니다.)
+`AI_PASSIVE` 플래그를 사용할 때 `nodename`에 `NULL`을 넘기면 위 와일드카드 주소를
+얻습니다. 특정 `nodename`을 넘기면 그 주소를 해석하며 `AI_PASSIVE`는 영향을 주지
+않습니다.
 
 입력 매개변수를 계속 보자면, `ai_family`는 아마 `AF_UNSPEC`으로 설정하고 싶을
 것입니다. 이것은 `getaddrinfo()`에게 IPv4와 IPv6 주소를 모두 찾아보라고 말합니다.
@@ -522,7 +522,7 @@ int rv;
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC; // IPv6만 강제하려면 AF_INET6 사용
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE; // 내 IP 주소를 사용
+hints.ai_flags = AI_PASSIVE; // bind()에 쓸 와일드카드 주소를 요청합니다
 
 if ((rv = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -1329,12 +1329,12 @@ int listen(int s, int backlog);
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()로 주소 구조체를 채웁니다:
+// 먼저 getaddrinfo()로 주소 구조체 목록을 가져옵니다:
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;  // IPv4와 IPv6 어느 쪽이든 사용
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;     // 내 IP를 대신 채웁니다
+hints.ai_flags = AI_PASSIVE;     // bind()에 쓸 와일드카드 주소를 요청합니다
 
 getaddrinfo(NULL, "3490", &hints, &res);
 
@@ -2050,7 +2050,7 @@ int socket(int domain, int type, int protocol);
 struct addrinfo hints, *res;
 int sockfd;
 
-// 먼저 getaddrinfo()로 주소 구조체를 채웁니다:
+// 먼저 getaddrinfo()로 주소 구조체 목록을 가져옵니다:
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family = AF_UNSPEC;     // AF_INET, AF_INET6, 또는 AF_UNSPEC

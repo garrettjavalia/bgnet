@@ -29,8 +29,8 @@
    struct sockaddr_in sa;
    struct sockaddr_in6 sa6;
 
-   sa.sin_addr.s_addr = INADDR_ANY;  // 내 IPv4 주소를 씁니다
-   sa6.sin6_addr = in6addr_any; // 내 IPv6 주소를 씁니다
+   sa.sin_addr.s_addr = INADDR_ANY;  // 모든 로컬 IPv4 인터페이스에 바인드합니다
+   sa6.sin6_addr = in6addr_any; // 모든 로컬 IPv6 인터페이스에 바인드합니다
    ```
 
    또한 `struct in6_addr`을 선언할 때 `IN6ADDR_ANY_INIT`을 초기값으로

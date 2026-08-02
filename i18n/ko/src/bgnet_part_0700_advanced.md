@@ -22,7 +22,7 @@
 이 함수들이 블록되도록 허용되어 있기 때문입니다.
 `socket()`으로 소켓 설명자를 처음 만들 때 커널이 이 소켓을 블로킹
 소켓으로 설정합니다. [i[Non-blocking sockets]] 소켓이 블록되지 않게 하려면
-않길 원한다면 [i[`fcntl()` function]] `fcntl()`을 호출해야 합니다:
+[i[`fcntl()` function]] `fcntl()`을 호출해야 합니다:
 
 ```{.c .numberLines}
 #include <unistd.h>
@@ -51,7 +51,7 @@ fcntl(sockfd, F_SETFL, O_NONBLOCK);
 소켓의 데이터를 기다리면서 바쁜 대기 상태가 되면 여러분의 프로그램은 보통의 프로그램보다 훨씬
 CPU 시간을 많이 사용할 것입니다. (역자 주: 특별한 제한을 걸지 않으면 최대 단일 코어
 하나를 100% 점유할 수 있습니다.) 읽을 데이터가 있는지 확인하는 더
-더 나은 방법은 [i[`poll()` function]] `poll()`을 다루는 다음 절에 있습니다.
+나은 방법은 [i[`poll()` function]] `poll()`을 다루는 다음 절에 있습니다.
 
 [i[Blocking]>]
 
