@@ -76,10 +76,10 @@ int accept(int s, struct sockaddr *addr, socklen_t *addrlen);
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `s`       | `listen()` 중인 소켓 설명자입니다. |
 | `addr`    | 여러분에게 연결하는 쪽의 주소로 채워집니다. |
-| `addrlen` | `addr` 매개변수로 반환된 구조체의 `sizeof()` 값으로 채워집니다. `addr`로 넘긴 타입이 `struct sockaddr_in`이고 그 타입이 돌아온다고 확신할 수 있다면 안전하게 무시할 수 있습니다. |
+| `addrlen` | 호출 전에는 `addr`가 가리키는 버퍼의 크기를 넣고, 호출 뒤에는 실제 피어 주소의 길이가 저장됩니다. 피어 주소가 필요 없다면 `addr`와 `addrlen`을 모두 `NULL`로 넘길 수 있습니다. |
 
 `accept()`는 보통 블록됩니다. 미리 `select()`를 사용해서 리스닝 소켓 설명자가
-"읽을 준비"가 되었는지 살펴볼 수 있습니다. 그렇다면 `accept()`될 새 연결이
+"읽을 준비"가 되었는지 살펴볼 수 있습니다. 그렇다면 `accept()`가 받을 새 연결이
 기다리고 있다는 뜻입니다! 야호! 다른 방법으로는 [i[`fcntl()` function]]
 `fcntl()`을 사용해서 리스닝 소켓에 [i[`O_NONBLOCK` macro]] `O_NONBLOCK`
 플래그를 설정할 수도 있습니다. 그러면 이 소켓은 블록되지 않고, 대신 `errno`를
@@ -170,7 +170,9 @@ sockaddr_in6` 구조체의 `sin6_addr` 필드에 전역 변수 `in6addr_any`를 
 또는 새 `struct in6_addr`를 선언하는 중이라면 `IN6ADDR_ANY_INIT`으로 초기화할 수
 있습니다.
 
-마지막으로 `addrlen` 매개변수는 `sizeof my_addr`로 설정되어야 합니다.
+마지막으로 `addrlen` 매개변수는 `my_addr`가 가리키는 주소 구조체의 크기로
+설정되어야 합니다. 예를 들어 IPv4 주소 구조체라면 `sizeof(struct sockaddr_in)`을
+사용할 수 있습니다.
 
 ### 반환값 {.unnumbered .unlisted}
 
@@ -570,7 +572,7 @@ freeaddrinfo(servinfo); // 이 구조체는 이제 필요 없습니다
 ### 개요 {.unnumbered .unlisted}
 
 ```{.c}
-#include <sys/unistd.h>
+#include <unistd.h>
 
 int gethostname(char *name, size_t len);
 ```
@@ -651,6 +653,10 @@ _주의하세요: 이 두 함수는 `getaddrinfo()`와 `getnameinfo()`로 대체
 매개변수를 보자면, `addr`은 `char*`이지만 실제로는 `struct in_addr`에 대한 포인터를
 넘기고 싶을 것입니다. `len`은 `sizeof(struct in_addr)`이어야 하고, `type`은
 `AF_INET`이어야 합니다.
+
+(역자 주: 위 함수 원형과 동작 설명은 오래된 BSD/POSIX 계열 표기입니다. 최신
+구현에서는 함수 원형이 조금 다르고 IPv6도 지원하지만, 이 함수의 사용은 권장되지
+않습니다.)
 
 그러면 반환되는 [i[`struct hostent` type]i] `struct hostent`는 무엇일까요?
 여기에는 해당 호스트에 대한 정보를 담은 여러 필드가 있습니다.
@@ -799,7 +805,7 @@ char service[20];
 
 // sa에 호스트와 포트에 대한 좋은 정보가 가득하다고 가정합니다...
 
-getnameinfo(&sa, sizeof sa, host, sizeof host, service,
+getnameinfo((const struct sockaddr *)&sa, sizeof sa, host, sizeof host, service,
             sizeof service, 0);
 
 printf("   host: %s\n", host);    // 예: "www.example.com"
@@ -928,7 +934,7 @@ if (s == -1) {
 }
 
 tryagain:
-if (select(n, &readfds, NULL, NULL) == -1) {
+if (select(n, &readfds, NULL, NULL, NULL) == -1) {
     // 오류가 발생했습니다!!
 
     // 단순히 인터럽트된 것뿐이라면 select() 호출을 다시 시작합니다:
@@ -955,8 +961,8 @@ if (select(n, &readfds, NULL, NULL) == -1) {
 ### 개요 {.unnumbered .unlisted}
 
 ```{.c}
-#include <sys/unistd.h>
-#include <sys/fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 int fcntl(int s, int cmd, long arg);
 ```
@@ -967,11 +973,11 @@ int fcntl(int s, int cmd, long arg);
 소켓 관련 기능도 몇 가지 가지고 있습니다.
 
 `s` 매개변수는 작업하려는 소켓 설명자입니다. `cmd`는 [i[`F_SETFL` macro]i]
-`F_SETFL`로 설정해야 하고, `arg`에는 아래 명령 중 하나가 올 수 있습니다. (말했듯이
+`F_SETFL`로 설정해야 하고, `arg`에는 아래 파일 상태 플래그를 지정할 수 있습니다. (말했듯이
 `fcntl()`에는 제가 여기에서 드러낸 것보다 더 많은 기능이 있지만, 저는 소켓 중심으로
 이야기하려고 합니다.)
 
-| `cmd`                                | 설명 |
+| `arg`                                | 설명 |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [i[`O_NONBLOCK` macro]i]`O_NONBLOCK` | 소켓을 논블로킹으로 설정합니다. 더 자세한 내용은 [블로킹](#blocking) 절을 보세요. |
 | [i[`O_ASYNC` macro]i]`O_ASYNC`       | 소켓이 비동기 I/O를 하도록 설정합니다. 소켓에서 `recv()`할 데이터가 준비되면 [i[`SIGIO` signal]] `SIGIO` 신호가 발생합니다. 보기 드문 방식이고 이 안내서의 범위를 벗어납니다. 또한 특정 시스템에서만 사용할 수 있는 것으로 생각합니다. |
@@ -1126,8 +1132,8 @@ _이 함수들은 IPv6을 처리하지 못하기 때문에 구식입니다! 대�
 (그러니까 "Network To ASCII"입니다. "toa" 접미사에는 C 라이브러리에 `atoi()`라는
 비슷한 친구가 있는데, 이것은 ASCII 문자열을 정수로 변환합니다.)
 
-`inet_aton()` 함수는 그 반대로, 점과 숫자 문자열을 `in_addr_t`로 변환합니다.
-(`in_addr_t`는 여러분의 `struct in_addr` 안에 있는 `s_addr` 필드의 타입입니다.)
+`inet_aton()` 함수는 그 반대로, 점과 숫자 문자열을 이진 IPv4 주소 형식으로 변환해
+두 번째 인수로 전달한 `struct in_addr`에 저장합니다.
 
 마지막으로 `inet_addr()` 함수는 기본적으로 `inet_aton()`과 같은 일을 하는 더 오래된
 함수입니다. 이론적으로는 구식이지만, 많이 보게 될 것이고 사용한다고 경찰이 잡으러
@@ -1464,7 +1470,7 @@ struct pollfd {
 | 매크로    | 설명                                                                |
 | --------- | ------------------------------------------------------------------- |
 | `POLLIN`  | 이 소켓에서 `recv()`할 데이터가 준비되면 알려줍니다.                |
-| `POLLOUT` | 이 소켓에 대기하지 않고 데이터를 `send()`할 수 있으면 알려줍니다.       |
+| `POLLOUT` | 이 소켓으로 대기하지 않고 데이터를 `send()`할 수 있으면 알려줍니다.       |
 | `POLLPRI` | 이 소켓에서 `recv()`할 out-of-band 데이터가 준비되면 알려줍니다.    |
 
 `poll()` 호출이 반환되면 `revents` 필드는 위 필드들을 비트 OR한 값으로 구성되어,
@@ -1526,7 +1532,7 @@ if (rv == -1) {
 
     // s2의 이벤트 확인:
     if (ufds[1].revents & POLLIN) {
-        recv(s1, buf2, sizeof buf2, 0);
+        recv(s2, buf2, sizeof buf2, 0);
     }
 }
 ```
@@ -1637,14 +1643,14 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 // accept()는 필요 없습니다. 그냥 recvfrom()입니다:
 
 fromlen = sizeof addr;
-byte_count = recvfrom(sockfd, buf, sizeof buf, 0, &addr, &fromlen);
+byte_count = recvfrom(sockfd, buf, sizeof buf, 0, (struct sockaddr *)&addr, &fromlen);
 
-printf("recv()'d %d bytes of data in buf\n", byte_count);
+printf("recvfrom()'d %d bytes of data in buf\n", byte_count);
 printf("from IP address %s\n",
     inet_ntop(addr.ss_family,
         addr.ss_family == AF_INET?
-            ((struct sockaddr_in *)&addr)->sin_addr:
-            ((struct sockaddr_in6 *)&addr)->sin6_addr,
+            (const void *)&((struct sockaddr_in *)&addr)->sin_addr:
+            (const void *)&((struct sockaddr_in6 *)&addr)->sin6_addr,
         ipstr, sizeof ipstr));
 ```
 
@@ -1723,7 +1729,7 @@ Linux 사용자를 위한 노트: Linux의 `select()`는 "읽을 준비가 됐�
 ### 예제 {.unnumbered .unlisted}
 
 ```{.c .numberLines}
-int s1, s2, n;
+int s1, s2, n, rv;
 fd_set readfds;
 struct timeval tv;
 char buf1[256], buf2[256];
@@ -1810,7 +1816,7 @@ int setsockopt(int s, int level, int optname, const void *optval,
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [i[`SO_BINDTODEVICE` macro]i]`SO_BINDTODEVICE` | `bind()`로 IP 주소에 바인드하는 대신 이 소켓을 `eth0` 같은 심볼릭 장치 이름에 바인드합니다. 유닉스에서 장치 이름을 보려면 `ifconfig` 명령을 입력하세요. |
 | [i[`SO_REUSEADDR` macro]i]`SO_REUSEADDR      ` | 이 포트에 이미 활성 리스닝 소켓이 바인드되어 있지 않다면, 다른 소켓도 이 포트에 `bind()`할 수 있게 합니다. 서버가 죽은 뒤 다시 시작하려 할 때 보이는 "Address already in use" 오류 메시지를 피할 수 있게 해 줍니다. |
-| [i[`SO_BROADCAST` macro]i]`SO_BROADCAST`       | UDP 데이터그램(`SOCK_DGRAM`) 소켓이 브로드캐스트 주소로 오가는 패킷을 보내고 받을 수 있게 합니다. TCP 스트림 소켓에는 아무 일도, _아무 일도!!_ 하지 않습니다! 하하하! |
+| [i[`SO_BROADCAST` macro]i]`SO_BROADCAST`       | UDP 데이터그램(`SOCK_DGRAM`) 소켓이 브로드캐스트 주소로 패킷을 보낼 수 있게 합니다. TCP 스트림 소켓에는 아무 일도, _아무 일도!!_ 하지 않습니다! 하하하! |
 
 (역자 주: `SO_BINDTODEVICE`는 Linux 전용 옵션입니다. 최근 Linux에서는 인터페이스 이름을
 확인할 때 `ifconfig` 대신 `ip link`를 흔히 사용합니다.)
@@ -1839,7 +1845,7 @@ int setsockopt(int s, int level, int optname, const void *optval,
 
 ```{.c .numberLines}
 int optval;
-int optlen;
+socklen_t optlen = sizeof optval;
 char *optval2;
 
 // 소켓의 SO_REUSEADDR을 참(1)으로 설정합니다:
@@ -1853,7 +1859,7 @@ setsockopt(s2, SOL_SOCKET, SO_BINDTODEVICE, optval2, 4);
 // SO_BROADCAST 플래그가 설정되어 있는지 확인합니다:
 getsockopt(s3, SOL_SOCKET, SO_BROADCAST, &optval, &optlen);
 if (optval != 0) {
-    print("SO_BROADCAST enabled on s3!\n");
+    printf("SO_BROADCAST enabled on s3!\n");
 }
 ```
 

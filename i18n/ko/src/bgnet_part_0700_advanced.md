@@ -547,7 +547,7 @@ int select(int numfds, fd_set *readfds, fd_set *writefds,
 가 준비된 파일 설명자를 찾지 못할 경우, 그것은 반환하고 여러분은 처리를 계속할
 수 있습니다.
 
-`struct timeval`는 아래와 같은 필드를 가지고 있습니다.
+`struct timeval`은 아래와 같은 필드를 가지고 있습니다.
 
 ```{.c}
 struct timeval {
@@ -868,7 +868,7 @@ int main(void)
 ```
 
 코드에 `master`와 `read_fds` 두 개의 파일 설명자 집합이 있음에 주목하세요.
-전자인 `master`는 새 연결을 리스닝 소켓 설명자와 현재 연결된 모든 소켓의
+전자인 `master`는 새 연결을 리스닝하는 소켓 설명자와 현재 연결된 모든 소켓의
 설명자를 가집니다.
 
 `master`를 가지는 이유는 `select()`가 사실 여러분이 넘기는 집합을 _변형해서_
@@ -1171,7 +1171,7 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
     long double result;
     long long shift;
     unsigned bias;
-    unsigned significandbits = bits - expbits - 1; // 부호 비트를 위해서 -1
+    unsigned significandbits = bits - expbits - 1; // 부호 비트를 위해 1을 뺍니다
 
     if (i == 0) return 0.0;
 
@@ -2002,7 +2002,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    their_addr.sin_family = AF_INET;     // 호스트 바이트 순서
+    their_addr.sin_family = AF_INET;     // IPv4 주소 계열
     their_addr.sin_port = htons(SERVERPORT); // short, 네트워크 바이트 순서
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
@@ -2048,7 +2048,7 @@ sent 3 bytes to 255.255.255.255
 `broadcaster`에 브로드캐스트 주소를 넣고 다시 실행해봅시다. `sendto()`를 한 번만
 실행했음에도 두 개의 `listener` 모두가 패킷을 받습니다! 멋지네요!
 
-만약 `listener`가 실행 중인 컴퓨터의 IP 주소를 목적지로 발송된 데이터는 받는데
+만약 `listener`가 실행 중인 컴퓨터의 IP 주소를 목적지로 하여 전송된 데이터는 받는데
 브로드캐스트 주소로 보낸 데이터는 받지 못한다면 아마도 [i[Firewall]] 방화벽이
 컴퓨터에서 패킷을 막고 있을 것입니다. (그래요, [i[Pat]] Pat, [i[Bapper]] Bapper.
 이게 제 샘플 코드가 동작하지 않았던 이유라는 것을 저보다 먼저 깨달아 줘서
