@@ -127,7 +127,7 @@ you, Knuth, but... daaahm.
 [nh[addrinfo]]
 [nh[closesocket]]
 
-안녕하세요! 소켓 프로그래밍 때문에 힘든가요? `man`페이지로 공부하기가 너무
+안녕하세요! 소켓 프로그래밍 때문에 힘든가요? `man` 페이지로 공부하기가 너무
 어려운가요? 멋진 인터넷 프로그래밍을 하고 싶지만 `connect()`를 호출하기 전에
 `bind()`를 호출해야 하는지 알아내려고 한 무더기의 `struct`를
 헤집고 다닐 시간이 없나요?
@@ -147,11 +147,11 @@ IPv6에 대한 안내를 갱신했습니다. 재밌게 보세요!
 
 그럼에도 불구하고 이 문서를 읽고 나면 맨페이지가 이해되기 시작할 것입니다.
 
-## 실행환경과 컴파일러
+## 플랫폼과 컴파일러
 
 이 문서에 포함된 코드는 GNU의 [i[Compilers-->GCC]] `gcc` 컴파일러를 사용하는
-리눅스 PC에서 컴파일되었습니다. 그러나 그 코드들은 `gcc`를 사용하는 어떤
-실행환경에서도 빌드되어야 합니다. 다만 윈도우용 프로그램을
+리눅스 PC에서 컴파일되었습니다. 그러나 그 코드들은 `gcc`를 사용하는 거의 모든
+플랫폼에서 빌드될 것입니다. 다만 Windows용 프로그램을
 만들고 있다면 해당 사항이 없습니다. 그런 경우라면 [윈도우 프로그래밍을 위한 절](#windows)을 참고하세요.
 
 ## 공식 홈페이지와 책 구매
@@ -180,11 +180,11 @@ IPv6에 대한 안내를 갱신했습니다. 재밌게 보세요!
 $ cc -o server server.c -lnsl -lsocket -lresolv
 ```
 
-여전히 에러가 있다면, 그 명령 뒤에 `-lxnet`를 덧붙여보세요. 그것이 정확히 무엇을
+여전히 오류가 있다면, 그 명령 뒤에 `-lxnet`를 덧붙여 보세요. 그것이 정확히 무엇을
 하는지 저는 모르지만, 몇몇 사람들은 그렇게 해야 했던 것으로 보입니다.
 
 `setsockopt()`을 호출하는 곳에서도 문제가 생길 수 있습니다.
-제 리눅스 장치와 함수 원형이 다릅니다. 그러므로 아래의 코드 대신
+제가 쓰는 리눅스 시스템과는 함수 원형이 다릅니다. 그러므로 아래의 코드 대신
 
 ```{.c}
 int yes=1;
@@ -196,7 +196,7 @@ int yes=1;
 char yes='1';
 ```
 
-저에게 Sun 장치가 없으므로 위에 적은 내용들을 시험해보지는 않았습니다.
+저에게 Sun 시스템이 없으므로 위에 적은 내용들을 시험해 보지는 않았습니다.
 저 내용들은 단지 사람들이 저에게 이메일로 알려준 것입니다.
 
 ## Windows 프로그래머들을 위한 노트 {#windows}
@@ -207,7 +207,7 @@ char yes='1';
 운영체제가 됩니다. 딱히 크게 불평할 것도 없습니다.
 
 음, 조금은 있습니다. 예를 들어 저는 이 글을 2025년에 2015년형 노트북에서 쓰고
-있습니다. 예전에는 Windows 10을 돌리던 장치였습니다. 결국 너무 느려져서 Linux를
+있습니다. 예전에는 Windows 10을 돌리던 컴퓨터였습니다. 결국 너무 느려져서 Linux를
 설치했고, 그 뒤로 계속 그렇게 쓰고 있습니다.
 
 그런데 이제 Windows 11은 Windows 10보다 더 강력한 하드웨어를 요구하는 것 같습니다.
@@ -232,6 +232,7 @@ Subsystem For Linux]] [fl[Windows Subsystem for
 Linux|https://learn.microsoft.com/en-us/windows/wsl/]]입니다. 이것은 간단히
 말하자면 Windows 10에 리눅스 VM 비슷한 것을 깔게 해 줍니다. 그렇게 하면 개발 환경을
 갖출 수 있고, 예제 프로그램을 있는 그대로 빌드하고 실행할 수 있습니다.
+(역자 주: WSL은 Windows 11에서도 사용할 수 있습니다.)
 
 여러분이 할 수 있는 다른 일은 [i[Cygwin]][fl[Cygwin|https://cygwin.com/]]을
 설치하는 것입니다. 이것은 Windows를 위한 유닉스 도구 모음입니다. 그렇게 하면 예제
@@ -239,7 +240,7 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]]입니다. 이것은 간�
 
 여러분 중 몇몇은 순수한 Windows 방식으로 이 일을 하고 싶을지도 모르겠습니다.
 그렇다면 아주 배짱이 두둑한 일이 되겠군요. 그렇게 하고 싶다면 당장 집 밖으로 가서
-유닉스를 돌릴 기계를 사세요! 장난입니다. 요새는 윈도우에 (좀 더) 친화적으로 행동하려고
+유닉스를 돌릴 컴퓨터를 사세요! 장난입니다. 요새는 윈도우에 (좀 더) 친화적으로 행동하려고
 노력하고 있습니다.
 
 좋습니다, 좋습니다. 이제 본론으로 돌아가겠습니다.
@@ -270,8 +271,8 @@ Linux|https://learn.microsoft.com/en-us/windows/wsl/]]입니다. 이것은 간�
 ```
 
 잠깐! 소켓 라이브러리를 쓰기 전에 [i[`WSAStartup()` function]]
-`WSAStartup()`을 호출해야 합니다. 이 함수에게 사용하길 원하는 Winsock
-버전(예를 들어 2.2)을 넘겨주고 결과값을 확인해서 쓰고자 하는 버전이
+`WSAStartup()`을 호출해야 합니다. 이 함수에 사용하려는 Winsock
+버전(예를 들어 2.2)을 인수로 넘기고 반환값을 확인해서 쓰고자 하는 버전이
 사용 가능한지 확인해야 합니다.
 
 그 작업을 하는 코드는 아래와 비슷할 것입니다.
@@ -340,8 +341,8 @@ POSIX 라이브러리에 링크하거나 다른 작업이 필요할 것입니다
 그저 여러분이 필요로 하는 자세한 답을 할 시간이 없을 것이라 생각하기 때문입니다.
 
 원칙적으로 질문이 복잡할수록 제가 응답할 가능성은 낮아질 것입니다.
-메일을 보내기 전에 질문의 범위를 좁히고 적절한 정보(실행환경, 컴파일러, 여러분이
-접하는 에러메시지, 문제 해결에 도움이 될 만한 다른 정보)를 첨부해주신다면
+메일을 보내기 전에 질문의 범위를 좁히고 적절한 정보(플랫폼, 컴파일러, 받은
+오류 메시지, 문제 해결에 도움이 될 만한 다른 정보)를 첨부한다면
 제 응답을 받을 확률이 올라갈 것입니다. 더 자세한 지침은 ESR의 문서인
 [fl[How To Ask Questions The Smart
 Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
@@ -378,7 +379,7 @@ Way|http://www.catb.org/~esr/faqs/smart-questions.html]]을 참고하세요.
 ## Copyright, Distribution, and Legal {#legal}
 
 (Translator's Note: This section has not been translated to keep its legal information.)
-(역자 주 : 이 절은 법적 정보를 보존하기 위해 번역하지 않았습니다.)
+(역자 주: 이 절은 법적 정보를 보존하기 위해 번역하지 않았습니다.)
 
 Beej's Guide to Network Programming is Copyright © 2019 Brian "Beej
 Jorgensen" Hall.
@@ -435,7 +436,7 @@ Donald Knuth, Bruce Schneier, W. Richard Stevens, Steve The Woz Wozniak,
 
 ## 출판 정보
 
-이 책은 GNU 도구를 갖춘 Arch Linux 장치에서 Vim 편집기를 사용해서 Markdown
+이 책은 GNU 도구를 갖춘 Arch Linux 시스템에서 Vim 편집기를 사용해서 Markdown
 으로 작성되었습니다. 표지 "미술"과 다이어그램은 Inkscape로 작성되었습니다.
 Markdown은 Python과 Pandoc, XeLaTeX를 통해 HTML과 LaTeX/PDF로 변환되었습니다.
 문서에는 Liberation 폰트를 사용했습니다. 툴체인은 전적으로 자유/공개 소프트웨어를

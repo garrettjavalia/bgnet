@@ -9,7 +9,7 @@
 그 프로그램이 들어오는 텔넷 요청을 처리하고 여러분에게 로그인 프롬프트를
 띄워주는 등의 일을 처리합니다.
 
-![클라이언트 - 서버 상호작용](cs.pdf "[클라이언트- 서버 상호작용 도표]")
+![클라이언트-서버 상호작용](cs.pdf "[클라이언트-서버 상호작용 도표]")
 
 위의 도표에 클라이언트와 서버의 정보 교환이 정리되어 있습니다.
 
@@ -19,9 +19,8 @@
 입니다. 여러분이 `ftp`를 쓸 때마다 여러분의 요청을 받아들이는 원격지 프로그램인
 `ftpd`가 있습니다.
 
-흔히 한 대의 장치에는 오직 하나의 서버만이 있을 것이며 그 서버는 [i[`fork()` function]] `fork()`
-를 통해서 여러 클라이언트를 처리할 것입니다. (역자 주 : 한 대의 장치에서 여러 개의
-서버를 실행하는 많은 방법이 있지만 이 문서의 초판은 90년대에 작성되었습니다.)
+흔히 한 대의 컴퓨터에는 서버가 하나뿐이고, 그 서버는 [i[`fork()` function]] `fork()`를
+통해 여러 클라이언트를 처리합니다.
 기본적인 과정은 아래와 같습니다. 서버가 연결을 기다리고, `accept()`한 후,
 요청을 처리할 자식 프로세스를 `fork()`합니다. 이것이 다음 절에서 우리의
 예제 서버가 하는 일입니다.
@@ -38,7 +37,9 @@
 $ telnet remotehostname 3490
 ```
 
-`remotehostname`은 여러분이 서버를 실행하는 장치의 이름입니다.
+(역자 주: 최신 macOS에는 `telnet`이 기본 포함되지 않습니다. Debian과 Fedora 등의 Linux 배포판에서는 패키지로 계속 제공됩니다. `telnet`을 쓸 수 없다면 이 책에 포함된 [flx[`telnot` 예제|telnot.c]]를 컴파일해 데모에 사용할 수 있습니다.)
+
+`remotehostname`은 서버를 실행하는 컴퓨터의 이름입니다.
 
 [flx[서버 코드|server.c]]:
 
@@ -77,7 +78,7 @@ void sigchld_handler(int s)
 }
 
 
-// IPv4 또는 IPv6 sockaddr을 얻습니다.
+// IPv4 또는 IPv6 주소를 가져옵니다.
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -92,7 +93,7 @@ int main(void)
     // sockfd에서 대기하고 들어오는 연결은 new_fd에 저장
     int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
-    struct sockaddr_storage their_addr; // 접속자의 주소 정보
+    struct sockaddr_storage their_addr; // 접속한 쪽의 주소 정보
     socklen_t sin_size;
     struct sigaction sa;
     int yes=1;
@@ -102,14 +103,14 @@ int main(void)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // 내 IP를 씁니다
+    hints.ai_flags = AI_PASSIVE; // bind()에 쓸 와일드카드 주소를 요청합니다
 
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
 
-    // 모든 결과를 조회하고 쓸 수 있는 첫 번째 것을 사용
+    // 모든 결과를 순회해 사용할 수 있는 첫 번째 결과에 바인드합니다
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
@@ -257,7 +258,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // 모든 결과를 순회하면서 쓸 수 있는 첫 번째 것을 사용합니다
+    // 모든 결과를 순회해 연결할 수 있는 첫 번째 결과를 사용합니다
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
@@ -320,12 +321,12 @@ int main(int argc, char *argv[])
 기본에 대해서 이미 알아보았습니다. 그러므로 바로 두 개의 예제 프로그램을
 제시하겠습니다. `talker.c`와 `listener.c`입니다.
 
-`listener`는 장치에서 포트 4950으로 들어오는 패킷을 대기합니다. `talker`는
-지정한 장치의 해당 포트로 사용자가 명령줄에 입력한 내용을 담은 패킷을 보냅니다.
+`listener`는 한 컴퓨터에서 포트 4950으로 들어오는 패킷을 기다립니다. `talker`는
+지정한 컴퓨터의 해당 포트로 사용자가 명령줄에 입력한 내용을 담은 패킷을 보냅니다.
 
 데이터그램 소켓은 연결이 없고 패킷을 허공에 던진 뒤 성공 여부는 신경 쓰지
 않기 때문에 클라이언트와 서버에 IPv6을 사용하도록 명시할 것입니다. 이렇게 하면
-서버가 IPv6에서 리스닝하고 클라이언트가 IPv4에서 발송해서 데이터를 받을 수 없는
+서버는 IPv6로 리스닝하는데 클라이언트는 IPv4로 전송하여, 서버가 데이터를 받지 못하는
 상황을 피할 수 있을 것입니다. (우리의 TCP 스트림 소켓 세상에서도 이런 불일치가
 발생할 수 있지만 `connect()`에서 하나의 주소 계열에 대해 오류가 발생하면
 다른 주소 계열로 다시 시도하게 됩니다.)
@@ -352,7 +353,7 @@ int main(int argc, char *argv[])
 
 #define MAXBUFLEN 100
 
-// IPv4 또는 IPv6 sockaddr을 얻습니다:
+// IPv4 또는 IPv6 주소를 가져옵니다:
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -376,7 +377,7 @@ int main(void)
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET6; // IPv4를 쓰려면 AF_INET으로 설정합니다
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_PASSIVE; // 내 주소를 씁니다
+	hints.ai_flags = AI_PASSIVE; // bind()에 쓸 와일드카드 주소를 요청합니다
 
 	if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
