@@ -1,54 +1,33 @@
-# 개요
+# 한국어판 빌드
 
-이 폴더에는 한국어 번역과 관련된 파일이 들어있습니다.
+의존성은 `책 → bgbspd-ko → bgbspd` 순서다. 이 책은 공개 bgbspd-ko의 지정 커밋만 사용하며 원본 조판 엔진이나 시스템 도구의 설치 절차를 관리하지 않는다.
 
-# 구조
+## 실행
 
-## fonts
+저장소 루트에서:
 
-Pretendard와 D2Coding 폰트 관련 파일이 들어있습니다. Pretendard는 본문 폰트로, D2Coding은 코드/고정폭 폰트로 사용합니다. Pretendard는 HTML에서 참조하는 공식 CDN 버전과 맞추기 위해 v1.3.9 릴리스 파일을 이 리포지토리에 고정해 두었습니다. D2Coding은 [VER1.3.3 릴리스](https://github.com/naver/d2-coding-font/releases/tag/VER1.3.3)의 Regular/Bold TTF와 OFL 라이선스를 고정해 두고 HTML/PDF 빌드가 로컬 파일만 사용하도록 구성했습니다.
-
-## src
-
-루트 아래의 src와 마찬가지이며 메이크파일의 설정변수들이 약간 변경되어 있습니다.
-
-## source
-
-한국어판에서 배포할 예제 소스 코드가 들어있습니다. `stage` 빌드에서는 이 폴더의 파일들이 `dist/source`와 `dist/html/source`로 복사됩니다.
-
-# 빌드
-
-Docker만으로 빌드하려면 루트 경로에서 아래와 같이 실행합니다.
-
-```
-docker build -f i18n/ko/Dockerfile -t bgnet-ko-builder .
-docker run --rm -v "$PWD":/guide -ti bgnet-ko-builder
+```sh
+make -C i18n/ko docker
+make -C i18n/ko html
+make -C i18n/ko pdf
+make -C i18n/ko status
 ```
 
-Docker 이미지 안에 Pandoc, XeLaTeX, 고정된 `bgbspd` 빌드 도구 버전이 포함되므로 호스트에는 별도 빌드 의존성을 설치하지 않아도 됩니다. Pretendard와 D2Coding은 이 리포지토리에 포함된 폰트 파일을 직접 참조하므로 Docker 이미지나 호스트 시스템에 폰트를 설치하지 않습니다.
+Git, make, Docker가 필요하다. 최초 실행 시 toolchain.lock의 bgbspd-ko 커밋을 `.toolchain/<SHA>/`에 내려받고 **그 저장소의 Dockerfile**을 직접 빌드한다. 원본 bgbspd와 Pandoc/TeX 설치는 공통 Dockerfile이 담당한다. 호스트에 별도 Python·폰트·조판 저장소를 설치할 필요는 없다.
 
-영어 원본과 동일하게 `BGBSPD_BUILD_DIR` 설정과 `bgbspd/source.make` 빌드 규칙을 사용합니다. 로컬에서 빌드하려면 루트 리포지토리와 같은 부모 폴더에 `bgbspd`를 클론하거나, `BGBSPD_BUILD_DIR` 환경 변수로 경로를 지정하세요. 로컬 빌드에는 Pandoc, XeLaTeX, Make가 필요하지만 폰트 설치는 필요하지 않습니다. 빌드 결과물은 `i18n/ko/dist` 폴더에 생성됩니다.
+캐시가 있으면 커밋과 작업 트리를 확인한 뒤 재사용한다. 공통 도구를 바꾸려면 toolchain.lock의 bgbspd_ko 커밋만 갱신한다. 엔진의 버전은 그 공통 커밋 내부에서 정한다. 책에는 Dockerfile·실행 어댑터·조판 로직을 복제하지 않는다.
 
-기본 빌드 명령인 `all`은 `stage`를 실행합니다. 기존 루트 Makefile의 `stage` 구조처럼 `html`, `pdf`, `source`를 나누어 `i18n/ko/dist` 아래에 생성합니다. `source`에는 한국어판 전용 예제 소스 코드와 `bgnet_source.zip`이 들어갑니다.
-
-```
-make -C i18n/ko stage
-```
-
-로컬에서 자주 쓰는 명령 예시는 아래와 같습니다.
-
-```
-make -C i18n/ko all
-make -C i18n/ko stage
-make -C i18n/ko clean
-make -C i18n/ko pristine
-make -C i18n/ko/src bgnet.html
-make -C i18n/ko/src bgnet-wide.html
-make -C i18n/ko/src bgnet_a4_c_1.pdf
+```sh
+make -C i18n/ko docker PDF_TARGETS=a4_c_1,a4_bw_2
+make -C i18n/ko docker OUTPUT=/absolute/output JOBS=2
 ```
 
-다른 `bgbspd` 커밋으로 Docker 이미지를 만들 때는 아래와 같이 명시할 수 있습니다.
+기본 출력은 i18n/ko/dist의 HTML과 PDF 8종이다. index.html/index-wide.html, 일반·와이드 분할본, ZIP, 로컬 폰트·그림, 예제 소스가 있는 책의 source와 소스 ZIP을 포함한다. all/build/stage도 같은 Docker 경로를 사용한다. clean/pristine은 해당 책이 생성한 출력만 정리하며 번역문이나 다운로드 캐시는 지우지 않는다.
 
-```
-docker build --build-arg BGBSPD_REF=<commit> -f i18n/ko/Dockerfile -t bgnet-ko-builder .
-```
+이미지 생성에는 네트워크가 필요하지만 책 빌드 실행은 네트워크 없이 수행한다. 책을 읽기 전용으로 연결하고 출력 폴더에만 쓴다. HTML 검사와 도구 버전 확인은 공통 실행기가 자동 수행한다. tests 역시 `make -C i18n/ko test`로 공통 저장소의 테스트를 실행한다.
+
+책별 설정은 build.json의 profile, lang, 선택적 extra_head다. lang은 실제 번역 상태에 맞춰 지정한다. 원문 루트 src와 번역 i18n/ko/src는 독립적이다.
+
+## bgnet
+
+기존 한국어 본문과 예제 코드를 유지한다. build.json의 extra_head로 기존 ko-head-src.html을 명시한다. 과거 폰트·래퍼 파일은 이 표준 빌드에서 사용하지 않는다. 기준 manifest가 없는 기존 번역에 status를 실행해도 초기화하거나 덮어쓰지 않는다.
