@@ -1,61 +1,33 @@
-# 공통 한국어판 Docker 빌드
+# 한국어판 빌드
 
-한국어 조판은 공개 저장소 [garrettjavalia/bgbspd-ko](https://github.com/garrettjavalia/bgbspd-ko)의 고정 커밋을 사용합니다. `toolchain.lock`은 공통 도구와 upstream bgbspd를 함께 고정합니다. Docker 이미지가 두 저장소를 직접 가져오므로 호스트에는 별도 조판 저장소·Python·Pandoc·TeX·폰트 설치가 필요하지 않습니다. 아래 make 명령은 호스트의 make와 Docker를 사용합니다.
+의존성은 `책 → bgbspd-ko → bgbspd` 순서다. 이 책은 공개 bgbspd-ko의 지정 커밋만 사용하며 원본 조판 엔진이나 시스템 도구의 설치 절차를 관리하지 않는다.
 
-## 동일한 실행 방법
+## 실행
 
-각 책 저장소 루트에서:
+저장소 루트에서:
 
 ```sh
 make -C i18n/ko docker
 make -C i18n/ko html
 make -C i18n/ko pdf
+make -C i18n/ko status
 ```
 
-`all`, `build`, `stage`도 같은 Docker 빌드를 실행합니다. 기본값은 일반/와이드 단일·분할 HTML과 A4/US Letter × 컬러/흑백 × 단면/양면 PDF 8종입니다.
+Git, make, Docker가 필요하다. 최초 실행 시 toolchain.lock의 bgbspd-ko 커밋을 `.toolchain/<SHA>/`에 내려받고 **그 저장소의 Dockerfile**을 직접 빌드한다. 원본 bgbspd와 Pandoc/TeX 설치는 공통 Dockerfile이 담당한다. 호스트에 별도 Python·폰트·조판 저장소를 설치할 필요는 없다.
+
+캐시가 있으면 커밋과 작업 트리를 확인한 뒤 재사용한다. 공통 도구를 바꾸려면 toolchain.lock의 bgbspd_ko 커밋만 갱신한다. 엔진의 버전은 그 공통 커밋 내부에서 정한다. 책에는 Dockerfile·실행 어댑터·조판 로직을 복제하지 않는다.
 
 ```sh
 make -C i18n/ko docker PDF_TARGETS=a4_c_1,a4_bw_2
-make -C i18n/ko docker OUTPUT=/absolute/path/to/output JOBS=2
+make -C i18n/ko docker OUTPUT=/absolute/output JOBS=2
 ```
 
-이미지 이름은 두 책 모두 `bgbspd-ko-builder`입니다. 같은 lock과 Dockerfile을 쓰므로 같은 이미지를 재사용합니다. 매번 docker build가 lock 변경을 확인하며, 변경이 없으면 캐시를 사용합니다. `IMAGE=다른이름` 또는 `DOCKER=/path/to/docker`로 덮어쓸 수 있습니다.
+기본 출력은 i18n/ko/dist의 HTML과 PDF 8종이다. index.html/index-wide.html, 일반·와이드 분할본, ZIP, 로컬 폰트·그림, 예제 소스가 있는 책의 source와 소스 ZIP을 포함한다. all/build/stage도 같은 Docker 경로를 사용한다. clean/pristine은 해당 책이 생성한 출력만 정리하며 번역문이나 다운로드 캐시는 지우지 않는다.
 
-make 없이 Docker만 사용할 수도 있습니다.
+이미지 생성에는 네트워크가 필요하지만 책 빌드 실행은 네트워크 없이 수행한다. 책을 읽기 전용으로 연결하고 출력 폴더에만 쓴다. HTML 검사와 도구 버전 확인은 공통 실행기가 자동 수행한다. tests 역시 `make -C i18n/ko test`로 공통 저장소의 테스트를 실행한다.
 
-```sh
-docker build -f i18n/ko/Dockerfile -t bgbspd-ko-builder .
-mkdir -p i18n/ko/dist
-docker run --rm --network none \
-  -v "$PWD:/guide:ro" -v "$PWD/i18n/ko/dist:/output" \
-  bgbspd-ko-builder
-```
+책별 설정은 build.json의 profile, lang, 선택적 extra_head다. lang은 실제 번역 상태에 맞춰 지정한다. 원문 루트 src와 번역 i18n/ko/src는 독립적이다.
 
-이미지 생성 시에는 GitHub 및 패키지 다운로드가 필요합니다. 책 빌드 시에는 네트워크를 차단하고 책을 읽기 전용으로 연결합니다. 출력만 `/output`에 씁니다. Docker 빌드 컨텍스트는 전용 Dockerfile.dockerignore로 lock과 실행 어댑터만 전달합니다. 이미지에 책의 원문/번역, 로컬 폰트, Git 자격증명이 복사되지 않습니다.
+## bgnet
 
-## 출력과 검사
-
-기본 출력은 `i18n/ko/dist/`입니다.
-
-- `html/index.html`, `html/index-wide.html`: 기존 배포 진입점. 책 이름의 HTML도 함께 있습니다.
-- `html/split/`, `html/split-wide/`: 장별 HTML, 이미지, 로컬 폰트.
-- `html/<책이름>.zip`, `html/<책이름>-wide.zip`: 분할본 ZIP 별칭. 공통 도구의 `*-split.zip`, `*-split-wide.zip`도 유지합니다.
-- `pdf/`: 요청한 PDF들.
-- `source/`, `html/source/`: 예제 소스가 있는 책만 생성합니다. 소스 ZIP도 제공합니다.
-- `build.log`, `evidence/`, `build-info.json`: 빌드 진단 정보.
-
-HTML 빌드 후 로컬 링크·앵커·자산·종료 태그·언어 메타데이터를 자동 검사하며 오류가 있으면 실패합니다. 웹/PDF 폰트는 공통 저장소에서 가져온 로컬 파일을 사용합니다. 컬러/흑백 코드 줄바꿈도 동일한 공통 규칙을 사용합니다. 흑백은 코드 강조 옵션이며 그림 자체를 회색조로 만들지는 않습니다.
-
-`make -C i18n/ko clean` 또는 `pristine`은 이 도구가 해당 책용으로 생성한 출력만 지웁니다. 소유 표시가 없는 기존 결과물 폴더는 자동으로 지우거나 덮어쓰지 않습니다. 예전 파이프라인 결과가 남아 있으면 별도 보관한 뒤 비어 있는 출력 폴더를 사용하세요.
-
-## 설정과 버전 변경
-
-책별 차이는 `build.json`의 profile, lang, 선택적인 extra_head뿐입니다. 분석 스크립트 등은 책별로 명시하며 다른 책에 자동 상속되지 않습니다. 실제 한국어 번역이 준비되면 lang을 ko로 설정합니다. 일회성 언어 변경은 docker run 명령 뒤에 `--lang ko`를 붙일 수 있습니다.
-
-공통 도구를 갱신할 때 두 책의 `toolchain.lock`에 검증한 커밋을 함께 반영하고 이미지를 다시 빌드합니다. lock과 이미지가 다르면 실행을 거절합니다. Python 기반 이미지와 apt 패키지는 완전히 고정하지 않았으므로 동일 lock만으로 바이트 단위 재현성을 보장하지 않습니다.
-
-원문 루트 `src/`와 원문용 빌드 파일은 변경하지 않습니다. 번역 원문은 `i18n/ko/src/`에만 둡니다. `i18n/ko/src/Makefile` 등 기존 직접 빌드 파일은 메타데이터/과거 경로이며, 표준 빌드 진입점은 이 문서의 `make -C i18n/ko ...`입니다.
-
-## bgnet 한국어판
-
-본문은 기존 한국어 번역을 사용합니다. 한국어 예제 코드는 i18n/ko/source에 있습니다. 과거에 포함한 fonts 및 조판 래퍼는 이번 Docker 파이프라인에서 사용하지 않고, 공통 저장소의 고정 버전을 사용합니다. 기존 ko-head-src.html은 build.json에서 명시적으로 연결해 유지합니다. 원문 추적 manifest가 없는 기존 bgnet에 status를 실행해도 번역을 초기화하거나 덮어쓰지 않습니다.
+기존 한국어 본문과 예제 코드를 유지한다. build.json의 extra_head로 기존 ko-head-src.html을 명시한다. 과거 폰트·래퍼 파일은 이 표준 빌드에서 사용하지 않는다. 기준 manifest가 없는 기존 번역에 status를 실행해도 초기화하거나 덮어쓰지 않는다.
