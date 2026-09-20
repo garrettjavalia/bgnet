@@ -1,58 +1,37 @@
-PACKAGE=bgnet
-SRCDIR=src
-DISTDIR=dist
-SOURCEDIR=source
-BUILDTMP=build_tmp
+BOOK_DIR := $(abspath ../..)
+OUTPUT ?= $(CURDIR)/dist
+override OUTPUT := $(abspath $(OUTPUT))
+IMAGE ?= bgbspd-ko-builder
+DOCKER ?= $(shell command -v docker 2>/dev/null || if test -x /Applications/Docker.app/Contents/Resources/bin/docker; then printf '%s' /Applications/Docker.app/Contents/Resources/bin/docker; else printf '%s' docker; fi)
+FORMAT ?= all
+PDF_TARGETS ?= all
+JOBS ?= 2
 
-.PHONY: all build stage clean pristine
+.PHONY: all build stage docker docker-build html pdf status clean pristine test
+all build stage: docker
 
-all: stage
+docker-build:
+	$(DOCKER) build -f "$(CURDIR)/Dockerfile" -t "$(IMAGE)" "$(BOOK_DIR)"
 
-build:
-	$(MAKE) -C $(SRCDIR) pristine all
-	$(MAKE) -C $(SOURCEDIR) clean
+docker: docker-build
+	mkdir -p "$(OUTPUT)"
+	$(DOCKER) run --rm --network none \
+		-v "$(BOOK_DIR):/guide:ro" -v "$(OUTPUT):/output" \
+		"$(IMAGE)" --format "$(FORMAT)" --pdf-targets "$(PDF_TARGETS)" --jobs "$(JOBS)"
 
-stage:
-	$(MAKE) build
-	rm -rf $(DISTDIR)
-	mkdir -p $(DISTDIR)/pdf
-	mkdir -p $(DISTDIR)/html
-	mkdir -p $(DISTDIR)/source
-	cp -v $(SRCDIR)/$(PACKAGE)*.pdf $(DISTDIR)/pdf
-	cp -v $(SRCDIR)/$(PACKAGE).html $(DISTDIR)/html/index.html
-	cp -v $(SRCDIR)/$(PACKAGE)-wide.html $(DISTDIR)/html/index-wide.html
-	mkdir -p $(DISTDIR)/html/fonts/d2coding/ttf
-	cp -v fonts/d2coding/ttf/* $(DISTDIR)/html/fonts/d2coding/ttf
-	cp -v $(SRCDIR)/*.svg $(DISTDIR)/html
-	mkdir -p $(DISTDIR)/html/$(PACKAGE)
-	cp -v $(SRCDIR)/split/* $(DISTDIR)/html/$(PACKAGE)
-	cp -rv $(DISTDIR)/html/fonts $(DISTDIR)/html/$(PACKAGE)
-	( cd $(DISTDIR)/html; zip -r $(PACKAGE).zip $(PACKAGE); mv $(PACKAGE) split )
-	mkdir -p $(DISTDIR)/html/$(PACKAGE)
-	cp -v $(SRCDIR)/split-wide/* $(DISTDIR)/html/$(PACKAGE)
-	cp -rv $(DISTDIR)/html/fonts $(DISTDIR)/html/$(PACKAGE)
-	( cd $(DISTDIR)/html; zip -r $(PACKAGE)-wide.zip $(PACKAGE); mv $(PACKAGE) split-wide )
-	cp -v $(SRCDIR)/*.svg $(DISTDIR)/html/split
-	cp -v $(SRCDIR)/*.svg $(DISTDIR)/html/split-wide
-	cp -rv $(DISTDIR)/html/fonts $(DISTDIR)/html/split
-	cp -rv $(DISTDIR)/html/fonts $(DISTDIR)/html/split-wide
-	cp -rv $(SOURCEDIR)/* $(DISTDIR)/source
-	cp -rv $(SOURCEDIR)/.htaccess $(DISTDIR)/source 2>/dev/null || :
-	mkdir -p $(BUILDTMP)/$(PACKAGE)_source
-	cp -rv $(SOURCEDIR)/* $(BUILDTMP)/$(PACKAGE)_source
-	cp -rv $(SOURCEDIR)/.htaccess $(BUILDTMP)/$(PACKAGE)_source 2>/dev/null || :
-	( cd $(BUILDTMP); zip -r $(PACKAGE)_source.zip $(PACKAGE)_source )
-	cp -v $(BUILDTMP)/$(PACKAGE)_source.zip $(DISTDIR)/source
-	cp -rv $(DISTDIR)/source $(DISTDIR)/html/source
-	rm -rf $(BUILDTMP)
-	$(MAKE) -C $(SRCDIR) pristine
+html:
+	$(MAKE) docker FORMAT=html
 
-clean:
-	$(MAKE) -C $(SRCDIR) clean
-	$(MAKE) -C $(SOURCEDIR) clean
-	rm -rf $(DISTDIR)
-	rm -rf $(BUILDTMP)
+pdf:
+	$(MAKE) docker FORMAT=pdf
 
-pristine: clean
-	$(MAKE) -C $(SRCDIR) pristine
-	$(MAKE) -C $(SOURCEDIR) pristine
+status: docker-build
+	$(DOCKER) run --rm --network none -v "$(BOOK_DIR):/guide:ro" "$(IMAGE)" --status
+
+clean pristine: docker-build
+	mkdir -p "$(OUTPUT)"
+	$(DOCKER) run --rm --network none \
+		-v "$(BOOK_DIR):/guide:ro" -v "$(OUTPUT):/output" "$(IMAGE)" --clean
+
+test:
+	PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s . -p 'test_docker_entrypoint.py' -v

@@ -1,0 +1,5 @@
+{
+  "profile": "bgnet",
+  "lang": "ko",
+  "extra_head": "i18n/ko/src/ko-head-src.html"
+}
